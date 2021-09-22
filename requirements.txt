@@ -1,0 +1,3 @@
+dotenv
+discord-py-slash-command
+pandas
