@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 from dataclasses import field, asdict
+from discord_slash.utils.manage_commands import create_option
 
 from pymongo.collection import Collection
 from pymongo.database import Database
 from bson.objectid import ObjectId
 
 import strings as strs
-from utils import getQueryAsList
+from utils import OptionTypes, getQueryAsList
 
 import discord
 from discord.ext import commands
@@ -14,8 +15,8 @@ from discord.ext.commands import Context
 from discord_slash.context import SlashContext
 from baseModel import BaseModel
 
-from bot import db, bot, slash, CONF
-from tos.server import serverController
+from bot import db, bot, slash, botGuilds, CONF
+from controllers.server import serverController
 from devCommands.devCommands import devCommand
 
 
@@ -30,7 +31,7 @@ class AdminController:
             return False
         if user.id in serverObj.adminUsers:
             return True
-        if any(role in user.roles for role in serverObj.adminRoles):
+        if any(role.id in serverObj.adminRoles for role in user.roles):
             return True
         return False
 

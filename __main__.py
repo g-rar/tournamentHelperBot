@@ -10,7 +10,8 @@ load_dotenv()
 
 import traceback
 from bot import bot, slash
-from tos import server, tournament
+from controllers import server, tournament
+import commands
 
 import devCommands
 

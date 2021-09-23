@@ -1,6 +1,6 @@
 import asyncio
 from dataclasses import dataclass, asdict, fields, field
-from tos.player import participantController
+from controllers.player import participantController
 from typing import List
 
 import requests

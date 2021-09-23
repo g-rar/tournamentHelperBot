@@ -5,17 +5,11 @@ from pymongo.collection import Collection
 from pymongo.database import Database
 from bson.objectid import ObjectId
 
-import strings as strs
 from utils import getQueryAsList
 
-import discord
-from discord.ext import commands
-from discord.ext.commands import Context
-from discord_slash.context import SlashContext
 from baseModel import BaseModel
 
-from bot import db, bot, botGuilds, slash, CONF
-from devCommands.devCommands import devCommand
+from bot import db
 
 @dataclass
 class Server(BaseModel):
@@ -44,10 +38,14 @@ class ServerController:
         res = self.collection.insert_one(asdict(server))
         return res.acknowledged
 
-    def getServer(self, serverId: int) -> Server:
+    def getServer(self, serverId: int, upsert:bool = False) -> Server:
         c = self.collection.find_one({"serverId":serverId})
         if c is None:
-            return None
+            if not upsert:
+                return None
+            server = Server(serverId)
+            wasAdded = self.addServer(server)
+            return server if wasAdded else None
         obj = Server.fromDict(c)
         return obj
 
@@ -55,29 +53,12 @@ class ServerController:
         c = self.collection.find()
         d = getQueryAsList(c) if c is not None else []
         return d
+    
+    def updateServer(self, server:Server) -> bool:
+        res = self.collection.find_one_and_replace({"_id":server._id}, asdict(server))
+        return bool(res)
+
 
 serverController = ServerController(db)
-
-
-@slash.slash(
-    name="registerServer",
-    guild_ids= botGuilds
-)
-async def slashRegisterServer(ctx:SlashContext):
-    guildId = ctx.guild_id
-    if guildId is None:
-        await ctx.send(strs.SpanishStrs.CANT_REGISTER_DM)
-        return
-    if serverController.getServer(guildId) is not None:
-        await ctx.send(strs.SpanishStrs.SERVER_ALREADY_IN)
-        return
-    server = Server(serverId=guildId)
-    if serverController.addServer(server):
-        await ctx.send(strs.SpanishStrs.SERVER_REGISTERED)
-    else:
-        await ctx.send(strs.SpanishStrs.DB_UPLOAD_ERROR)
-
-
-
 
 
