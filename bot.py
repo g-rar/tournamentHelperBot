@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import logging
 import discord
 from discord.ext.commands import Bot
 from discord_slash import SlashCommand
@@ -33,5 +34,5 @@ slash:SlashCommand = SlashCommand(bot,sync_commands=True)
 
 @bot.listen('on_ready')
 async def on_ready():
-    print("Connected to discord")
+    logging.info("Connected to discord")
 

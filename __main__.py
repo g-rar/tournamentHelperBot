@@ -1,20 +1,14 @@
-import discord
-from discord.ext import commands
-from discord_slash import SlashCommand, SlashContext
-
 from dotenv import load_dotenv
-import pprint as pretty_print
-from pprint import pprint
 import os
 load_dotenv()
 
-import traceback
-from bot import bot, slash
-from controllers import server, tournament
+import logging
+from bot import bot
+
+# import to register commands
 import commands
 
-import devCommands
-
+logging.basicConfig(level=logging.INFO,format="%(asctime)s - %(funcName)s:%(lineno)d - %(levelname)s: %(message)s", filename="output.log", filemode="a")
 
 
 if __name__ == "__main__":

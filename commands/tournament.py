@@ -6,6 +6,7 @@ from datetime import datetime
 from io import StringIO
 from pprint import pformat
 from typing import List
+import logging
 
 import discord
 from discord.file import File
@@ -328,13 +329,13 @@ async def setListenersBackUp():
     tournaments = tournamentController.getOpenTournaments()
     if not tournaments:
         return
-    print("Setting up tournament listeners...")
+    logging.info("Setting up tournament listeners...")
     for tournament in tournaments:
         if tournament.registration.status == TournamentStatus.REGISTRATION_OPEN_BY_MSG:
             regChannel = bot.get_channel(tournament.registration.channelId)
             setupMessageRegistration(regChannel, tournament)
         # TODO when other registration method is implemented add listener setup here
-    print("Tournament listeners ready!")
+    logging.info("Tournament listeners ready!")
     pass
 
 ####################
