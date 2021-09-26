@@ -38,21 +38,19 @@ from utils import OptionTypes, extractQuotedSubstrs
     guild_ids= botGuilds,
     description="Add a tournament for tetr.io integrated game.",
     options=[
-        create_option(
-            name="name", description="The tournament's name.",
-            option_type=OptionTypes.STRING, required=True
-        ),
-        create_option(
-            name="rank_cap", description="Maximun TR a player can have to register",
-            option_type=OptionTypes.INTEGER, required=False
-        ),
-        create_option(
-            name="rank_floor", description="Minimum TR a player can have to register",
-            option_type=OptionTypes.INTEGER, required=False
-        )
+        create_option(  name="name", description="The tournament's name.",
+                        option_type=OptionTypes.STRING, required=True),
+        create_option(  name="rank_cap", description="Maximun lowercase rank a player can have to register",
+                        option_type=OptionTypes.STRING, required=False),
+        create_option(  name="rank_floor", description="Minimum lowercase rank a player can have to register",
+                        option_type=OptionTypes.INTEGER, required=False),
+        create_option(  name="tr_cap", description="Maximun TR a player can have to register",
+                        option_type=OptionTypes.INTEGER, required=False),
+        create_option(  name="tr_floor", description="Minimum TR a player can have to register",
+                        option_type=OptionTypes.INTEGER, required=False)
     ])
 @adminCommand
-async def addTournamentTetrio(ctx:SlashContext, name:str, rank_cap:int=None, rank_floor:int=None):
+async def addTournamentTetrio(ctx:SlashContext, name:str, rank_cap:str=None, rank_floor:str=None, tr_cap:int=None, tr_floor:int=None):
     game = "tetr.io"
     if ctx.guild_id is None:
         await ctx.send(strs.SpanishStrs.NOT_FOR_DM)
@@ -66,7 +64,15 @@ async def addTournamentTetrio(ctx:SlashContext, name:str, rank_cap:int=None, ran
     # customTemplate.participantFields += controller.PLAYER_FIELDS
     templateFields = controller.PLAYER_FIELDS 
     regTemplate = RegistrationTemplate(name=name,serverId=ctx.guild_id,participantFields=templateFields)
-    tournament = TetrioTournament(name=name, game=game, hostServerId=ctx.guild_id, registrationTemplate=regTemplate, rankTop=rank_cap, rankBottom=rank_floor)
+    tournament = TetrioTournament(name=name, 
+        game=game, 
+        hostServerId=ctx.guild_id, 
+        registrationTemplate=regTemplate, 
+        rankTop=rank_cap, 
+        rankBottom=rank_floor,
+        trTop=tr_cap,
+        trBottom=tr_floor
+    )
     if tournamentController.addTournament(tournament):
         await ctx.send(strs.SpanishStrs.TOURNAMENT_ADDED.format(name=name,game=game))
     else:
@@ -124,6 +130,7 @@ async def openRegistrationInChat(ctx:SlashContext,tournament:str,channel:discord
 
     # add listener for channel
     await ctx.send(strs.SpanishStrs.REGISTRATION_OPEN_CHAT.format(tournament=tournamentObj.name, chat=channel.mention))
+
 
 @slash.slash(
     name="closeRegistration",
@@ -198,6 +205,7 @@ async def getTournamentParticipants(ctx:SlashContext, tournament:str):
     df = pd.DataFrame(partList)
     await ctx.send(file=File(StringIO(df.to_csv()), filename= f"Participants_{datetime.utcnow()}.txt"))
 
+
 @slash.slash(
     name="readCheckInFromReaction",
     description="Register people who reacted to a certain message as checked in",
@@ -242,7 +250,7 @@ async def readCheckIns(ctx:SlashContext,
     try:
         msg:Message = await channel.fetch_message(messageId)
     except Exception as e:
-        await ctx.send(strs.SpanishStrs.MESSAGE_NOT_FOUND.format(data=type(e).__name__))
+        await ctx.send(strs.SpanishStrs.MESSAGE_NOT_FOUND.format(data =type(e).__name__))
         return
     
     def check(_, user):
@@ -266,6 +274,7 @@ async def readCheckIns(ctx:SlashContext,
 
     df = pd.DataFrame(participants)    
     await ctx.send(file=File(StringIO(df.to_csv()), filename= f"Participants_{datetime.utcnow()}.txt"))
+
 
 @slash.slash(
     name="seedBy",
