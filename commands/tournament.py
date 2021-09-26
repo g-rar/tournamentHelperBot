@@ -242,7 +242,7 @@ async def readCheckIns(ctx:SlashContext,
     try:
         msg:Message = await channel.fetch_message(messageId)
     except Exception as e:
-        await ctx.send(strs.SpanishStrs.MESSAGE_NOT_FOUND.format(type(e).__name__))
+        await ctx.send(strs.SpanishStrs.MESSAGE_NOT_FOUND.format(data=type(e).__name__))
         return
     
     def check(_, user):

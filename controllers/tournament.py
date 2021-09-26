@@ -82,7 +82,7 @@ class TournamentController:
         c = self.collection.find({"registration.status":{"$ne":0}})
         d = getQueryAsList(c) if c is not None else []
         res = list(map(lambda x: factories.getGameTournament(x["game"], x), d))
-        return res
+        return res 
 
     def updateTournament(self, tournament:Tournament) -> bool:
         res = self.collection.find_one_and_replace({"_id":tournament._id}, asdict(tournament))
@@ -97,7 +97,8 @@ class TournamentController:
         gameController = factories.getControllerFor(tournament)
         newFields, playerData = gameController.validateFields(fields, tournament)
         usr:User = member._user
-        participantController.registerPlayer(usr.id, member.display_name, tournament, newFields, playerData)
+        displayName = f"{usr.display_name}#{usr.discriminator}"
+        participantController.registerPlayer(usr.id, displayName, tournament, newFields, playerData)
 
 
 tournamentController = TournamentController(db)

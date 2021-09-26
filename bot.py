@@ -35,4 +35,5 @@ slash:SlashCommand = SlashCommand(bot,sync_commands=True)
 @bot.listen('on_ready')
 async def on_ready():
     logging.info("Connected to discord")
+    print("Connected to discord")
 
