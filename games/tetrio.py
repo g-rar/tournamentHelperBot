@@ -133,7 +133,7 @@ class TetrioController(BaseGameController):
         base["VS"] = round(player.info.league.vs, 2)
         base["APM"] = round(player.info.league.apm, 2)
         base["PPS"] = round(player.info.league.pps, 2)
-        base["Sprint"] = round(player.records.sprintTime, 2)
+        base["Sprint"] = round(player.records.sprintTime, 2) if player.records.sprintTime else None
         base["Blitz"] = player.records.blitzScore
         return base
 
