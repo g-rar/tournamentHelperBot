@@ -88,5 +88,5 @@ async def getReactions(ctx:SlashContext, channel:TextChannel, message_id:str):
     async for user in reaction.users():
         usr:User = user._user
         participants.append(f"{usr.name}#{user.discriminator}")
-    df = pd.DataFrame(participants)    
-    await ctx.send(file=File(StringIO(df.to_csv()), filename= f"Participants_{datetime.utcnow()}.txt"))
+    df = pd.DataFrame(participants)
+    await ctx.send(file=File(StringIO(df.to_csv(index=False,header=False)), filename= f"Participants_{datetime.utcnow()}.txt"))
