@@ -11,6 +11,7 @@ import discord
 from discord.file import File
 from discord.message import Message
 from discord.user import User
+from discord.member import Member
 from discord.channel import TextChannel
 from discord_slash.utils.manage_commands import create_option
 from discord_slash.context import SlashContext
@@ -85,6 +86,7 @@ async def getReactions(ctx:SlashContext, channel:TextChannel, message_id:str):
     reaction = reaction[0]
     participants = []
     async for user in reaction.users():
-        participants.append(f"{user.display_name}#{user.discriminator}")
+        usr:User = user._user
+        participants.append(f"{usr.name}#{user.discriminator}")
     df = pd.DataFrame(participants)    
     await ctx.send(file=File(StringIO(df.to_csv()), filename= f"Participants_{datetime.utcnow()}.txt"))
