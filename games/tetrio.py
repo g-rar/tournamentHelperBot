@@ -157,7 +157,7 @@ class TetrioController(BaseGameController):
         if player is None:
             raise RegistrationError("Invalid playername", self.INVALID_PLAYER)
         if participantController.getParticipantFromData(tournament._id, {"info._id":player.info._id}):
-            #TODO some funky griefs could go on with this check
+            #TODO some funky griefs could go on with this check, could be fixed if TOs are able to remove player
             raise RegistrationError("Tetrio account already registered", self.ALREADY_REGISTERED)
         if tournament.trTop and player.info.league.rating > tournament.trTop:
             raise RegistrationError("TR over cap", self.TR_OVER_TOP)
@@ -195,7 +195,6 @@ class TetrioController(BaseGameController):
         usr = username.lower()
         res = getPlayerProfile(usr)
         resCode, reqData = res.status_code, res.json()
-        #TODO make this return errors properly
 
         if resCode != 200:
             # await ctx.send(strs.ERROR.format(f"Error {resCode}"))

@@ -18,7 +18,7 @@ def addModule(gameController, gameParticipant, gameTournament):
 
 def getControllerFor(tournament:Union[Tournament, str]) -> BaseGameController:
     global gameControllers
-    tournamentGame = tournament if isinstance(tournament, str) else tournament.game
+    tournamentGame = tournament.game if isinstance(tournament, Tournament) else tournament
     ctr = gameControllers.get(tournamentGame, BaseGameController)
     return ctr()
 

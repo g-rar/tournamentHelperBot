@@ -196,7 +196,7 @@ async def getTournamentParticipants(ctx:SlashContext, tournament:str):
     tournamentObj = tournamentController.getTournamentFromName(ctx.guild_id,tournament)
     tournamentCtrl = factories.getControllerFor(tournamentObj)
     if tournamentObj is None:
-        await ctx.send(strs.SpanishStrs.TOURNAMENT_UNEXISTING)
+        await ctx.send(strs.SpanishStrs.TOURNAMENT_UNEXISTING.format(name=tournament))
         return
     participants = participantController.getParticipantsForTournament(tournamentObj._id)
     partList = []
@@ -366,8 +366,11 @@ def setupMessageRegistration(channel:discord.TextChannel, tournament:Tournament)
         for i in range(len(content)):
             fields[i].value = content[i]
         try:
-            tournamentController.registerPlayer(msg.author, tournament, fields)
-            await msg.add_reaction("✅")
+            if tournamentController.registerPlayer(tournament, fields, msg.author):
+                await msg.add_reaction("✅")
+            else:
+                logging.error("Failed to upload to db.")
+                await msg.add_reaction("🆘")
         except RegistrationError as e:
             # TODO proper error message
             await msg.add_reaction("❌")
