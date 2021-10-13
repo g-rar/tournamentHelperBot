@@ -129,10 +129,10 @@ class TetrioController(BaseGameController):
     def getParticipantView(self, p:Participant):
         base = super().getParticipantView(p)
         player:TetrioPlayer = p.playerData
-        base["TR"] = round(player.info.league.rating, 2)
-        base["VS"] = round(player.info.league.vs, 2)
-        base["APM"] = round(player.info.league.apm, 2)
-        base["PPS"] = round(player.info.league.pps, 2)
+        base["TR"] = round(player.info.league.rating, 2) if player.info.league.rating else None
+        base["VS"] = round(player.info.league.vs, 2) if player.info.league.vs else None
+        base["APM"] = round(player.info.league.apm, 2) if player.info.league.apm else None
+        base["PPS"] = round(player.info.league.pps, 2) if player.info.league.pps else None
         base["Sprint"] = round(player.records.sprintTime, 2) if player.records.sprintTime else None
         base["Blitz"] = player.records.blitzScore
         return base
