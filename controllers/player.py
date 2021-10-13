@@ -48,6 +48,15 @@ class ParticipantController:
             obj.playerData = getGamePlayerData(obj.playerData.get("game"), obj.playerData)
         return obj
     
+    def getParticipantFromDisplayName(self, playerDisplayName:str, tournamentId:ObjectId) -> Participant:
+        c = self.collection.find_one({"discordDisplayname":playerDisplayName,"tournament":tournamentId})
+        if c is None:
+            return None
+        obj = Participant.fromDict(c)
+        if obj.playerData:
+            obj.playerData = getGamePlayerData(obj.playerData.get("game"), obj.playerData)
+        return obj
+
     def getParticipantFromData(self, tournamentId:ObjectId , data:dict) -> Participant:
         playerData = {f"playerData.{key}":val for key,val in data.items()}
         c = self.collection.find_one({"tournament":tournamentId, **playerData})
@@ -90,6 +99,6 @@ class ParticipantController:
             fields=fields,
             playerData=playerData
         )
-        self.addParticipant(newParticipant)
+        return self.addParticipant(newParticipant)
 
 participantController = ParticipantController(db)

@@ -27,6 +27,7 @@ class RegistrationTemplate:
 @dataclass
 class Participant(BaseModel):
     """"Represents a registered player in a tournament"""
+    # TODO need to make discordId not required,
     discordId:int
     discordDisplayname:str
     registeredTime:datetime

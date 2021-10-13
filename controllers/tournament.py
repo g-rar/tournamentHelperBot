@@ -93,12 +93,19 @@ class TournamentController:
         res = self.collection.find_one_and_update({"_id":tournament._id}, {"$set":{"registration":regDict}})
         return bool(res)
 
-    def registerPlayer(self, member:Member, tournament:Tournament, fields):
+    # TODO need to add method to register player without it being discord member
+
+    def registerPlayer(self, tournament:Tournament, fields:list, member:Member = None):
         gameController = factories.getControllerFor(tournament)
         newFields, playerData = gameController.validateFields(fields, tournament)
-        usr:User = member._user
-        displayName = f"{usr.display_name}#{usr.discriminator}"
-        participantController.registerPlayer(usr.id, displayName, tournament, newFields, playerData)
+        if member:
+            usr:User = member._user
+            usr_id = usr.id
+            displayName = f"{usr.display_name}#{usr.discriminator}"
+        else:
+            usr_id = None
+            displayName = None
+        return participantController.registerPlayer(usr_id, displayName, tournament, newFields, playerData)
 
 
 tournamentController = TournamentController(db)
