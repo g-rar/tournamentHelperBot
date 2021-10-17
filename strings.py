@@ -37,6 +37,7 @@ class SpanishStrs:
     VALUE_SHOULD_BE_DEC = "El valor para la opción '{option}' debe ser un número."
     VALUE_SHOULD_BE_TEXT_CHANNEL = "El valor para la opción '{option}' debe ser un canal de texto."
     MESSAGE_NOT_FOUND = "No se encontró el mensaje: {data}..."
+    REACTION_TIMEOUT = "Se acabó el tiempo para reaccionar. Hay un límite de {time} segundos. Intenta de nuevo (＾v＾u)..."
 
     #Server
     CANT_REGISTER_DM = "Este no es un servidor. No uno que pueda registrar al menos ¯\\\_(ツ)_/¯"

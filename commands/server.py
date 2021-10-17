@@ -77,7 +77,7 @@ async def getReactions(ctx:SlashContext, channel:TextChannel, message_id:str):
         res1 = await ctx.send(strs.SpanishStrs.INPUT_CHECK_IN_REACTION)
         inputReaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=check)
     except asyncio.TimeoutError:
-        await ctx.send('👎')
+        await ctx.send(strs.SpanishStrs.REACTION_TIMEOUT.format(time="60"))
         return
     reaction = list(filter(lambda x: x.emoji == inputReaction.emoji, msg.reactions))
     if reaction == []:

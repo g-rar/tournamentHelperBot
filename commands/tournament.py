@@ -259,7 +259,7 @@ async def readCheckIns(ctx:SlashContext,
         res1 = await ctx.send(strs.SpanishStrs.INPUT_CHECK_IN_REACTION)
         inputReaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=check)
     except asyncio.TimeoutError:
-        await ctx.send('👎')
+        await ctx.send(strs.SpanishStrs.REACTION_TIMEOUT.format(time="60"))
         return
     reaction = list(filter(lambda x: x.emoji == inputReaction.emoji, msg.reactions))
     if reaction == []:
@@ -269,11 +269,12 @@ async def readCheckIns(ctx:SlashContext,
     participants = []
     async for user in reaction.users():
         p = participantController.getParticipantFromDiscordId(user.id, tournamentObj._id)
+        if p is None: continue
         pData = tournamentCtrl.getParticipantView(p)
         participants.append(pData)
 
     df = pd.DataFrame(participants)    
-    await ctx.send(file=File(StringIO(df.to_csv()), filename= f"Participants_{datetime.utcnow()}.txt"))
+    await ctx.send(file=File(StringIO(df.to_csv()), filename= f"Participants_{datetime.utcnow()}.csv"))
 
 
 @slash.slash(
