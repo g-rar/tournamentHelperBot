@@ -354,6 +354,9 @@ async def setListenersBackUp():
 
 def setupMessageRegistration(channel:discord.TextChannel, tournament:Tournament):
     global registrationListeners
+    if (channel.guild.id, tournament.name) in registrationListeners: 
+        #prevent from setting two identical listeners
+        return
     @bot.listen()
     async def on_message(msg:discord.Message):
         if msg.channel.id != channel.id:
