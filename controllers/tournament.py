@@ -30,7 +30,6 @@ from models.registration import RegistrationField, RegistrationTemplate, Registr
 from controllers.player import participantController
 from controllers.admin import adminCommand
 from games import factories
-from games.tetrio import TetrioController, TetrioTournament
 
 import strings as strs
 from utils import getQueryAsList, OptionTypes, extractQuotedSubstrs
@@ -67,7 +66,6 @@ class TournamentController:
         return obj
 
     def getTournamentsForServer(self, serverId:int) -> List[Tournament]:
-        c = self.collection.find({"hostServerId":serverId})
         c = self.collection.find({"hostServerId":serverId}, sort=[("createdAt", -1)])
         d = getQueryAsList(c) if c is not None else []
         res = list(map(lambda x: factories.getGameTournament(x.get("game"), x), d))
@@ -96,16 +94,19 @@ class TournamentController:
 
     # TODO need to add method to register player without it being discord member
 
-    def registerPlayer(self, tournament:Tournament, fields:list, member:Member = None):
+    def registerPlayer(self, tournament:Tournament, fields:list, member:Member = None, displayName:str = None):
         gameController = factories.getControllerFor(tournament)
         newFields, playerData = gameController.validateFields(fields, tournament)
         if member:
+            if participantController.getParticipantFromDiscordId(member._user.id, tournament._id):
+                raise RegistrationError("Discord user already registered in tournament", 3)
             usr:User = member._user
             usr_id = usr.id
             displayName = f"{usr.display_name}#{usr.discriminator}"
-        else:
+        elif displayName:
             usr_id = None
-            displayName = None
+        else:
+            raise RegistrationError("Either a discord member or displayName are required to register a player!", 2)
         return participantController.registerPlayer(usr_id, displayName, tournament, newFields, playerData)
 
 
