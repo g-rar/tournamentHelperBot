@@ -1,6 +1,7 @@
 from baseModel import BaseModel
 from dataclasses import dataclass, field, asdict
 from models.registration import RegistrationTemplate
+from datetime import datetime
 
 from bson.objectid import ObjectId
 
@@ -31,6 +32,7 @@ class Tournament(BaseModel):
     _id: ObjectId = field(default_factory=ObjectId)
     registrationTemplate:RegistrationTemplate = None
     checkInOpen:int = 0
+    createdAt:datetime = field(default_factory=datetime.utcnow)
     registration:TournamentRegistration = field(default_factory=TournamentRegistration)
     participants:list = field(default_factory=list)
     finished:bool=False

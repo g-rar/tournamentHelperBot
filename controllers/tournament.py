@@ -68,6 +68,7 @@ class TournamentController:
 
     def getTournamentsForServer(self, serverId:int) -> List[Tournament]:
         c = self.collection.find({"hostServerId":serverId})
+        c = self.collection.find({"hostServerId":serverId}, sort=[("createdAt", -1)])
         d = getQueryAsList(c) if c is not None else []
         res = list(map(lambda x: factories.getGameTournament(x.get("game"), x), d))
         return res

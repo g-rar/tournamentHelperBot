@@ -29,7 +29,7 @@ from games import factories
 from games.tetrio import TetrioController, TetrioTournament
 
 import strings as strs
-from utils import OptionTypes, extractQuotedSubstrs
+from utils import OptionTypes, extractQuotedSubstrs, setupButtonNavigation
 
 
 @slash.subcommand(
@@ -169,16 +169,59 @@ async def closeRegistration(ctx:SlashContext, tournament:str):
 
 
 @slash.slash(
-    name="seeTournaments",
+    name="see_tournaments",
+    options=[
+        create_option(name="tournament",description="Get the details for one tournament",
+                        option_type=OptionTypes.STRING,required=False)
+    ],
     guild_ids= botGuilds,
     description="Shows a list of the tournaments made by this server"
 )
-async def getTournaments(ctx: SlashContext):
-    # TODO beautify this, since probably its going to get messy quickly
+async def getTournaments(ctx: SlashContext, tournament:str = None):
+    #TODO this can be further pretified
+    guild:discord.Guild = ctx.guild
+    if tournament:
+        tournamentData = tournamentController.getTournamentFromName(guild.id, tournament)
+        if tournamentData:
+            await ctx.send(strs.utilStrs.JS.format(pformat(asdict(tournamentData))))
+        else:
+            await ctx.send(strs.SpanishStrs.TOURNAMENT_UNEXISTING.format(name=tournament))
+        return
     tournaments = tournamentController.getTournamentsForServer(ctx.guild_id)
-    tournamentStrs = list(map(lambda x: asdict(x), tournaments))
-    for t in tournamentStrs:
-        await ctx.send(strs.utilStrs.JS.format(pformat(t)))
+    if len(tournaments) > 20:
+        embedList = []
+        embedTournaments = []
+        page = 1
+        while len(tournaments) != 0:
+            embedTournaments.append(
+                # ej. ROADTOXRANK
+                tournaments.pop(0).name.replace("_","\\_")
+            )
+            if len(embedTournaments) == 20 or len(tournaments) == 0:
+                playersStr = "\n".join(embedTournaments)
+                embed = discord.Embed(
+                    title=f"{guild.name} (Page #{page})\n", 
+                    colour=discord.Colour(0xFFBA00), 
+                    description=f"Showing tournaments from {embedTournaments[0]} to {embedTournaments[-1]}:\n"+playersStr, 
+                    timestamp=datetime.utcnow())
+                embed.set_thumbnail(url=guild.icon_url)
+                embed.set_footer(text="TournamentHelper Bot")
+                embedList.append(embed)
+                embedTournaments = []
+                page += 1
+        await setupButtonNavigation(ctx, embedList, bot)
+    else:
+        playersStr = ""
+        for tournament in tournaments:
+            playersStr += tournament.name + "\n"
+        embed = discord.Embed(
+            title=guild.name, 
+            colour=discord.Colour(0xFFBA00), 
+            description="The tournaments in this server are:\n"+playersStr, 
+            timestamp=datetime.utcnow())
+        embed.set_thumbnail(url=guild.icon_url)
+        embed.set_footer(text="TournamentHelper Bot")
+        await ctx.send(embed=embed)
 
 
 @slash.slash(
