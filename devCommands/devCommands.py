@@ -12,6 +12,7 @@ from pymongo.collection import Collection
 
 import strings as strs
 from discord_slash.utils.manage_commands import create_choice, create_option
+from pprint import pformat
 
 def devCommand(f):
     async def wrapper(ctx: cmds.Context, *args, **kargs):
@@ -48,3 +49,27 @@ async def devTest(ctx:cmds.Context):
 )
 async def ping(ctx:SlashContext):
     await ctx.send("pong")
+
+@slash.slash(
+    name="see_commands",
+    description="see bot commands",
+    guild_ids=botGuilds
+)
+async def see_commands(ctx:SlashContext):
+    await ctx.send(f'''
+```py
+{pformat(slash.commands)}
+```
+''')
+
+@slash.slash(
+    name="see_subcommands",
+    description="see bot subcommands",
+    guild_ids=botGuilds
+)
+async def see_commands(ctx:SlashContext):
+    await ctx.send(f'''
+```py
+{pformat(slash.subcommands)}
+```
+''')

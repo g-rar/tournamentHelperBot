@@ -1,3 +1,3 @@
-from controllers.tournament import Tournament, tournamentController, TournamentController
-from controllers.admin import AdminController
-from controllers.server import Server, serverController, ServerController
+from controllers.tournamentController import Tournament, tournamentController, TournamentController
+from controllers.adminContoller import AdminController
+from controllers.serverController import Server, serverController, ServerController

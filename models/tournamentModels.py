@@ -1,6 +1,6 @@
 from baseModel import BaseModel
 from dataclasses import dataclass, field, asdict
-from models.registration import RegistrationTemplate
+from models.registrationModels import RegistrationTemplate
 from datetime import datetime
 
 from bson.objectid import ObjectId

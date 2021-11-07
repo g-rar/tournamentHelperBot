@@ -1,5 +1,5 @@
 from games.default import BaseGameController, BasePlayer
-from models.tournament import Tournament
+from models.tournamentModels import Tournament
 from typing import Dict, List, Union
 
 

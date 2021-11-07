@@ -16,7 +16,7 @@ from discord_slash.context import SlashContext
 from baseModel import BaseModel
 
 from bot import db, bot, slash, botGuilds, CONF
-from controllers.server import serverController
+from controllers.serverController import serverController
 from devCommands.devCommands import devCommand
 
 

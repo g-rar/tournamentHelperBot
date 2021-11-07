@@ -1,4 +1,5 @@
-from controllers.admin import adminCommand
+from controllers.adminContoller import adminCommand
+from controllers.serverController import serverController
 from discord_slash.utils.manage_commands import create_option
 
 import strings as strs
@@ -8,7 +9,6 @@ import discord
 from discord_slash.context import SlashContext
 
 from bot import slash, botGuilds
-from controllers.server import serverController
 from devCommands.devCommands import devCommand
 
 

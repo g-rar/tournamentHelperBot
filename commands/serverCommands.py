@@ -2,8 +2,8 @@ import asyncio
 import pandas as pd
 from io import StringIO
 from datetime import datetime
-from controllers.admin import adminCommand
-from controllers.server import Server, serverController
+from controllers.adminContoller import adminCommand
+from controllers.serverController import Server, serverController
 
 import strings as strs
 

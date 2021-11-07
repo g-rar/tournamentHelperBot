@@ -12,7 +12,7 @@ load_dotenv()
 
 import traceback
 from bot import bot, slash, botGuilds, CONF
-from controllers import server, tournament
+from controllers import serverController, tournamentController
 
 from devCommands.devCommands import devCommand, ping
 

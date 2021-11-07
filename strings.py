@@ -58,3 +58,8 @@ class SpanishStrs:
     REGISTRATION_CLOSED_ALREADY = "El registro para el torneo '{tournament}' ya estaba cerrado."
     INPUT_CHECK_IN_REACTION = "Reacciona a este mensaje con el emoji con el que los jugadores hacen check in."
     NO_REACTION_IN_MSG = "Nadie ha reaccionado con '{reaction}' :thinking:..."
+
+    #Tetr.io
+    UNEXISTING_TETRIORANK = "No existe el rango '{rank}' (._.`)・・・"
+    TETRIORANKCAP_LOWERTHAN_RANKFLOOR = "El rank_cap '{rank_cap}' no puede ser menor que el rank_floor '{rank_floor}' (._.`)・・・"
+    TETRIOTRCAP_LOWERTHAN_TRFLOOR = "El tr_cap '{tr_cap}' no puede ser menor que el tr_floor '{tr_floor}' (._.`)・・・"

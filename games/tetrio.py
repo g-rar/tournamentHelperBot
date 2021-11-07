@@ -1,16 +1,28 @@
 import asyncio
 from dataclasses import dataclass, asdict, fields, field
-from controllers.player import participantController
 from typing import List
 
 import requests
 
 from games.factories import addModule
-
-from models.tournament import Tournament
-from baseModel import BaseModel
 from games.default import BaseGameController, BasePlayer
-from models.registration import Participant, RegistrationError, RegistrationField, RegistrationTemplate
+
+from baseModel import BaseModel
+from models.tournamentModels import Tournament
+from models.registrationModels import Participant, RegistrationError, RegistrationField, RegistrationTemplate
+
+from controllers.tournamentController import tournamentController
+from controllers.playerController import participantController
+from controllers.adminContoller import adminCommand
+from controllers.playerController import participantController
+
+from bot import bot, botGuilds, slash
+from discord_slash.utils.manage_commands import create_choice, create_option
+from discord.channel import TextChannel
+from discord.message import Message
+from discord_slash.context import SlashContext
+
+import strings as strs
 from utils import OptionTypes
 
 tetrioRanks = ["z","d","d+"] + [let + sign for let in "cbas" for sign in ["-","","+"]] + ["ss","u",'x']
@@ -229,5 +241,74 @@ class TetrioController(BaseGameController):
         playerNews = reqRecData["data"]["news"]
         
         return player, playerNews
+
+@slash.subcommand(
+    base="add_tournament",
+    name="tetrio",
+    guild_ids= botGuilds,
+    description="Add a tournament for tetr.io integrated game.",
+    options=[
+        create_option(  name="name", description="The tournament's name.",
+                        option_type=OptionTypes.STRING, required=True),
+        create_option(  name="rank_cap", description="Maximun lowercase rank a player can have to register",
+                        option_type=OptionTypes.STRING, required=False),
+        create_option(  name="rank_floor", description="Minimum lowercase rank a player can have to register",
+                        option_type=OptionTypes.INTEGER, required=False),
+        create_option(  name="tr_cap", description="Maximun TR a player can have to register",
+                        option_type=OptionTypes.INTEGER, required=False),
+        create_option(  name="tr_floor", description="Minimum TR a player can have to register",
+                        option_type=OptionTypes.INTEGER, required=False)
+    ])
+@adminCommand
+async def addTournamentTetrio(ctx:SlashContext, name:str, rank_cap:str=None, rank_floor:str=None, tr_cap:int=None, tr_floor:int=None):
+    game = "tetr.io"
+    if ctx.guild_id is None:
+        await ctx.send(strs.SpanishStrs.NOT_FOR_DM)
+        return
+    if tournamentController.getTournamentFromName(ctx.guild_id, name):
+        await ctx.send(strs.SpanishStrs.TOURNAMENT_EXISTS_ALREADY.format(name=name))
+        return
+    
+    #rank checks
+    if rank_cap:
+        rank_cap = rank_cap.lower()
+        if rank_cap not in tetrioRanks:
+            await ctx.send(strs.SpanishStrs.UNEXISTING_TETRIORANK.format(rank=rank_cap))
+            return
+    if rank_floor:
+        rank_floor = rank_floor.lower()
+        if rank_floor not in tetrioRanks:
+            await ctx.send(strs.SpanishStrs.UNEXISTING_TETRIORANK.format(rank=rank_floor))
+            return
+    if (rank_cap and rank_floor) and tetrioRanks.index(rank_floor) > tetrioRanks.index(rank_cap):
+        await ctx.send(strs.SpanishStrs.TETRIORANKCAP_LOWERTHAN_RANKFLOOR.format(rank_cap=rank_cap, rank_floor=rank_floor))
+        return
+    
+    #tr checks
+    if (tr_cap and tr_floor) and tr_floor > tr_cap:
+        await ctx.send(strs.SpanishStrs.TETRIORANKCAP_LOWERTHAN_RANKFLOOR.format(rank_cap=rank_cap, rank_floor=rank_floor))
+        return
+
+    controller = TetrioController()
+    # uncomment on completing template implementation
+    # customTemplate = templatesController.getTemplate(ctx.guild_id, template) # returns [] if doesnt exist
+    # customTemplate.participantFields += controller.PLAYER_FIELDS
+    templateFields = controller.PLAYER_FIELDS 
+    regTemplate = RegistrationTemplate(name=name,serverId=ctx.guild_id,participantFields=templateFields)
+    tournament = TetrioTournament(name=name, 
+        game=game, 
+        hostServerId=ctx.guild_id, 
+        registrationTemplate=regTemplate, 
+        rankTop=rank_cap, 
+        rankBottom=rank_floor,
+        trTop=tr_cap,
+        trBottom=tr_floor
+    )
+    if tournamentController.addTournament(tournament):
+        await ctx.send(strs.SpanishStrs.TOURNAMENT_ADDED.format(name=name,game=game))
+    else:
+        await ctx.send(strs.SpanishStrs.DB_UPLOAD_ERROR)
+
+
 
 addModule(TetrioController, TetrioPlayer, TetrioTournament)

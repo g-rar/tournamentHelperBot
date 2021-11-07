@@ -1,12 +1,12 @@
 from dataclasses import asdict, dataclass
-from models.tournament import Tournament
-from models.registration import Participant, RegistrationError
+from models.tournamentModels import Tournament
+from models.registrationModels import Participant, RegistrationError
 from typing import List
 
 from utils import OptionTypes
 
 from baseModel import BaseModel
-from models.registration import RegistrationField
+from models.registrationModels import RegistrationField
 
 
 class BaseGameController:

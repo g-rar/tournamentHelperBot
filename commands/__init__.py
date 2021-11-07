@@ -1,3 +1,3 @@
-import commands.admin
-import commands.server
-import commands.tournament
+import commands.adminCommands
+import commands.serverCommands
+import commands.tournamentCommands

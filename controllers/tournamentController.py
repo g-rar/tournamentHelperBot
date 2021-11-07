@@ -24,11 +24,11 @@ import requests
 
 from bot import db, bot, botGuilds, slash
 
-from models.tournament import Tournament, TournamentRegistration, TournamentStatus
-from models.registration import RegistrationField, RegistrationTemplate, RegistrationError
+from models.tournamentModels import Tournament, TournamentRegistration, TournamentStatus
+from models.registrationModels import RegistrationField, RegistrationTemplate, RegistrationError
 
-from controllers.player import participantController
-from controllers.admin import adminCommand
+from controllers.playerController import participantController
+from controllers.adminContoller import adminCommand
 from games import factories
 
 import strings as strs

@@ -4,9 +4,9 @@ from datetime import datetime
 from games.factories import getGamePlayerData
 from games.default import BaseGameController
 
-from models.tournament import Tournament
+from models.tournamentModels import Tournament
+from models.registrationModels import Participant, RegistrationError, RegistrationField
 
-from models.registration import Participant, RegistrationError, RegistrationField
 from typing import List
 from bson.objectid import ObjectId
 

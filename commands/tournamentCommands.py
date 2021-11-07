@@ -19,64 +19,17 @@ import requests
 
 from bot import bot, botGuilds, slash
 
-from models.tournament import Tournament, TournamentStatus
-from models.registration import RegistrationField, RegistrationTemplate, RegistrationError
+from models.tournamentModels import Tournament, TournamentRegistration, TournamentStatus
+from models.registrationModels import RegistrationField, RegistrationTemplate, RegistrationError
 
-from controllers.admin import adminCommand
-from controllers.player import participantController
-from controllers.tournament import tournamentController
+from controllers.adminContoller import adminCommand
+from controllers.playerController import participantController
+from controllers.tournamentController import tournamentController
 from games import factories
-from games.tetrio import TetrioController, TetrioTournament
 
 import strings as strs
 from utils import OptionTypes, extractQuotedSubstrs, setupButtonNavigation
 
-
-@slash.subcommand(
-    base="add_tournament",
-    name="tetrio",
-    guild_ids= botGuilds,
-    description="Add a tournament for tetr.io integrated game.",
-    options=[
-        create_option(  name="name", description="The tournament's name.",
-                        option_type=OptionTypes.STRING, required=True),
-        create_option(  name="rank_cap", description="Maximun lowercase rank a player can have to register",
-                        option_type=OptionTypes.STRING, required=False),
-        create_option(  name="rank_floor", description="Minimum lowercase rank a player can have to register",
-                        option_type=OptionTypes.INTEGER, required=False),
-        create_option(  name="tr_cap", description="Maximun TR a player can have to register",
-                        option_type=OptionTypes.INTEGER, required=False),
-        create_option(  name="tr_floor", description="Minimum TR a player can have to register",
-                        option_type=OptionTypes.INTEGER, required=False)
-    ])
-@adminCommand
-async def addTournamentTetrio(ctx:SlashContext, name:str, rank_cap:str=None, rank_floor:str=None, tr_cap:int=None, tr_floor:int=None):
-    game = "tetr.io"
-    if ctx.guild_id is None:
-        await ctx.send(strs.SpanishStrs.NOT_FOR_DM)
-        return
-    if tournamentController.getTournamentFromName(ctx.guild_id, name):
-        await ctx.send(strs.SpanishStrs.TOURNAMENT_EXISTS_ALREADY.format(name=name))
-        return
-    controller = TetrioController()
-    # uncomment on completing template implementation
-    # customTemplate = templatesController.getTemplate(ctx.guild_id, template) # returns [] if doesnt exist
-    # customTemplate.participantFields += controller.PLAYER_FIELDS
-    templateFields = controller.PLAYER_FIELDS 
-    regTemplate = RegistrationTemplate(name=name,serverId=ctx.guild_id,participantFields=templateFields)
-    tournament = TetrioTournament(name=name, 
-        game=game, 
-        hostServerId=ctx.guild_id, 
-        registrationTemplate=regTemplate, 
-        rankTop=rank_cap, 
-        rankBottom=rank_floor,
-        trTop=tr_cap,
-        trBottom=tr_floor
-    )
-    if tournamentController.addTournament(tournament):
-        await ctx.send(strs.SpanishStrs.TOURNAMENT_ADDED.format(name=name,game=game))
-    else:
-        await ctx.send(strs.SpanishStrs.DB_UPLOAD_ERROR)
 
 
 # this is unlikely to scale very much
@@ -193,16 +146,18 @@ async def getTournaments(ctx: SlashContext, tournament:str = None):
         embedTournaments = []
         page = 1
         while len(tournaments) != 0:
-            embedTournaments.append(
-                # ej. ROADTOXRANK
-                tournaments.pop(0).name.replace("_","\\_")
-            )
+            t = tournaments.pop(0)
+            # ej. TAWS 15
+            tournamentStr = t.name.replace("_","\\_")
+            if t.registration.status != TournamentStatus.CHECK_IN_CLOSED:
+                tournamentStr += "......( 📝 )"
+            embedTournaments.append(tournamentStr)
             if len(embedTournaments) == 20 or len(tournaments) == 0:
-                playersStr = "\n".join(embedTournaments)
+                tournamentStr = "\n".join(embedTournaments)
                 embed = discord.Embed(
                     title=f"{guild.name} (Page #{page})\n", 
                     colour=discord.Colour(0xFFBA00), 
-                    description=f"Showing tournaments from {embedTournaments[0]} to {embedTournaments[-1]}:\n"+playersStr, 
+                    description=f"Showing tournaments from {embedTournaments[0]} to {embedTournaments[-1]}:\n"+tournamentStr, 
                     timestamp=datetime.utcnow())
                 embed.set_thumbnail(url=guild.icon_url)
                 embed.set_footer(text="TournamentHelper Bot")
@@ -211,13 +166,16 @@ async def getTournaments(ctx: SlashContext, tournament:str = None):
                 page += 1
         await setupButtonNavigation(ctx, embedList, bot)
     else:
-        playersStr = ""
+        tournamentStr = ""
         for tournament in tournaments:
-            playersStr += tournament.name + "\n"
+            tournamentStr += tournament.name
+            if tournament.registration.status != TournamentStatus.CHECK_IN_CLOSED:
+                tournamentStr += "......( 📝 )"
+            tournamentStr += "\n"
         embed = discord.Embed(
             title=guild.name, 
             colour=discord.Colour(0xFFBA00), 
-            description="The tournaments in this server are:\n"+playersStr, 
+            description="The tournaments in this server are:\n"+tournamentStr, 
             timestamp=datetime.utcnow())
         embed.set_thumbnail(url=guild.icon_url)
         embed.set_footer(text="TournamentHelper Bot")
