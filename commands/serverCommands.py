@@ -17,7 +17,6 @@ from discord_slash.utils.manage_commands import create_option
 from discord_slash.context import SlashContext
 
 from bot import botGuilds, slash, bot
-from devCommands.devCommands import devCommand
 from utils import OptionTypes
 
 

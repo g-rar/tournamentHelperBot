@@ -11,6 +11,9 @@ import commands
 # import to register game modules
 import games.tetrio
 
+if os.getenv("DEV"):
+    import devCommands
+
 logging.basicConfig(level=logging.INFO,format="%(asctime)s - %(funcName)s:%(lineno)d - %(levelname)s: %(message)s", filename="output.log", filemode="a")
 
 def main():

@@ -9,7 +9,6 @@ import discord
 from discord_slash.context import SlashContext
 
 from bot import slash, botGuilds
-from devCommands.devCommands import devCommand
 
 
 @slash.subcommand(

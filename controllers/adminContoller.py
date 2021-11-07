@@ -17,7 +17,6 @@ from baseModel import BaseModel
 
 from bot import db, bot, slash, botGuilds, CONF
 from controllers.serverController import serverController
-from devCommands.devCommands import devCommand
 
 
 

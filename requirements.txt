@@ -1,3 +1,4 @@
 dotenv
 discord-py-slash-command
+discord-interactions
 pandas
