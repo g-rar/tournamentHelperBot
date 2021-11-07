@@ -147,6 +147,7 @@ class TetrioController(BaseGameController):
         base["PPS"] = round(player.info.league.pps, 2) if player.info.league.pps else None
         base["Sprint"] = round(player.records.sprintTime, 2) if player.records.sprintTime else None
         base["Blitz"] = player.records.blitzScore
+        base["Tetr.io_ID"] = player.info._id
         return base
 
     def validateFields(self, fields:List[RegistrationField], tournament:TetrioTournament):
