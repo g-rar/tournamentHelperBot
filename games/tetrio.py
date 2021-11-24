@@ -105,7 +105,9 @@ class TetrioPlayer(BasePlayer):
 
     @staticmethod
     def fromDict(d):
-        return BaseModel.fromDict(d, TetrioPlayer)
+        base = BaseModel.fromDict(d, TetrioPlayer)
+        base._id = base.info._id
+        return base
 
 
 @dataclass
