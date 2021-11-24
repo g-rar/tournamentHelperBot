@@ -31,7 +31,6 @@ import strings as strs
 from utils import OptionTypes, extractQuotedSubstrs, setupButtonNavigation
 
 
-
 # this is unlikely to scale very much
 # follow {(serverId, tournamentName): coroutine}
 registrationListeners = {}
@@ -120,6 +119,33 @@ async def closeRegistration(ctx:SlashContext, tournament:str):
         tournamentController.updateRegistrationForTournament(tournamentObj, tournamentObj.registration)
     await ctx.send(strs.SpanishStrs.REGISTRATION_CLOSED.format(tournament=tournament))
 
+
+@slash.slash(
+    name="delete_tournament",
+    options=[
+        create_option(name="tournament",description="Tournament to delete",
+                        option_type=OptionTypes.STRING, required=True)
+    ],
+    guild_ids=botGuilds,
+    description="Deletes a tournament from existence"
+)
+@adminCommand
+async def deleteTournament(ctx:SlashContext, tournament:str):
+    if ctx.guild_id is None:
+        await ctx.send(strs.SpanishStrs.NOT_FOR_DM)
+        return
+    guild:discord.Guild = ctx.guild
+    tournamentData = tournamentController.getTournamentFromName(guild.id, tournament)
+    if not tournamentData:
+        await ctx.send(strs.SpanishStrs.TOURNAMENT_UNEXISTING.format(name=tournament))
+        return
+    if tournamentData.registration.status != TournamentStatus.REGISTRATION_CLOSED:
+        await closeRegistration.invoke(ctx, tournament = tournament)
+    if tournamentController.deleteTournament(tournamentData):
+        await ctx.send(strs.SpanishStrs.TOURNAMENT_DELETED.format(name=tournament))
+    else:
+        await ctx.send(strs.SpanishStrs.DB_DROP_ERROR)
+    
 
 @slash.slash(
     name="see_tournaments",
@@ -330,8 +356,6 @@ async def seedBy(ctx:SlashContext, column:str, order:str, message_id:str):
         
     except Exception as e:
         await ctx.send(strs.utilStrs.ERROR.format(e))
-
-
 
 
 @bot.listen('on_ready')

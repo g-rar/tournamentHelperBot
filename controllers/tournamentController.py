@@ -92,6 +92,10 @@ class TournamentController:
         res = self.collection.find_one_and_update({"_id":tournament._id}, {"$set":{"registration":regDict}})
         return bool(res)
 
+    def deleteTournament(self, tournament:Tournament) -> bool:
+        res = self.collection.find_one_and_delete({"_id":tournament._id})
+        return bool(res)
+
     # TODO need to add method to register player without it being discord member
 
     def registerPlayer(self, tournament:Tournament, fields:list, member:Member = None, displayName:str = None):
