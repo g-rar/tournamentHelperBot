@@ -99,6 +99,8 @@ class TournamentController:
     # TODO need to add method to register player without it being discord member
 
     def registerPlayer(self, tournament:Tournament, fields:list, member:Member = None, displayName:str = None):
+        if tournament.registration.status == TournamentStatus.REGISTRATION_CLOSED:
+            raise RegistrationError("Registration for this tournament is currently closed",4)
         gameController = factories.getControllerFor(tournament)
         newFields, playerData = gameController.validateFields(fields, tournament)
         if member:

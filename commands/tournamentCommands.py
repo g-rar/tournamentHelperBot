@@ -1,5 +1,6 @@
 import asyncio
 from discord import channel
+from discord.member import Member
 import pandas as pd
 from dataclasses import asdict
 from datetime import datetime
@@ -24,7 +25,7 @@ from models.registrationModels import RegistrationField, RegistrationTemplate, R
 
 from controllers.adminContoller import adminCommand
 from controllers.playerController import participantController
-from controllers.tournamentController import tournamentController
+from controllers.tournamentController import TournamentController, tournamentController
 from games import factories
 
 import strings as strs
@@ -207,6 +208,48 @@ async def getTournaments(ctx: SlashContext, tournament:str = None):
         embed.set_footer(text="TournamentHelper Bot")
         await ctx.send(embed=embed)
 
+@slash.subcommand(
+    base="register_player_as",
+    name="with_message",
+    options=[
+        create_option(name="tournament", description="Tournament to register player in",
+                        option_type=OptionTypes.STRING, required=True),
+        create_option(name="discord_id", description="Discord Id of the player to register",
+                        option_type=OptionTypes.STRING, required=True),
+        create_option(name="msg_content", description="Content of the message the player would input to register",
+                        option_type=OptionTypes.STRING, required=True)
+    ],
+    guild_ids=botGuilds,
+    description="Register a player as if they registered themselves with a message."
+)
+@adminCommand
+async def registerPlayerWithDiscord(ctx:SlashContext, tournament:str, discord_id:str, msg_content:str):
+    if ctx.guild_id is None:
+        await ctx.send(strs.SpanishStrs.NOT_FOR_DM)
+        return
+    if not discord_id.isnumeric():
+        await ctx.send(strs.SpanishStrs.VALUE_SHOULD_BE_DEC.format(option="discord_id"))
+        return
+    userId = int(discord_id)
+    member:Member = ctx.guild.get_member(userId)
+    if member is None:
+        await ctx.send(strs.SpanishStrs.MEMBER_NOT_FOUND_BY_ID.format(id=discord_id))
+        return
+    tournamentData = tournamentController.getTournamentFromName(ctx.guild_id, tournament)
+    if not tournamentData:
+        await ctx.send(strs.SpanishStrs.TOURNAMENT_UNEXISTING.format(name=tournament))
+        return
+    content = extractQuotedSubstrs(msg_content)
+    fields:List[RegistrationField] = tournamentData.registrationTemplate.participantFields
+    for i in range(len(content)):
+        fields[i].value = content[i]
+    try:
+        if tournamentController.registerPlayer(tournamentData, fields, member):
+            await ctx.send(strs.SpanishStrs.PLAYER_REGISTERED.format(username=member.display_name, tournament=tournament))
+        else:
+            await ctx.send(strs.SpanishStrs.DB_UPLOAD_ERROR)
+    except Exception as e:
+        await ctx.send(strs.SpanishStrs.ERROR.format(e))
 
 @slash.slash(
     name="see_participants",
