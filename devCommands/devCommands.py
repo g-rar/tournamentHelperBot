@@ -73,3 +73,14 @@ async def see_commands(ctx:SlashContext):
 {pformat(slash.subcommands)}
 ```
 ''')
+
+@slash.slash(
+    name="test_local",
+    description="test language diversity",
+    guild_ids=botGuilds,
+    options=[]
+)
+@devCommand
+# @localized
+async def testLocalized(ctx:SlashContext):
+    ...

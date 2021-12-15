@@ -29,6 +29,10 @@ class utilStrs:
 {}    
 ```'''
 
+class Languages:
+    SPANISH = "Spanish"
+    ENGLISH = "English"
+
 class SpanishStrs:
     #Generales
     DB_UPLOAD_ERROR = "No se pudo añadir la información. Intenta en otro momento y si no llamá a g.rar"

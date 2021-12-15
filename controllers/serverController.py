@@ -14,6 +14,8 @@ from bot import db
 @dataclass
 class Server(BaseModel):
     serverId: int
+    serverName: str = ""
+    language: str = "ENGLISH"
     _id: ObjectId = field(default_factory=ObjectId)
     guildTournaments: list = field(default_factory=list)
     players: list = field(default_factory=list)
