@@ -101,4 +101,10 @@ class ParticipantController:
         )
         return self.addParticipant(newParticipant)
 
+    def deleteParticipant(self, tournamentId:ObjectId, playerDiscordId:int) -> Participant:
+        partDict = self.collection.find_one_and_delete({"discordId":playerDiscordId,"tournament":tournamentId})
+        if not partDict:
+            return None
+        return Participant.fromDict(partDict)
+
 participantController = ParticipantController(db)

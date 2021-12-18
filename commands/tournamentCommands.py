@@ -251,6 +251,37 @@ async def registerPlayerWithDiscord(ctx:SlashContext, tournament:str, discord_id
     except Exception as e:
         await ctx.send(strs.SpanishStrs.ERROR.format(e))
 
+@slash.subcommand(
+    base="delete_participant",
+    name="with_discord_id",
+    options=[
+        create_option(name="tournament", description="Tournament in which participant is registered",
+                        option_type=OptionTypes.STRING, required=True),
+        create_option(name="discord_id", description="DiscordId of participant to be deleted",
+                        option_type=OptionTypes.STRING, required=True)
+    ],
+    guild_ids=botGuilds,
+    description="Delete a participant from a tournament. You get to decide why you do that."
+)
+@adminCommand
+async def deleteParticipant(ctx:SlashContext, tournament:str, discord_id:str):
+    if ctx.guild_id is None:
+        await ctx.send(strs.SpanishStrs.NOT_FOR_DM)
+        return
+    if not discord_id.isnumeric():
+        await ctx.send(strs.SpanishStrs.VALUE_SHOULD_BE_DEC.format(option="discord_id"))
+        return
+    userId = int(discord_id)
+    tournamentData = tournamentController.getTournamentFromName(ctx.guild_id, tournament)
+    if not tournamentData:
+        await ctx.send(strs.SpanishStrs.TOURNAMENT_UNEXISTING.format(name=tournament))
+        return
+    participant = participantController.deleteParticipant(tournamentData._id, userId)
+    if participant:
+        await ctx.send(strs.SpanishStrs.PARTICIPANT_DELETED.format(username=f"id: {discord_id}", tournament=tournament))
+    else:
+        await ctx.send(strs.SpanishStrs.PARTICIPANT_UNEXISTING.format(username=f"id: {discord_id}", tournament=tournament))
+
 @slash.slash(
     name="see_participants",
     description="See who's registered in your tournament",
