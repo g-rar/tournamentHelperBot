@@ -179,18 +179,19 @@ class TetrioController(BaseGameController):
         if tournament.trBottom and player.info.league.rating < tournament.trBottom:
             raise RegistrationError("TR under floor", self.TR_UNDER_BOTTOM)
         
-        if tournament.rankTop or tournament.rankBottom:
+        rankTop, rankBottom = tournament.rankTop, tournament.rankBottom
+        if rankTop or rankBottom:
             achievedOverBottom = False
             if (tournament.rankTop and
                     tetrioRanks.index(player.info.league.rank) > tetrioRanks.index(tournament.rankTop)):
                 raise RegistrationError("Overranked", self.OVERRANKED)
             for new in news:
-                if new["type"] == "rankup" and tetrioRanks.index(new["data"]["rank"]) > tetrioRanks.index(tournament.rankTop):
+                if rankTop and new["type"] == "rankup" and tetrioRanks.index(new["data"]["rank"]) > tetrioRanks.index(rankTop):
                     raise RegistrationError("Overranked", self.OVERRANKED)
-                if new["type"] == "rankup" and tetrioRanks.index(new["data"]["rank"]) >= tetrioRanks.index(tournament.rankBottom):
+                if rankBottom and new["type"] == "rankup" and tetrioRanks.index(new["data"]["rank"]) >= tetrioRanks.index(rankBottom):
                     achievedOverBottom = True
-            if (tournament.rankBottom and not achievedOverBottom and
-                    tetrioRanks.index(player.info.league.rank) < tetrioRanks.index(tournament.rankBottom)):
+            if (rankBottom and not achievedOverBottom and
+                    tetrioRanks.index(player.info.league.rank) < tetrioRanks.index(rankBottom)):
                 raise RegistrationError("Underranked", self.UNDERRANKED)
 
         return player

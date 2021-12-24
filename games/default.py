@@ -14,6 +14,7 @@ class BaseGameController:
     WRONG_TYPE:int = 1
     REQUIRED_FIELD:int = 2
     ALREADY_REGISTERED:int = 3
+    REGISTRATION_CLOSED:int = 4
     PLAYER_FIELDS:list = list()
     TEAM_FIELDS:list = list()
 
