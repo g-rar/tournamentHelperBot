@@ -1,18 +1,18 @@
 from discord_slash import SlashContext
 import discord
 
-import local.strings as strs
+import local.names as strs
 from controllers import serverController
 
 class CustomContext(SlashContext):
     async def sendLocalized(ctx:SlashContext, s:str, **kwargs):
-        if s not in strs.StringsNames.__members__:
+        if not hasattr(strs.StringsNames, s):
             await ctx.send(s)
             return
         server = serverController.getServer(ctx.guild_id)
         language = \
-            strs.Languages.ENGLISH.value if not server \
-            else strs.Languages[server.language].value
+            strs.EnglishStrs if not server \
+            else strs.languages.get(server.language, strs.EnglishStrs)
         await ctx.send(language[s].value.format(**kwargs))
 
 def localized(f):

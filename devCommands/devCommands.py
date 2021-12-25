@@ -1,6 +1,8 @@
 from discord.ext import commands
 from discord_slash.context import SlashContext
 from bot import bot, CONF, db, slash, botGuilds
+from local.localContext import CustomContext, localized
+from local.names import StringsNames
 from utils import OptionTypes, getQueryAsList
 
 import discord
@@ -80,7 +82,7 @@ async def see_commands(ctx:SlashContext):
     guild_ids=botGuilds,
     options=[]
 )
-@devCommand
-# @localized
-async def testLocalized(ctx:SlashContext):
-    ...
+@localized
+async def testLocalized(ctx:CustomContext):
+    print("Hola")
+    await ctx.sendLocalized(StringsNames.SERVER_REGISTERED)

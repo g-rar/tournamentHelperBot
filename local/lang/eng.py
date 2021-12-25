@@ -1,76 +1,7 @@
 from enum import Enum
+from local.lang.utils import utilStrs
 
-
-class utilStrs:
-    UNEXISTING_GAME = '''```diff
-🔎🤔 The game '{}' is not currently supported. Check if there was a typo. The currently supported games are:
-
-{}
-```'''
-    UNEXISTING_COMMAND = '''```diff
-- There is no '{}' command. The currently supported commands are:
-
-{}
-```'''
-    WARNING = '''```fix
-[ {} ]
-```'''
-    ERROR = '''```css
-[ {} ]
-```'''
-    INFO = '''```ini
-[ {} ]
-```'''
-    NORMAL = '```{}```'
-    DIFF = '''```diff
-{}
-```'''
-    JSON='''```json
-{}    
-```'''
-    JS='''```js
-{}    
-```'''
-
-class StringsNames(Enum):
-    DB_UPLOAD_ERROR = "DB_UPLOAD_ERROR"
-    NOT_FOR_DM = "NOT_FOR_DM"
-    ADMIN_ONLY = "ADMIN_ONLY"
-    VALUE_SHOULD_BE_DEC = "VALUE_SHOULD_BE_DEC"
-    VALUE_SHOULD_BE_TEXT_CHANNEL = "VALUE_SHOULD_BE_TEXT_CHANNEL"
-    MESSAGE_NOT_FOUND = "MESSAGE_NOT_FOUND"
-    REACTION_TIMEOUT = "REACTION_TIMEOUT"
-
-    #Server
-    CANT_REGISTER_DM = "CANT_REGISTER_DM"
-    SERVER_ALREADY_IN = "SERVER_ALREADY_IN"
-    SERVER_REGISTERED = "SERVER_REGISTERED"
-    ADDED_OPERATOR_ROLE = "ADDED_OPERATOR_ROLE"
-    REMOVED_OPERATOR_ROLE = "REMOVED_OPERATOR_ROLE"
-    NO_OPERATOR_ROLES = "NO_OPERATOR_ROLES"
-    MANY_PEOPLE_WITH_ROLE = "MANY_PEOPLE_WITH_ROLE"
-    NOT_AN_OPERATOR_ROLE = "NOT_AN_OPERATOR_ROLE"
-
-    #Tournament
-    TOURNAMENT_UNEXISTING = "TOURNAMENT_UNEXISTING"
-    TOURNAMENT_ADDED = "TOURNAMENT_ADDED"
-    TOURNAMENT_EXISTS_ALREADY = "TOURNAMENT_EXISTS_ALREADY"
-    REGISTRATION_OPEN_CHAT = "REGISTRATION_OPEN_CHAT"
-    REGISTRATION_CLOSED = "REGISTRATION_CLOSED"
-    REGISTRATION_CLOSED_ALREADY = "REGISTRATION_CLOSED_ALREADY"
-    INPUT_CHECK_IN_REACTION = "INPUT_CHECK_IN_REACTION"
-    NO_REACTION_IN_MSG = "NO_REACTION_IN_MSG"
-
-    #Tetr.io
-    UNEXISTING_TETRIORANK = "UNEXISTING_TETRIORANK"
-    TETRIORANKCAP_LOWERTHAN_RANKFLOOR = "TETRIORANKCAP_LOWERTHAN_RANKFLOOR"
-    TETRIOTRCAP_LOWERTHAN_TRFLOOR = "TETRIOTRCAP_LOWERTHAN_TRFLOOR"
-
-class Languages(Enum):
-    SPANISH = "Spanish"
-    ENGLISH = "English"
-
-class SpanishStrs(Enum):
+class EnglishStrs(Enum):
     #Generales
     DB_UPLOAD_ERROR = "No se pudo añadir la información. Intenta en otro momento y si no llamá a g.rar"
     DB_DROP_ERROR = "No se pudo remover la información. Intenta en otro momento y si no llamá a g.rar"
@@ -86,7 +17,7 @@ class SpanishStrs(Enum):
     #Server
     CANT_REGISTER_DM = "Este no es un servidor. No uno que pueda registrar al menos ¯\\\_(ツ)_/¯"
     SERVER_ALREADY_IN = "Este serividor ya está registrado. No puedes estar más registrado de lo que ya estás ( ´･･)ﾉ(._.`)"
-    SERVER_REGISTERED = "Gracias por recibirme en el server, espero ser de ayuda ( •̀ ω •́ )✧"
+    SERVER_REGISTERED = "Thanks for receiving me on your server, hope to be helpfull ( •̀ ω •́ )✧"
     ADDED_OPERATOR_ROLE = "Se ha añadido el rol '{role}' como operador de este servidor (＾u＾)ノ~"
     REMOVED_OPERATOR_ROLE = "Se ha quitado el rol '{role}' como operador de este servidor..."
     NO_OPERATOR_ROLES = "En este momento, no hay ningún rol de operador en el server (._. u)"
