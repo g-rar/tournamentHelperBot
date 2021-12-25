@@ -6,6 +6,9 @@ from controllers import serverController
 
 class CustomContext(SlashContext):
     async def sendLocalized(ctx:SlashContext, s:str, **kwargs):
+        if s not in strs.StringsNames.__members__:
+            await ctx.send(s)
+            return
         server = serverController.getServer(ctx.guild_id)
         language = \
             strs.Languages.ENGLISH.value if not server \

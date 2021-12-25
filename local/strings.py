@@ -32,7 +32,7 @@ class utilStrs:
 {}    
 ```'''
 
-class StringsNames:
+class StringsNames(Enum):
     DB_UPLOAD_ERROR = "DB_UPLOAD_ERROR"
     NOT_FOR_DM = "NOT_FOR_DM"
     ADMIN_ONLY = "ADMIN_ONLY"
