@@ -4,6 +4,8 @@ from io import StringIO
 from datetime import datetime
 from controllers.adminContoller import adminCommand
 from controllers.serverController import Server, serverController
+from local.localContext import localized, CustomContext
+from local.names import StringsNames
 
 import strings as strs
 
@@ -13,18 +15,17 @@ from discord.message import Message
 from discord.user import User
 from discord.member import Member
 from discord.channel import TextChannel
-from discord_slash.utils.manage_commands import create_option
+from discord_slash.utils.manage_commands import create_choice, create_option
 from discord_slash.context import SlashContext
 
 from bot import botGuilds, slash, bot
 from utils import OptionTypes
 
-
-
 @slash.slash(
-    name="registerServer",
+    name="register_server",
     description="Make tournament helper feel welcome on your server.",
-    guild_ids = botGuilds
+    guild_ids = botGuilds,
+    options=[]
 )
 @adminCommand
 async def slashRegisterServer(ctx:SlashContext):
@@ -40,6 +41,42 @@ async def slashRegisterServer(ctx:SlashContext):
         await ctx.send(strs.SpanishStrs.SERVER_REGISTERED)
     else:
         await ctx.send(strs.SpanishStrs.DB_UPLOAD_ERROR)
+
+@slash.subcommand(
+    base="config",
+    name="language",
+    description="Set the language for the responses on this server.",
+    guild_ids=botGuilds,
+    options=[
+        create_option(
+            name="language", description="Language in to switch the bot to.",
+            option_type=OptionTypes.STRING, required=True,
+            choices=[
+                create_choice(name="English", value="ENGLISH"),
+                create_choice(name="Español", value="SPANISH")
+            ]
+        )
+    ]
+)
+@adminCommand
+@localized
+async def setServerLanguage(ctx: CustomContext, language:str):
+    guildId = ctx.guild_id
+    if guildId is None:
+        await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
+        return
+    server = serverController.getServer(guildId)
+    if server is None:
+        server = Server(serverId=guildId, language=language)
+        if not serverController.addServer(server):
+            await ctx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
+        return
+    server.language = language
+    if serverController.updateServer(server):
+        await ctx.sendLocalized(StringsNames.LANGUAGE_CHANGED)
+    else:
+        await ctx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
+
 
 @slash.slash(
     name="get_reactions",

@@ -13,6 +13,9 @@ class CustomContext(SlashContext):
         language = \
             strs.EnglishStrs if not server \
             else strs.languages.get(server.language, strs.EnglishStrs)
+        if s not in language.__members__:
+            await ctx.send(s)
+            return
         await ctx.send(language[s].value.format(**kwargs))
 
 def localized(f):

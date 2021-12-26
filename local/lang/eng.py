@@ -23,6 +23,7 @@ class EnglishStrs(Enum):
     NO_OPERATOR_ROLES = "En este momento, no hay ningún rol de operador en el server (._. u)"
     MANY_PEOPLE_WITH_ROLE = "Esas son {rolecount} personas a quien se les podria echar la culpa si algo sale mal (´。＿。｀)・・・"
     NOT_AN_OPERATOR_ROLE = "El rol '{role}' no es un rol de operador (u •_•)"
+    LANGUAGE_CHANGED = "The language for this server has been changed to English. We're up for having nice conversations!"
 
     #Tournament
     TOURNAMENT_UNEXISTING = "No se ha encontrado ningún torneo con el nombre `{name}`, asegúrate de que escribiste el nombre bien (._.`)・・・"
