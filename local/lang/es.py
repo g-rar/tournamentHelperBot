@@ -41,5 +41,5 @@ class SpanishStrs(Enum):
 
     #Tetr.io
     UNEXISTING_TETRIORANK = "No existe el rango `{rank}` (._.`)・・・"
-    TETRIORANKCAP_LOWERTHAN_RANKFLOOR = "El rank_cap `{rank_cap}` no puede ser menor que el rank_floor `{rank_floor}` (._.`)・・・"
-    TETRIOTRCAP_LOWERTHAN_TRFLOOR = "El tr_cap `{tr_cap}` no puede ser menor que el tr_floor `{tr_floor}` (._.`)・・・"
+    TETRIORANKCAP_LOWERTHAN_RANKFLOOR = "El rank-cap `{rank_cap}` no puede ser menor que el rank-floor `{rank_floor}` (._.`)・・・"
+    TETRIOTRCAP_LOWERTHAN_TRFLOOR = "El tr-cap `{tr_cap}` no puede ser menor que el tr-floor `{tr_floor}` (._.`)・・・"

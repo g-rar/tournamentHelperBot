@@ -8,6 +8,8 @@ from games.factories import addModule
 from games.default import BaseGameController, BasePlayer
 
 from baseModel import BaseModel
+from local.localContext import CustomContext, localized
+from local.names import StringsNames
 from models.tournamentModels import Tournament
 from models.registrationModels import Participant, RegistrationError, RegistrationField, RegistrationTemplate
 
@@ -257,40 +259,41 @@ class TetrioController(BaseGameController):
         create_option(  name="rank_cap", description="Maximun lowercase rank a player can have to register",
                         option_type=OptionTypes.STRING, required=False),
         create_option(  name="rank_floor", description="Minimum lowercase rank a player can have to register",
-                        option_type=OptionTypes.INTEGER, required=False),
+                        option_type=OptionTypes.STRING, required=False),
         create_option(  name="tr_cap", description="Maximun TR a player can have to register",
                         option_type=OptionTypes.INTEGER, required=False),
         create_option(  name="tr_floor", description="Minimum TR a player can have to register",
                         option_type=OptionTypes.INTEGER, required=False)
     ])
 @adminCommand
-async def addTournamentTetrio(ctx:SlashContext, name:str, rank_cap:str=None, rank_floor:str=None, tr_cap:int=None, tr_floor:int=None):
+@localized
+async def addTournamentTetrio(ctx:CustomContext, name:str, rank_cap:str=None, rank_floor:str=None, tr_cap:int=None, tr_floor:int=None):
     game = "tetr.io"
     if ctx.guild_id is None:
-        await ctx.send(strs.SpanishStrs.NOT_FOR_DM)
+        await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
         return
     if tournamentController.getTournamentFromName(ctx.guild_id, name):
-        await ctx.send(strs.SpanishStrs.TOURNAMENT_EXISTS_ALREADY.format(name=name))
+        await ctx.sendLocalized(StringsNames.TOURNAMENT_EXISTS_ALREADY, name=name)
         return
     
     #rank checks
     if rank_cap:
         rank_cap = rank_cap.lower()
         if rank_cap not in tetrioRanks:
-            await ctx.send(strs.SpanishStrs.UNEXISTING_TETRIORANK.format(rank=rank_cap))
+            await ctx.sendLocalized(StringsNames.UNEXISTING_TETRIORANK, rank=rank_cap)
             return
     if rank_floor:
         rank_floor = rank_floor.lower()
         if rank_floor not in tetrioRanks:
-            await ctx.send(strs.SpanishStrs.UNEXISTING_TETRIORANK.format(rank=rank_floor))
+            await ctx.sendLocalized(StringsNames.UNEXISTING_TETRIORANK, rank=rank_floor)
             return
     if (rank_cap and rank_floor) and tetrioRanks.index(rank_floor) > tetrioRanks.index(rank_cap):
-        await ctx.send(strs.SpanishStrs.TETRIORANKCAP_LOWERTHAN_RANKFLOOR.format(rank_cap=rank_cap, rank_floor=rank_floor))
+        await ctx.sendLocalized(StringsNames.TETRIORANKCAP_LOWERTHAN_RANKFLOOR, rank_cap=rank_cap, rank_floor=rank_floor)
         return
     
     #tr checks
     if (tr_cap and tr_floor) and tr_floor > tr_cap:
-        await ctx.send(strs.SpanishStrs.TETRIORANKCAP_LOWERTHAN_RANKFLOOR.format(rank_cap=rank_cap, rank_floor=rank_floor))
+        await ctx.sendLocalized(StringsNames.TETRIOTRCAP_LOWERTHAN_TRFLOOR, tr_cap=tr_cap, tr_floor=tr_floor)
         return
 
     controller = TetrioController()
@@ -309,9 +312,9 @@ async def addTournamentTetrio(ctx:SlashContext, name:str, rank_cap:str=None, ran
         trBottom=tr_floor
     )
     if tournamentController.addTournament(tournament):
-        await ctx.send(strs.SpanishStrs.TOURNAMENT_ADDED.format(name=name,game=game))
+        await ctx.sendLocalized(StringsNames.TOURNAMENT_ADDED, name=name, game=game)
     else:
-        await ctx.send(strs.SpanishStrs.DB_UPLOAD_ERROR)
+        await ctx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
 
 
 
