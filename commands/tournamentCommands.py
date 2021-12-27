@@ -117,6 +117,7 @@ async def closeRegistration(ctx:SlashContext, tournament:str):
         bot.remove_listener(listener, "on_message")
         registrationListeners.pop((ctx.guild_id, tournamentObj.name))
         tournamentObj.registration.status = TournamentStatus.REGISTRATION_CLOSED
+        tournamentObj.registration.channelId = None
         tournamentController.updateRegistrationForTournament(tournamentObj, tournamentObj.registration)
     await ctx.send(strs.SpanishStrs.REGISTRATION_CLOSED.format(tournament=tournament))
 
@@ -440,10 +441,21 @@ async def setListenersBackUp():
         return
     logging.info("Setting up tournament listeners...")
     for tournament in tournaments:
-        if tournament.registration.status == TournamentStatus.REGISTRATION_OPEN_BY_MSG:
-            regChannel = bot.get_channel(tournament.registration.channelId)
-            setupMessageRegistration(regChannel, tournament)
-        # TODO when other registration method is implemented add listener setup here
+        try:
+            # TODO when other registration method is implemented add listener setup here
+            if tournament.registration.status == TournamentStatus.REGISTRATION_OPEN_BY_MSG:
+                regChannel = bot.get_channel(tournament.registration.channelId)
+                if not regChannel: #channel got deleted or something
+                    #TODO send message to log channel in server
+                    logging.error(f"Didnt find channel for tournament: {tournament.name}")
+                    raise Exception()
+                setupMessageRegistration(regChannel, tournament)
+        except:
+            logging.error(f"Closing registration for tournament: {tournament.name}")
+            tournament.registration.status = TournamentStatus.REGISTRATION_CLOSED
+            tournament.registration.channelId = None
+            tournamentController.updateRegistrationForTournament(tournament, tournament.registration)
+
     logging.info("Tournament listeners ready!")
     pass
 
