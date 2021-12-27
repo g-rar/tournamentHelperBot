@@ -3,7 +3,8 @@ from pymongo.database import Database
 from pymongo.cursor import Cursor
 import re
 import asyncio
-from discord_slash.context import SlashContext
+from discord_slash.context import ComponentContext, SlashContext
+from discord_slash.utils import manage_components as mc
 
 from discord_components import DiscordComponents, Button, ButtonStyle, InteractionType
 from discord.ext import commands
@@ -14,43 +15,37 @@ async def setupButtonNavigation(ctx:SlashContext,paginationList:list,bot:command
     #Sets a default embed
     current = 0
     #Sending first message
-    #I used ctx.reply, you can use simply send as well
+    actionRow = mc.create_actionrow(
+        mc.create_button(
+            label="Prev",
+            custom_id="back",
+            style=ButtonStyle.green
+        ),
+        mc.create_button(
+            label = f"Page {int(paginationList.index(paginationList[current])) + 1}/{len(paginationList)}",
+            custom_id = "cur",
+            style = ButtonStyle.grey,
+            disabled = True
+        ),
+        mc.create_button(
+            label = "Next",
+            custom_id = "front",
+            style = ButtonStyle.green
+        )
+    )
     mainMessage = await ctx.send(
         embed = paginationList[current],
-        components = [ #Use any button style you wish to :)
-            [
-                Button(
-                    label = "Prev",
-                    id = "back",
-                    style = ButtonStyle.green
-                ),
-                Button(
-                    label = f"Page {int(paginationList.index(paginationList[current])) + 1}/{len(paginationList)}",
-                    id = "cur",
-                    style = ButtonStyle.grey,
-                    disabled = True
-                ),
-                Button(
-                    label = "Next",
-                    id = "front",
-                    style = ButtonStyle.green
-                )
-            ]
-        ]
+        components = [actionRow]
     )
     #Infinite loop
     while True:
         #Try and except blocks to catch timeout and break
         try:
-            interaction = await bot.wait_for(
-                "button_click",
-                check = lambda i: i.component.id in ["back", "front"], #You can add more
-                timeout = 60.0 #one minute of inactivity
-            )
+            btn_ctx: ComponentContext = await mc.wait_for_component(bot, components=actionRow, timeout=60)
             #Getting the right list index
-            if interaction.component.id == "back":
+            if btn_ctx.custom_id == "back":
                 current -= 1
-            elif interaction.component.id == "front":
+            elif btn_ctx.custom_id == "front":
                 current += 1
             #If its out of index, go back to start / end
             if current == len(paginationList):
@@ -59,55 +54,33 @@ async def setupButtonNavigation(ctx:SlashContext,paginationList:list,bot:command
                 current = len(paginationList) - 1
 
             #Edit to new page + the center counter changes
-            await interaction.respond(
-                type = InteractionType.UpdateMessage,
+            await btn_ctx.edit_origin(
                 embed = paginationList[current],
-                components = [ #Use any button style you wish to :)
-                    [
-                        Button(
-                            label = "Prev",
-                            id = "back",
-                            style = ButtonStyle.green
-                        ),
-                        Button(
-                            label = f"Page {int(paginationList.index(paginationList[current])) + 1}/{len(paginationList)}",
-                            id = "cur",
-                            style = ButtonStyle.grey,
-                            disabled = True
-                        ),
-                        Button(
-                            label = "Next",
-                            id = "front",
-                            style = ButtonStyle.green
-                        )
-                    ]
-                ]
+                components = [ actionRow ]
             )
         except asyncio.TimeoutError:
             #Disable and get outta here
             await mainMessage.edit(
-                components = [
-                    [
-                        Button(
-                            label = "Prev",
-                            id = "back",
-                            style = ButtonStyle.green,
-                            disabled = True
-                        ),
-                        Button(
-                            label = f"Page {int(paginationList.index(paginationList[current])) + 1}/{len(paginationList)}",
-                            id = "cur",
-                            style = ButtonStyle.grey,
-                            disabled = True
-                        ),
-                        Button(
-                            label = "Next",
-                            id = "front",
-                            style = ButtonStyle.green,
-                            disabled = True
-                        )
-                    ]
-                ]
+                components = [ mc.create_actionrow(
+                    mc.create_button(
+                        label="Prev",
+                        custom_id="back",
+                        style=ButtonStyle.green,
+                        disabled=True
+                    ),
+                    mc.create_button(
+                        label = f"Page {int(paginationList.index(paginationList[current])) + 1}/{len(paginationList)}",
+                        custom_id = "cur",
+                        style = ButtonStyle.grey,
+                        disabled = True
+                    ),
+                    mc.create_button(
+                        label = "Next",
+                        custom_id = "front",
+                        style = ButtonStyle.green,
+                        disabled=True
+                    )
+                )]
             )
             break
 
