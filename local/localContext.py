@@ -16,7 +16,7 @@ class CustomContext(SlashContext):
         if s not in language.__members__:
             await ctx.send(s)
             return
-        await ctx.send(language[s].value.format(**kwargs))
+        return await ctx.send(language[s].value.format(**kwargs))
 
 def localized(f):
     async def wrapper(ctx:SlashContext, *args, **kwargs):
