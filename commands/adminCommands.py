@@ -1,8 +1,9 @@
 from controllers.adminContoller import adminCommand
 from controllers.serverController import serverController
 from discord_slash.utils.manage_commands import create_option
+from local.localContext import CustomContext, localized
+from local.names import StringsNames
 
-import strings as strs
 from utils import OptionTypes
 
 import discord
@@ -23,23 +24,27 @@ from bot import slash, botGuilds
     ]
 )
 @adminCommand
-async def addOperatorRole(ctx:SlashContext, role:discord.Role):
+@localized
+async def addOperatorRole(ctx:CustomContext, role:discord.Role):
     if ctx.guild_id is None:
-        await ctx.send(strs.SpanishStrs.NOT_FOR_DM)
+        await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
         return
     server = serverController.getServer(ctx.guild_id, upsert=True)
     if not server:
-        await ctx.send(strs.SpanishStrs.DB_UPLOAD_ERROR)
+        await ctx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
+        return
+    if role.id in server.adminRoles:
+        await ctx.sendLocalized(StringsNames.OPERATOR_ROLE_ALREADY_EXISTS, role=role.name)
         return
     server.adminRoles.append(role.id)
     res = serverController.updateServer(server)
     if res:
-        await ctx.send(strs.SpanishStrs.ADDED_OPERATOR_ROLE.format(role=role.name))
+        await ctx.sendLocalized(StringsNames.ADDED_OPERATOR_ROLE, role=role.name)
         if len(role.members) > 10:
-            await ctx.send(strs.SpanishStrs.MANY_PEOPLE_WITH_ROLE.format(rolecount=len(role.members)))
+            await ctx.sendLocalized(StringsNames.MANY_PEOPLE_WITH_ROLE, rolecount=len(role.members))
         return
     else:
-        await ctx.send(strs.SpanishStrs.DB_UPLOAD_ERROR)
+        await ctx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
         return
 
 
@@ -55,22 +60,23 @@ async def addOperatorRole(ctx:SlashContext, role:discord.Role):
     ]
 )
 @adminCommand
-async def removeOperatorRole(ctx:SlashContext, role:discord.Role):
+@localized
+async def removeOperatorRole(ctx:CustomContext, role:discord.Role):
     if ctx.guild_id is None:
-        await ctx.send(strs.SpanishStrs.NOT_FOR_DM)
+        await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
         return
     server = serverController.getServer(ctx.guild_id)
-    if not server:
-        await ctx.send(strs.SpanishStrs.NO_OPERATOR_ROLES)
+    if not server or len(server.adminRoles) == 0:
+        await ctx.sendLocalized(StringsNames.NO_OPERATOR_ROLES)
         return
     if role.id not in server.adminRoles:
-        await ctx.send(strs.SpanishStrs.NOT_AN_OPERATOR_ROLE.format(role=role.name))
+        await ctx.sendLocalized(StringsNames.NOT_AN_OPERATOR_ROLE, role=role.name)
         return
     server.adminRoles.remove(role.id)
     res = serverController.updateServer(server)
     if res:
-        await ctx.send(strs.SpanishStrs.REMOVED_OPERATOR_ROLE.format(role=role.name))
+        await ctx.sendLocalized(StringsNames.REMOVED_OPERATOR_ROLE, role=role.name)
         return
     else:
-        await ctx.send(strs.SpanishStrs.DB_UPLOAD_ERROR)
+        await ctx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
         return

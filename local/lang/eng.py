@@ -20,6 +20,7 @@ class EnglishStrs(Enum):
     SERVER_REGISTERED = "Thanks for receiving me on your server, hope to be helpfull ( •̀ ω •́ )✧"
     ADDED_OPERATOR_ROLE = "The role '{role}' was added as bot operator on this server (＾u＾)ノ~"
     REMOVED_OPERATOR_ROLE = "The role '{role}' was removed as bot operator on this server..."
+    OPERATOR_ROLE_ALREADY_EXISTS = "The role '{role}' is an operator role already (＾v＾u)..."
     NO_OPERATOR_ROLES = "At this momment, there's no operator role on this server (._. u)"
     MANY_PEOPLE_WITH_ROLE = "Those are {rolecount} people who could be blamed if something goes wrong (´。＿。｀)・・・"
     NOT_AN_OPERATOR_ROLE = "The role '{role}' is not an operator role (u •_•)"

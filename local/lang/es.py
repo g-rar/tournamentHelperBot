@@ -20,6 +20,7 @@ class SpanishStrs(Enum):
     SERVER_REGISTERED = "Gracias por recibirme en el server, espero ser de ayuda ( •̀ ω •́ )✧"
     ADDED_OPERATOR_ROLE = "Se ha añadido el rol '{role}' como operador de este servidor (＾u＾)ノ~"
     REMOVED_OPERATOR_ROLE = "Se ha quitado el rol '{role}' como operador de este servidor..."
+    OPERATOR_ROLE_ALREADY_EXISTS = "Ese rol '{role}' ya es un rol de operador para empezar (＾v＾u)..."
     NO_OPERATOR_ROLES = "En este momento, no hay ningún rol de operador en el server (._. u)"
     MANY_PEOPLE_WITH_ROLE = "Esas son {rolecount} personas a quien se les podria echar la culpa si algo sale mal (´。＿。｀)・・・"
     NOT_AN_OPERATOR_ROLE = "El rol '{role}' no es un rol de operador (u •_•)"

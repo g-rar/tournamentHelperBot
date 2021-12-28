@@ -27,20 +27,21 @@ from utils import OptionTypes
     guild_ids = botGuilds,
     options=[]
 )
+@localized
 @adminCommand
-async def slashRegisterServer(ctx:SlashContext):
+async def slashRegisterServer(ctx:CustomContext):
     guildId = ctx.guild_id
     if guildId is None:
-        await ctx.send(strs.SpanishStrs.CANT_REGISTER_DM)
+        await ctx.sendLocalized(StringsNames.CANT_REGISTER_DM)
         return
     if serverController.getServer(guildId) is not None:
-        await ctx.send(strs.SpanishStrs.SERVER_ALREADY_IN)
+        await ctx.sendLocalized(StringsNames.SERVER_ALREADY_IN)
         return
     server = Server(serverId=guildId)
     if serverController.addServer(server):
-        await ctx.send(strs.SpanishStrs.SERVER_REGISTERED)
+        await ctx.sendLocalized(StringsNames.SERVER_REGISTERED)
     else:
-        await ctx.send(strs.SpanishStrs.DB_UPLOAD_ERROR)
+        await ctx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
 
 @slash.subcommand(
     base="config",
@@ -93,9 +94,13 @@ async def setServerLanguage(ctx: CustomContext, language:str):
         ),
     ]
 )
-async def getReactions(ctx:SlashContext, channel:TextChannel, message_id:str):
+@localized
+async def getReactions(ctx:CustomContext, channel:TextChannel, message_id:str):
     if channel.type != discord.ChannelType.text:
         await ctx.send(strs.SpanishStrs.VALUE_SHOULD_BE_TEXT_CHANNEL.format(option="channel"))
+        return
+    if not message_id.isdecimal():
+        await ctx.sendLocalized(StringsNames.VALUE_SHOULD_BE_DEC, option="message_id")
         return
     if ctx.guild_id is None:
         await ctx.send(strs.SpanishStrs.NOT_FOR_DM)
@@ -104,20 +109,20 @@ async def getReactions(ctx:SlashContext, channel:TextChannel, message_id:str):
     try:
         msg:Message = await channel.fetch_message(messageId)
     except Exception as e:
-        await ctx.send(strs.SpanishStrs.MESSAGE_NOT_FOUND.format(data =type(e).__name__))
+        await ctx.sendLocalized(StringsNames.MESSAGE_NOT_FOUND, data=type(e).__name__)
         return
     
     def check(_, user):
         return user == ctx.author
     try:
-        res1 = await ctx.send(strs.SpanishStrs.INPUT_CHECK_IN_REACTION)
+        res1 = await ctx.sendLocalized(StringsNames.INPUT_CHECK_IN_REACTION)
         inputReaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=check)
     except asyncio.TimeoutError:
-        await ctx.send(strs.SpanishStrs.REACTION_TIMEOUT.format(time="60"))
+        await ctx.send(StringsNames.REACTION_TIMEOUT, time="60")
         return
     reaction = list(filter(lambda x: x.emoji == inputReaction.emoji, msg.reactions))
     if reaction == []:
-        await ctx.send(strs.SpanishStrs.NO_REACTION_IN_MSG.format(reaction=str(inputReaction.emoji)))
+        await ctx.sendLocalized(StringsNames.NO_REACTION_IN_MSG, reaction=str(inputReaction.emoji))
         return
     reaction = reaction[0]
     participants = []
