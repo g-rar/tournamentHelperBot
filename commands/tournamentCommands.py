@@ -425,14 +425,14 @@ async def seedBy(ctx:CustomContext, column:str, order:str, message_id:str):
     try:
         msg:Message = await chn.fetch_message(messageId)
     except Exception as e:
-        await ctx.send(StringsNames.MESSAGE_NOT_FOUND, data=type(e).__name__)
+        await ctx.sendLocalized(StringsNames.MESSAGE_NOT_FOUND, data=type(e).__name__)
         return
     
     try:
         csvs:str = await getCsvTextFromMsg(msg)
         playersDF:pd.DataFrame = pd.read_csv(StringIO(csvs))
 
-        await ctx.send(strs.utilStrs.INFO.format("Seeding players..."))
+        await ctx.send(utilStrs.INFO.format("Seeding players..."))
         playersDF.sort_values(column, ascending=order, ignore_index=True, inplace=True)
         playersDF["Seed"] = playersDF.index + 1
 

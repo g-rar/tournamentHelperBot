@@ -12,27 +12,27 @@ from bot import bot
 
 
 async def setupButtonNavigation(ctx:SlashContext,paginationList:list,bot:commands.Bot):
-    #Sets a default embed
+    #Set up stuff
     current = 0
-    #Sending first message
-    actionRow = mc.create_actionrow(
-        mc.create_button(
-            label="Prev",
-            custom_id="back",
-            style=ButtonStyle.green
-        ),
-        mc.create_button(
-            label = f"Page {int(paginationList.index(paginationList[current])) + 1}/{len(paginationList)}",
-            custom_id = "cur",
-            style = ButtonStyle.grey,
-            disabled = True
-        ),
-        mc.create_button(
-            label = "Next",
-            custom_id = "front",
-            style = ButtonStyle.green
-        )
+    prevButton = mc.create_button(
+        label="Prev",
+        custom_id="back",
+        style=ButtonStyle.green
     )
+    pageButton = mc.create_button(
+        label = f"Page {int(paginationList.index(paginationList[current])) + 1}/{len(paginationList)}",
+        custom_id = "cur",
+        style = ButtonStyle.grey,
+        disabled = True
+    )
+    nextButton = mc.create_button(
+        label = "Next",
+        custom_id = "front",
+        style = ButtonStyle.green
+    )
+    actionRow = mc.create_actionrow( prevButton, pageButton, nextButton)
+
+    #Sending first message
     mainMessage = await ctx.send(
         embed = paginationList[current],
         components = [actionRow]
@@ -52,7 +52,7 @@ async def setupButtonNavigation(ctx:SlashContext,paginationList:list,bot:command
                 current = 0
             elif current < 0:
                 current = len(paginationList) - 1
-
+            pageButton["label"] = f"Page {int(paginationList.index(paginationList[current])) + 1}/{len(paginationList)}"
             #Edit to new page + the center counter changes
             await btn_ctx.edit_origin(
                 embed = paginationList[current],
@@ -60,28 +60,9 @@ async def setupButtonNavigation(ctx:SlashContext,paginationList:list,bot:command
             )
         except asyncio.TimeoutError:
             #Disable and get outta here
-            await mainMessage.edit(
-                components = [ mc.create_actionrow(
-                    mc.create_button(
-                        label="Prev",
-                        custom_id="back",
-                        style=ButtonStyle.green,
-                        disabled=True
-                    ),
-                    mc.create_button(
-                        label = f"Page {int(paginationList.index(paginationList[current])) + 1}/{len(paginationList)}",
-                        custom_id = "cur",
-                        style = ButtonStyle.grey,
-                        disabled = True
-                    ),
-                    mc.create_button(
-                        label = "Next",
-                        custom_id = "front",
-                        style = ButtonStyle.green,
-                        disabled=True
-                    )
-                )]
-            )
+            prevButton['disabled'] = True
+            nextButton['disabled'] = True
+            await mainMessage.edit(components = [ actionRow ])
             break
 
 def getQueryAsList(c:Cursor) -> list:

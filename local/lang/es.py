@@ -2,7 +2,7 @@ from enum import Enum
 from local.lang.utils import utilStrs
 
 class SpanishStrs(Enum):
-    #Generales
+    #General
     DB_UPLOAD_ERROR = "No se pudo añadir la información. Intenta en otro momento y si no llamá a g.rar"
     DB_DROP_ERROR = "No se pudo remover la información. Intenta en otro momento y si no llamá a g.rar"
     ERROR = "Ocurrió un error: \n" + utilStrs.ERROR

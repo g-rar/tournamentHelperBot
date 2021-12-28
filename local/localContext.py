@@ -10,12 +10,14 @@ class CustomContext(SlashContext):
             await ctx.send(s)
             return
         server = serverController.getServer(ctx.guild_id)
-        language = \
-            strs.EnglishStrs if not server \
+        language =                              \
+            strs.EnglishStrs if not server      \
             else strs.languages.get(server.language, strs.EnglishStrs)
         if s not in language.__members__:
-            await ctx.send(s)
-            return
+            if s in strs.EnglishStrs.__members__:
+                return await ctx.send(strs.EnglishStrs[s].value.format(**kwargs))
+            else:
+                return await ctx.send(s)
         return await ctx.send(language[s].value.format(**kwargs))
 
 def localized(f):
