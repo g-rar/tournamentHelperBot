@@ -7,7 +7,6 @@ from local.names import StringsNames
 from utils import OptionTypes
 
 import discord
-from discord_slash.context import SlashContext
 
 from bot import slash, botGuilds
 

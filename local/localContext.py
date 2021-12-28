@@ -1,5 +1,4 @@
 from discord_slash import SlashContext
-import discord
 
 import local.names as strs
 from controllers import serverController

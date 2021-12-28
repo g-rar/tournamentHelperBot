@@ -1,38 +1,21 @@
-import asyncio
-from discord import channel
-from discord.guild import Guild
 from discord.member import Member
 from discord.user import User
-import pandas as pd
 from dataclasses import asdict
-from datetime import datetime
-from io import StringIO
-from pprint import pformat
 from typing import List
-
-import discord
-from discord.file import File
-from discord.channel import TextChannel
-from discord.message import Message
-from discord_slash.context import SlashContext
-from discord_slash.utils.manage_commands import create_choice, create_option
 
 from pymongo.collection import Collection
 from pymongo.database import Database
 from bson.objectid import ObjectId
-import requests
 
-from bot import db, bot, botGuilds, slash
+from bot import db
 
 from models.tournamentModels import Tournament, TournamentRegistration, TournamentStatus
-from models.registrationModels import RegistrationField, RegistrationTemplate, RegistrationError
+from models.registrationModels import RegistrationError
 
 from controllers.playerController import participantController
-from controllers.adminContoller import adminCommand
 from games import factories
 
-import strings as strs
-from utils import getQueryAsList, OptionTypes, extractQuotedSubstrs
+from utils import getQueryAsList
 
 # TODO for plus games there are mandatory fields and custom field validation
 # TODO if its not plus game theres a default valitador (for data types at least)

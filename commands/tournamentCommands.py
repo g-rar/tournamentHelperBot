@@ -13,7 +13,6 @@ import discord
 from discord.file import File
 from discord.channel import TextChannel
 from discord.message import Message
-from discord_slash.context import SlashContext
 from discord_slash.utils.manage_commands import create_choice, create_option
 
 import requests
@@ -31,7 +30,6 @@ from controllers.playerController import participantController
 from controllers.tournamentController import TournamentController, tournamentController
 from games import factories
 
-import strings as strs
 from utils import OptionTypes, extractQuotedSubstrs, setupButtonNavigation
 
 
@@ -172,7 +170,7 @@ async def getTournaments(ctx: CustomContext, tournament:str = None):
     if tournament:
         tournamentData = tournamentController.getTournamentFromName(guild.id, tournament)
         if tournamentData:
-            await ctx.send(strs.utilStrs.JS.format(pformat(asdict(tournamentData))))
+            await ctx.send(utilStrs.JS.format(pformat(asdict(tournamentData))))
         else:
             await ctx.sendLocalized(StringsNames.TOURNAMENT_UNEXISTING, name=tournament)
         return
@@ -438,12 +436,12 @@ async def seedBy(ctx:CustomContext, column:str, order:str, message_id:str):
 
         dfcsv = playersDF.to_csv(index=False)
         await ctx.send(
-            content=strs.utilStrs.INFO.format("File generated"),
+            content= utilStrs.INFO.format("File generated"),
             file= File(fp=StringIO(dfcsv), filename="Seeding.csv")
         )
         
     except Exception as e:
-        await ctx.send(strs.utilStrs.ERROR.format(e))
+        await ctx.send(utilStrs.ERROR.format(e))
 
 
 @bot.listen('on_ready')

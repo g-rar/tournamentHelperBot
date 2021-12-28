@@ -1,19 +1,14 @@
-from discord.ext import commands
 from discord_slash.context import SlashContext
 from bot import bot, CONF, db, slash, botGuilds
 from local.localContext import CustomContext, localized
 from local.names import StringsNames
-from utils import OptionTypes, getQueryAsList
+from utils import getQueryAsList
 
 import discord
 import discord.ext.commands as cmds
-from discord.ext.commands import Bot
-from discord import Message, Guild, TextChannel
 
 from pymongo.collection import Collection
 
-import strings as strs
-from discord_slash.utils.manage_commands import create_choice, create_option
 from pprint import pformat
 
 def devCommand(f):

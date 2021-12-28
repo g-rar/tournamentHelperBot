@@ -1,11 +1,9 @@
-from baseModel import BaseModel
 from dataclasses import asdict
 from datetime import datetime
 from games.factories import getGamePlayerData
-from games.default import BaseGameController
 
 from models.tournamentModels import Tournament
-from models.registrationModels import Participant, RegistrationError, RegistrationField
+from models.registrationModels import Participant
 
 from typing import List
 from bson.objectid import ObjectId
@@ -15,7 +13,7 @@ from pymongo.database import Database
 
 from utils import getQueryAsList
 
-from bot import db, bot
+from bot import db
 
 
 class ParticipantController:

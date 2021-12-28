@@ -1,6 +1,6 @@
 from games.default import BaseGameController, BasePlayer
 from models.tournamentModels import Tournament
-from typing import Dict, List, Union
+from typing import Dict, Union
 
 
 gameControllers:Dict[str, BaseGameController] = { }

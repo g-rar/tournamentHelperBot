@@ -1,5 +1,4 @@
-import asyncio
-from dataclasses import dataclass, asdict, fields, field
+from dataclasses import dataclass
 from typing import List
 
 import requests
@@ -18,13 +17,9 @@ from controllers.playerController import participantController
 from controllers.adminContoller import adminCommand
 from controllers.playerController import participantController
 
-from bot import bot, botGuilds, slash
-from discord_slash.utils.manage_commands import create_choice, create_option
-from discord.channel import TextChannel
-from discord.message import Message
-from discord_slash.context import SlashContext
+from bot import botGuilds, slash
+from discord_slash.utils.manage_commands import create_option
 
-import strings as strs
 from utils import OptionTypes
 
 tetrioRanks = ["z","d","d+"] + [let + sign for let in "cbas" for sign in ["-","","+"]] + ["ss","u",'x']

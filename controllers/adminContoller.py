@@ -1,21 +1,9 @@
-from dataclasses import dataclass
-from dataclasses import field, asdict
-from discord_slash.utils.manage_commands import create_option
-
-from pymongo.collection import Collection
-from pymongo.database import Database
-from bson.objectid import ObjectId
-
-import strings as strs
-from utils import OptionTypes, getQueryAsList
+from local.lang.eng import EnglishStrs
+from local.lang.utils import utilStrs
 
 import discord
-from discord.ext import commands
-from discord.ext.commands import Context
 from discord_slash.context import SlashContext
-from baseModel import BaseModel
 
-from bot import db, bot, slash, botGuilds, CONF
 from controllers.serverController import serverController
 
 
@@ -41,6 +29,6 @@ def adminCommand(f):
         if AdminController.isAdmin(ctx.guild,ctx.author):
             await f(ctx, *args, **kargs)
         else:
-            await ctx.send(strs.utilStrs.ERROR.format(strs.SpanishStrs.ADMIN_ONLY), hidden=True)
+            await ctx.send(utilStrs.ERROR.format(EnglishStrs.ADMIN_ONLY.value), hidden=True)
         return f
     return wrapper

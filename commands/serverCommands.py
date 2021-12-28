@@ -7,16 +7,12 @@ from controllers.serverController import Server, serverController
 from local.localContext import localized, CustomContext
 from local.names import StringsNames
 
-import strings as strs
-
 import discord
 from discord.file import File
 from discord.message import Message
 from discord.user import User
-from discord.member import Member
 from discord.channel import TextChannel
 from discord_slash.utils.manage_commands import create_choice, create_option
-from discord_slash.context import SlashContext
 
 from bot import botGuilds, slash, bot
 from utils import OptionTypes
@@ -97,13 +93,13 @@ async def setServerLanguage(ctx: CustomContext, language:str):
 @localized
 async def getReactions(ctx:CustomContext, channel:TextChannel, message_id:str):
     if channel.type != discord.ChannelType.text:
-        await ctx.send(strs.SpanishStrs.VALUE_SHOULD_BE_TEXT_CHANNEL.format(option="channel"))
+        await ctx.sendLocalized(StringsNames.VALUE_SHOULD_BE_TEXT_CHANNEL, option="channel")
         return
     if not message_id.isdecimal():
         await ctx.sendLocalized(StringsNames.VALUE_SHOULD_BE_DEC, option="message_id")
         return
     if ctx.guild_id is None:
-        await ctx.send(strs.SpanishStrs.NOT_FOR_DM)
+        await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
         return
     messageId = int(message_id)
     try:

@@ -1,4 +1,3 @@
-from enum import Enum
 from local.lang.eng import EnglishStrs
 from local.lang.es import SpanishStrs
 
