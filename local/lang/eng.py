@@ -24,6 +24,7 @@ class EnglishStrs(Enum):
     NO_OPERATOR_ROLES = "At this momment, there's no operator role on this server (._. u)"
     MANY_PEOPLE_WITH_ROLE = "Those are {rolecount} people who could be blamed if something goes wrong (´。＿。｀)・・・"
     NOT_AN_OPERATOR_ROLE = "The role '{role}' is not an operator role (u •_•)"
+    NEED_MANAGE_ROLES = "For that I need permission to manage roles. Also moving my role higher in the hierarchy could help (＾v＾u)..."
     LANGUAGE_CHANGED = "The language for this server has been changed to English. We're up for having nice conversations!"
 
     #Tournament

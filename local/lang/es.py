@@ -24,6 +24,7 @@ class SpanishStrs(Enum):
     NO_OPERATOR_ROLES = "En este momento, no hay ningún rol de operador en el server (._. u)"
     MANY_PEOPLE_WITH_ROLE = "Esas son {rolecount} personas a quien se les podria echar la culpa si algo sale mal (´。＿。｀)・・・"
     NOT_AN_OPERATOR_ROLE = "El rol '{role}' no es un rol de operador (u •_•)"
+    NEED_MANAGE_ROLES = "Para eso necesito permiso para administrar roles. Mover mi rol más arriba en la jerarquía de roles también podría ayudar (＾v＾u)..."
     LANGUAGE_CHANGED = "Se ha cambiado el idioma a Español para este servidor. ¡Espero que nos entendamos bien!"
 
     #Tournament

@@ -9,6 +9,7 @@ from bson.objectid import ObjectId
 class TournamentRegistration(BaseModel):
     status:int = 0
     channelId:int = None
+    participantRole:int = None
     
     @staticmethod
     def fromDict(d):

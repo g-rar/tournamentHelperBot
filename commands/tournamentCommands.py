@@ -1,5 +1,7 @@
 import asyncio
 from discord import channel
+from discord.errors import Forbidden
+from discord.guild import Guild
 from discord.member import Member
 import pandas as pd
 from dataclasses import asdict
@@ -43,21 +45,21 @@ registrationListeners = {}
     guild_ids= botGuilds,
     options=[
         create_option(
-            name="tournament",
-            description="Tournament to open registration",
-            option_type=OptionTypes.STRING,
-            required=True
+            name="tournament", description="Tournament to open registration",
+            option_type=OptionTypes.STRING, required=True
         ),
         create_option(
-            name="channel",
-            description="Channel in which participants register",
-            required=True,
-            option_type=OptionTypes.CHANNEL
+            name="channel", description="Channel in which participants register",
+            required=True, option_type=OptionTypes.CHANNEL
+        ),
+        create_option(
+            name="participant_role", description="Role that registered players will be given once they register",
+            option_type=OptionTypes.ROLE, required=False
         )
     ])
 @adminCommand
 @localized
-async def openRegistrationInChat(ctx:CustomContext,tournament:str,channel:discord.TextChannel):
+async def openRegistrationInChat(ctx:CustomContext,tournament:str,channel:discord.TextChannel, participant_role:discord.Role = None):
     global registrationListeners
     #check stuff is correct
     if ctx.guild_id is None:
@@ -77,12 +79,16 @@ async def openRegistrationInChat(ctx:CustomContext,tournament:str,channel:discor
     if tournamentObj.registrationTemplate.teamSize != 1:
         # TODO add logic for team games
         pass
-
+    if participant_role:
+        if not ctx.me.guild_permissions.manage_roles:
+            await ctx.sendLocalized(StringsNames.NEED_MANAGE_ROLES)
+            return
+        tournamentObj.registration.participantRole = participant_role.id
     tournamentObj.registration.status = TournamentStatus.REGISTRATION_OPEN_BY_MSG
     tournamentObj.registration.channelId = channel.id
     tournamentController.updateRegistrationForTournament(tournamentObj, tournamentObj.registration)
 
-    setupMessageRegistration(channel, tournamentObj)
+    setupMessageRegistration(channel, tournamentObj, participant_role)
 
     # add listener for channel
     await ctx.sendLocalized(StringsNames.REGISTRATION_OPEN_CHAT, tournament=tournamentObj.name, chat=channel.mention)
@@ -455,12 +461,14 @@ async def setListenersBackUp():
         try:
             # TODO when other registration method is implemented add listener setup here
             if tournament.registration.status == TournamentStatus.REGISTRATION_OPEN_BY_MSG:
-                regChannel = bot.get_channel(tournament.registration.channelId)
+                regChannel:discord.TextChannel = bot.get_channel(tournament.registration.channelId)
+                regRole:discord.Guild = regChannel.guild.get_role(tournament.registration.participantRole)
                 if not regChannel: #channel got deleted or something
                     #TODO send message to log channel in server
                     logging.error(f"Didnt find channel for tournament: {tournament.name}")
                     raise Exception()
-                setupMessageRegistration(regChannel, tournament)
+                #TODO if api change changes guild.get_role returning None if not found
+                setupMessageRegistration(regChannel, tournament, regRole)
         except:
             logging.error(f"Closing registration for tournament: {tournament.name}")
             tournament.registration.status = TournamentStatus.REGISTRATION_CLOSED
@@ -474,7 +482,7 @@ async def setListenersBackUp():
 # Helper functions #
 ####################
 
-def setupMessageRegistration(channel:discord.TextChannel, tournament:Tournament):
+def setupMessageRegistration(channel:discord.TextChannel, tournament:Tournament, role:discord.Role=None):
     global registrationListeners
     if (channel.guild.id, tournament.name) in registrationListeners: 
         #prevent from setting two identical listeners
@@ -494,12 +502,16 @@ def setupMessageRegistration(channel:discord.TextChannel, tournament:Tournament)
         try:
             if tournamentController.registerPlayer(tournament, fields, msg.author):
                 await msg.add_reaction("✅")
+                if role:
+                    await msg.author.add_roles(role)
             else:
                 logging.error("Failed to upload to db.")
                 await msg.add_reaction("🆘")
         except RegistrationError as e:
             # TODO proper error message
             await msg.add_reaction("❌")
+        except Forbidden as e:
+            await msg.add_reaction("🤷‍♂️")
     registrationListeners[(channel.guild.id, tournament.name)] = on_message
 
 
