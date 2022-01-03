@@ -13,6 +13,7 @@ class EnglishStrs(Enum):
     MESSAGE_NOT_FOUND = "Couldn't find message: {data}..."
     MEMBER_NOT_FOUND_BY_ID = "Couldn't find user with id: `{id}`"
     REACTION_TIMEOUT = "Time for reacting is over. There's  a {time} seconds limit. Try again (＾v＾u)..."
+    MAY_TAKE_LONG = "This may take a while (＾v＾u)..."
 
     #Server
     CANT_REGISTER_DM = "This is not a server. Not one that can be registered anyways ¯\\\_(ツ)_/¯"

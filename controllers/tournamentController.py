@@ -10,7 +10,7 @@ from bson.objectid import ObjectId
 from bot import db
 
 from models.tournamentModels import Tournament, TournamentRegistration, TournamentStatus
-from models.registrationModels import RegistrationError
+from models.registrationModels import Participant, RegistrationError, RegistrationField
 
 from controllers.playerController import participantController
 from games import factories
@@ -81,11 +81,11 @@ class TournamentController:
 
     # TODO need to add method to register player without it being discord member
 
-    def registerPlayer(self, tournament:Tournament, fields:list, member:Member = None, displayName:str = None):
+    async def registerPlayer(self, tournament:Tournament, fields:list, member:Member = None, displayName:str = None):
         if tournament.registration.status == TournamentStatus.REGISTRATION_CLOSED:
             raise RegistrationError("Registration for this tournament is currently closed",4)
         gameController = factories.getControllerFor(tournament)
-        newFields, playerData = gameController.validateFields(fields, tournament)
+        newFields, playerData = await gameController.validateFields(fields, tournament)
         if member:
             if participantController.getParticipantFromDiscordId(member._user.id, tournament._id):
                 raise RegistrationError("Discord user already registered in tournament", 3)
@@ -98,6 +98,14 @@ class TournamentController:
             raise RegistrationError("Either a discord member or displayName are required to register a player!", 2)
         return participantController.registerPlayer(usr_id, displayName, tournament, newFields, playerData)
 
+    def checkPlayer(self, tournament:Tournament, participant:Participant, update:bool=False):
+        gameController = factories.getControllerFor(tournament)
+        newFields, playerData = gameController.validateFields(participant.fields, tournament, review=True)
+        participant.playerData = playerData
+        participant.fields = newFields
+        if update:
+            participantController.updateParticipant(participant)
+        return participant
 
 tournamentController = TournamentController(db)
 

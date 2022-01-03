@@ -1,7 +1,10 @@
 from dataclasses import dataclass
 from typing import List
+import aiohttp
 
 import requests
+import pandas as pd
+import asyncio
 
 from games.factories import addModule
 from games.default import BaseGameController, BasePlayer
@@ -149,27 +152,44 @@ class TetrioController(BaseGameController):
         base["Tetr.io_ID"] = player.info._id
         return base
 
-    def validateFields(self, fields:List[RegistrationField], tournament:TetrioTournament):
+    async def validateFields(self, fields:List[RegistrationField], tournament:TetrioTournament, review=False, session=None):
         newFields = []
         for field in fields:
             if field.name == "Tetr.io username":
-                playerData = self.validatePlayer(field.value, tournament)
+                playerData = await self.validatePlayer(field.value, tournament, review, session=session)
             # if validation fails for some field throws error
-            res = self.validateField(field)
+            res = self.validateField(field, review)
             newFields.append(res[0])
         return (newFields, playerData)
 
-    def validatePlayer(self, username:str, tournament:TetrioTournament) -> TetrioPlayer:
+    async def checkParticipants(self, participants: List[Participant], tournament):
+        newParticipants = []
+        failed = []
+        async def validatePlayer(participant:Participant, tournament, session):
+            try:
+                newFields, playerData = await self.validateFields(participant.fields, tournament, review=True, session=session)
+                participant.playerData = playerData
+                participant.fields = newFields
+                newParticipants.append(participant)
+            except Exception as e:
+                failed.append((participant,str(e)))
+        
+        async with aiohttp.ClientSession() as session:
+            coros = [validatePlayer(p, tournament, session) for p in participants]
+            await asyncio.gather(*coros)
+
+        return newParticipants, failed
+
+    async def validatePlayer(self, username:str, tournament:TetrioTournament, review=False, session=None) -> TetrioPlayer:
         try:
             player:TetrioPlayer  
             news:dict 
-            player, news = TetrioController.getTetrioPlayer(username)
+            player, news = await TetrioController.getTetrioPlayer(username, session)
         except:
             raise RegistrationError("Invalid playername", self.INVALID_PLAYER)
         if player is None:
             raise RegistrationError("Invalid playername", self.INVALID_PLAYER)
-        if participantController.getParticipantFromData(tournament._id, {"info._id":player.info._id}):
-            #TODO some funky griefs could go on with this check, could be fixed if TOs are able to remove player
+        if not review and participantController.getParticipantFromData(tournament._id, {"info._id":player.info._id}):
             raise RegistrationError("Tetrio account already registered", self.ALREADY_REGISTERED)
         if tournament.trTop and player.info.league.rating > tournament.trTop:
             raise RegistrationError("TR over cap", self.TR_OVER_TOP)
@@ -193,21 +213,27 @@ class TetrioController(BaseGameController):
 
         return player
 
-    def getTetrioPlayer(username:str):
+    async def getTetrioPlayer(username:str, session):
         api = "https://ch.tetr.io/api/"
+        if session:
+            s = session
+        else:
+            s = aiohttp.ClientSession()
 
-        def getPlayerProfile(username:str):
-            return requests.get(api + f"users/{username}")
+        async def getPlayerProfile(username:str):
+            async with s.get(api + f"users/{username}") as r:
+                return r.status, await r.json()
 
-        def getPlayerRecords(username:str):
-            return requests.get(api + f"users/{username}/records")
+        async def getPlayerRecords(username:str):
+            async with s.get(api + f"users/{username}/records") as r:
+                return r.status, await r.json()
 
-        def getPlayerNews(id:str):
-            return requests.get(api + f"news/user_{id}")
+        async def getPlayerNews(id:str):
+            async with s.get(api + f"news/user_{id}") as r:
+                return r.status, await r.json()
         
         usr = username.lower()
-        res = getPlayerProfile(usr)
-        resCode, reqData = res.status_code, res.json()
+        resCode, reqData = await getPlayerProfile(usr)
 
         if resCode != 200:
             # await ctx.send(strs.ERROR.format(f"Error {resCode}"))
@@ -219,8 +245,7 @@ class TetrioController(BaseGameController):
 
         
         # get records, checks only to be sure
-        res = getPlayerRecords(usr)
-        resCode, reqRecData  = res.status_code, res.json()
+        resCode, reqRecData = await getPlayerRecords(usr)
         if resCode != 200:
             # await ctx.send(strs.ERROR.format(f"Error {resCode}"))
             raise RegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
@@ -236,11 +261,13 @@ class TetrioController(BaseGameController):
 
         player:TetrioPlayer = TetrioPlayer.fromDict(playerDict)
 
-        res = getPlayerNews(player._id)
-        resCode, reqRecData  = res.status_code, res.json()
+        resCode, reqRecData = await getPlayerNews(player._id)
 
         playerNews = reqRecData["data"]["news"]
         
+        if not session:
+            await s.close()
+
         return player, playerNews
 
 @slash.subcommand(

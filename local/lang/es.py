@@ -13,6 +13,7 @@ class SpanishStrs(Enum):
     MESSAGE_NOT_FOUND = "No se encontró el mensaje: {data}..."
     MEMBER_NOT_FOUND_BY_ID = "No se encontró el usuario con id: `{id}`"
     REACTION_TIMEOUT = "Se acabó el tiempo para reaccionar. Hay un límite de {time} segundos. Intenta de nuevo (＾v＾u)..."
+    MAY_TAKE_LONG = "Esto podría durar un rato (＾v＾u)..."
 
     #Server
     CANT_REGISTER_DM = "Este no es un servidor. No uno que pueda registrar al menos ¯\\\_(ツ)_/¯"
@@ -39,6 +40,7 @@ class SpanishStrs(Enum):
     PLAYER_REGISTERED = "Se ha registrado a **{username}** en el torneo **{tournament}** ( •̀ ω •́ )✧"
     PARTICIPANT_UNEXISTING = "No se ha encontrado el participante `{username}` en el torneo **{tournament}** (u •_•)"
     PARTICIPANT_DELETED = "Se ha eliminado el participante `{username}` del torneo **{tournament}** ヾ(^▽^*)"
+    PARTICIPANTS_DELETED = "Se han eliminado `{amount}` participantes:"
     REGISTRATION_OPEN_CHAT = "Se ha abierto el registro para el torneo `{tournament}` en el chat {chat}."
     REGISTRATION_OPEN_ALREADY = "Ya el registro está abierto para el torneo `{tournament}` en el chat {chat}."
     REGISTRATION_CLOSED = "Se ha cerrado el registro para el torneo `{tournament}`."

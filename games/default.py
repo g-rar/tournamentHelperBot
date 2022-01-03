@@ -7,7 +7,7 @@ from utils import OptionTypes
 
 from baseModel import BaseModel
 from models.registrationModels import RegistrationField
-
+import pandas as pd
 
 class BaseGameController:
     GAME:str = None
@@ -29,21 +29,21 @@ class BaseGameController:
             d[field.name] = field.value
         return d
 
-    def validateFields(self, fields:List[RegistrationField], tournament:Tournament):
+    async def validateFields(self, fields:List[RegistrationField], tournament:Tournament, review:bool=False):
         newFields = []
         for field in fields:
             # if validation fails for some field throws error
-            res = BaseGameController.validateField(field)
+            res = BaseGameController.validateField(field, review)
             newFields.append(res[0])
         return (newFields, None)
 
-    def validateField(self, field: RegistrationField):
+    def validateField(self, field: RegistrationField, review:bool = False):
         ''' Validate that the value given in the field meets
         the field constraints'''
         try:
             t = self.getFieldType(field.fieldType)
             if field.value is None and field.required:
-                raise RegistrationError(field, BaseGameController.REQUIRED_TYPE)
+                raise RegistrationError(field, BaseGameController.REQUIRED_FIELD)
             val = t(field.value)
             field.value = val
             return (field, True)
@@ -51,6 +51,19 @@ class BaseGameController:
             raise RegistrationError(f"Wrong value type for {field.name}: '{field.value}'",BaseGameController.WRONG_TYPE)
         except RegistrationError as e:
             raise e
+
+    async def checkParticipants(self, participants: List[Participant], tournament):
+        newParticipants = []
+        failed = []
+        for participant in participants:
+            try:
+                newFields, playerData = self.validateFields(participant.fields, tournament, review=True)
+                participant.playerData = playerData
+                participant.fields = newFields
+                newParticipants.append(participant)
+            except Exception as e:
+                failed.append((participant, str(e)))
+        return newParticipants, failed
             
     def getFieldType(self, fieldType: int) -> type:
         if fieldType == OptionTypes.STRING:

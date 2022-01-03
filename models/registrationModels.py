@@ -28,6 +28,7 @@ class RegistrationTemplate:
 class Participant(BaseModel):
     """"Represents a registered player in a tournament"""
     # TODO need to make discordId not required,
+    _id:ObjectId
     discordId:int
     discordDisplayname:str
     registeredTime:datetime
@@ -67,4 +68,4 @@ class RegistrationError(Exception):
         self.data = data
         self.errorType = errorType
     def __str__(self):
-        return repr(self.data) + " f"
+        return repr(self.data)

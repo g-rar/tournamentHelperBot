@@ -258,7 +258,7 @@ async def registerPlayerWithDiscord(ctx:CustomContext, tournament:str, discord_i
     for i in range(len(content)):
         fields[i].value = content[i]
     try:
-        if tournamentController.registerPlayer(tournamentData, fields, member):
+        if await tournamentController.registerPlayer(tournamentData, fields, member):
             await ctx.sendLocalized(StringsNames.PLAYER_REGISTERED, username=member.display_name, tournament=tournament)
         else:
             await ctx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
@@ -320,7 +320,48 @@ async def getTournamentParticipants(ctx:CustomContext, tournament:str):
     for p in participants:
         partList.append(tournamentCtrl.getParticipantView(p))
     df = pd.DataFrame(partList)
-    await ctx.send(file=File(StringIO(df.to_csv()), filename= f"Participants_{datetime.utcnow()}.txt"))
+    await ctx.send(file=File(StringIO(df.to_csv()), filename= f"Participants_{datetime.utcnow()}.csv"))
+
+@slash.subcommand(
+    base="participants",
+    name="refresh",
+    description="View the latest registration criteria for participants. Useful with deeply integrated games.",
+    guild_ids=botGuilds,
+    options=[
+        create_option(
+            name="tournament", description="Tournament for which check players",
+            option_type=OptionTypes.STRING, required=True
+        ),
+        create_option(
+            name="update", description="Wether to make player data permanent or not.",
+            option_type=OptionTypes.BOOLEAN, required=False 
+        )
+    ]
+)
+@adminCommand
+@localized
+async def refreshParticipants(ctx:CustomContext, tournament:str, update:bool = False):
+    tournamentObj = tournamentController.getTournamentFromName(ctx.guild_id,tournament)
+    tournamentCtrl = factories.getControllerFor(tournamentObj)
+    if tournamentObj is None:
+        await ctx.sendLocalized(StringsNames.TOURNAMENT_UNEXISTING, name=tournament)
+        return
+    await ctx.sendLocalized(StringsNames.MAY_TAKE_LONG)
+    participants = participantController.getParticipantsForTournament(tournamentObj._id)
+    async with ctx.channel.typing():
+        newParticipants, failed = await tournamentCtrl.checkParticipants(participants, tournamentObj)
+    pViews = list(map(lambda p: tournamentCtrl.getParticipantView(p), newParticipants))
+    fViews = [{'reason':r, **tournamentCtrl.getParticipantView(p)} for p,r in failed]
+    participantViews = pd.DataFrame(pViews)
+    failedViews = pd.DataFrame(fViews)
+    await ctx.channel.send(file=File(StringIO(participantViews.to_csv()), filename= f"Participants_{datetime.utcnow()}.csv"))
+    if update:
+        participantController.updateParticipants(newParticipants)
+        participantController.deleteParticipants([p for p,_ in failed])
+    if len(failed) != 0:
+        if update:
+            await ctx.sendLocalized(StringsNames.PARTICIPANTS_DELETED, _as_reply=False, amount=len(failed))
+        await ctx.channel.send(file=File(StringIO(failedViews.to_csv()), filename= f"Disqualified_{datetime.utcnow()}.csv"))
 
 
 @slash.slash(
@@ -500,7 +541,7 @@ def setupMessageRegistration(channel:discord.TextChannel, tournament:Tournament,
         for i in range(len(content)):
             fields[i].value = content[i]
         try:
-            if tournamentController.registerPlayer(tournament, fields, msg.author):
+            if await tournamentController.registerPlayer(tournament, fields, msg.author):
                 await msg.add_reaction("✅")
                 if role:
                     await msg.author.add_roles(role)

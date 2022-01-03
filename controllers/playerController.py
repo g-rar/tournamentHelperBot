@@ -1,5 +1,6 @@
 from dataclasses import asdict
 from datetime import datetime
+
 from games.factories import getGamePlayerData
 
 from models.tournamentModels import Tournament
@@ -10,6 +11,7 @@ from bson.objectid import ObjectId
 
 from pymongo.collection import Collection
 from pymongo.database import Database
+from pymongo.operations import DeleteOne, ReplaceOne
 
 from utils import getQueryAsList
 
@@ -87,6 +89,10 @@ class ParticipantController:
         res = self.collection.update_one({"_id":participant._id}, asdict(participant))
         return bool(res.modified_count)
 
+    def updateParticipants(self, participants:List[Participant]) -> bool:
+        res = self.collection.bulk_write([ReplaceOne({"_id": p._id}, asdict(p)) for p in participants])
+        return bool(res.acknowledged)
+
     def registerPlayer(self, userId:int, userDisplayName:str, tournament:Tournament, fields:list, playerData):
         newParticipant = Participant(
             discordId=userId, 
@@ -104,5 +110,9 @@ class ParticipantController:
         if not partDict:
             return None
         return Participant.fromDict(partDict)
+
+    def deleteParticipants(self, participants:List[Participant]) -> bool:
+        res = self.collection.bulk_write([DeleteOne({"_id": p._id}) for p in participants])
+        return bool(res.acknowledged)
 
 participantController = ParticipantController(db)
