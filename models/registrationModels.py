@@ -28,11 +28,11 @@ class RegistrationTemplate:
 class Participant(BaseModel):
     """"Represents a registered player in a tournament"""
     # TODO need to make discordId not required,
-    _id:ObjectId
     discordId:int
     discordDisplayname:str
     registeredTime:datetime
     tournament:ObjectId
+    _id:ObjectId = field(default_factory=ObjectId)
     template:ObjectId = None
     checkedIn:datetime = None
     position:int = None
