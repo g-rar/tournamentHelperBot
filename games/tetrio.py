@@ -135,6 +135,7 @@ class TetrioController(BaseGameController):
     TR_UNDER_BOTTOM:int = 101
     OVERRANKED:int = 102
     UNDERRANKED:int = 103
+    UNRANKED:int = 104
     INVALID_PLAYER:int = 105
 
     def __init__(self):
@@ -187,6 +188,11 @@ class TetrioController(BaseGameController):
             player, news = await TetrioController.getTetrioPlayer(username, session)
         except:
             raise RegistrationError("Invalid playername", self.INVALID_PLAYER)
+
+        if any([tournament.trBottom, tournament.trTop, tournament.rankBottom, tournament.rankTop]) \
+            and player.info.league.rank == 'z':
+            raise RegistrationError("Unranked", self.UNRANKED)
+
         if player is None:
             raise RegistrationError("Invalid playername", self.INVALID_PLAYER)
         if not review and participantController.getParticipantFromData(tournament._id, {"info._id":player.info._id}):
