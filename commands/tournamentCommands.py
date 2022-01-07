@@ -25,7 +25,7 @@ from local.localContext import CustomContext, localized
 from local.names import StringsNames
 
 from models.tournamentModels import Tournament, TournamentRegistration, TournamentStatus
-from models.registrationModels import RegistrationField, RegistrationTemplate, RegistrationError
+from models.registrationModels import Participant, RegistrationField, RegistrationTemplate, RegistrationError
 
 from controllers.adminContoller import adminCommand
 from controllers.playerController import participantController
@@ -362,6 +362,12 @@ async def refreshParticipants(ctx:CustomContext, tournament:str, update:bool = F
         if update:
             await ctx.sendLocalized(StringsNames.PARTICIPANTS_DELETED, _as_reply=False, amount=len(failed))
         await ctx.channel.send(file=File(StringIO(failedViews.to_csv()), filename= f"Disqualified_{datetime.utcnow()}.csv"))
+        if tournamentObj.registration.participantRole:
+            role:discord.Role = ctx.guild.get_role(tournamentObj.registration.participantRole)
+            for p,r in failed:
+                member:Member = ctx.guild.get_member(p.discordId)
+                await member.remove_roles(role, reason=f"Disquialified for: {r}")
+            await ctx.sendLocalized(StringsNames.PARTICIPANTS_ROLE_REMOVED, _as_reply=False, rolename=role.name)
 
 
 @slash.slash(

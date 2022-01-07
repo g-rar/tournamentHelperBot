@@ -44,6 +44,7 @@ class EnglishStrs(Enum):
     REGISTRATION_OPEN_ALREADY = "Sign ups for the tournament `{tournament}` were already open on {chat}."
     REGISTRATION_CLOSED = "Sign ups for the tournament `{tournament}` have been closed."
     REGISTRATION_CLOSED_ALREADY = "Sign ups for the tournament `{tournament}` were closed already."
+    PARTICIPANTS_ROLE_REMOVED = "The role \"@{rolename}\" was also removed from the disqualified servers."
 
     #Tetr.io
     UNEXISTING_TETRIORANK = "There's no `{rank}` rank (._.`)・・・"

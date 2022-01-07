@@ -45,6 +45,7 @@ class SpanishStrs(Enum):
     REGISTRATION_OPEN_ALREADY = "Ya el registro está abierto para el torneo `{tournament}` en el chat {chat}."
     REGISTRATION_CLOSED = "Se ha cerrado el registro para el torneo `{tournament}`."
     REGISTRATION_CLOSED_ALREADY = "El registro para el torneo `{tournament}` ya estaba cerrado."
+    PARTICIPANTS_ROLE_REMOVED = "También se le ha quitado el rol \"@{rolename}\" a los participantes descalificados."
 
     #Tetr.io
     UNEXISTING_TETRIORANK = "No existe el rango `{rank}` (._.`)・・・"

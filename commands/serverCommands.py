@@ -11,6 +11,7 @@ import discord
 from discord.file import File
 from discord.message import Message
 from discord.user import User
+from discord.role import Role
 from discord.channel import TextChannel
 from discord_slash.utils.manage_commands import create_choice, create_option
 

@@ -90,6 +90,8 @@ class ParticipantController:
         return bool(res.modified_count)
 
     def updateParticipants(self, participants:List[Participant]) -> bool:
+        if participants == []:
+            return True
         res = self.collection.bulk_write([ReplaceOne({"_id": p._id}, asdict(p)) for p in participants])
         return bool(res.acknowledged)
 
@@ -112,6 +114,8 @@ class ParticipantController:
         return Participant.fromDict(partDict)
 
     def deleteParticipants(self, participants:List[Participant]) -> bool:
+        if participants == []:
+            return True
         res = self.collection.bulk_write([DeleteOne({"_id": p._id}) for p in participants])
         return bool(res.acknowledged)
 
