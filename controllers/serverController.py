@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from dataclasses import field, asdict
+from typing import List
 
 from pymongo.collection import Collection
 from pymongo.database import Database
@@ -15,6 +16,7 @@ from bot import db
 class Server(BaseModel):
     serverId: int
     serverName: str = ""
+    logChannel: int = None
     language: str = "ENGLISH"
     _id: ObjectId = field(default_factory=ObjectId)
     guildTournaments: list = field(default_factory=list)
@@ -36,7 +38,7 @@ class ServerController:
     def __init__(self, database: Database) -> None:
         self.db = database
 
-    def addServer(self, server: Server):
+    def addServer(self, server: Server) -> bool:
         res = self.collection.insert_one(asdict(server))
         return res.acknowledged
 
@@ -51,10 +53,11 @@ class ServerController:
         obj = Server.fromDict(c)
         return obj
 
-    def getServers(self):
-        c = self.collection.find()
+    def getServers(self, options={}) -> List[Server]:
+        c = self.collection.find(options)
         d = getQueryAsList(c) if c is not None else []
-        return d
+        res = list(map(lambda x: Server.fromDict(x), d))
+        return res
     
     def updateServer(self, server:Server) -> bool:
         res = self.collection.find_one_and_replace({"_id":server._id}, asdict(server))
