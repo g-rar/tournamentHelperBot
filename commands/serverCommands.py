@@ -18,8 +18,9 @@ from discord_slash.utils.manage_commands import create_choice, create_option
 from bot import botGuilds, slash, bot
 from utils import OptionTypes
 
-@slash.slash(
-    name="register_server",
+@slash.subcommand(
+    base="config",
+    name="init",
     description="Make tournament helper feel welcome on your server.",
     guild_ids = botGuilds,
     options=[]

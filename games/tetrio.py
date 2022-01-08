@@ -277,8 +277,8 @@ class TetrioController(BaseGameController):
         return player, playerNews
 
 @slash.subcommand(
-    base="add_tournament",
-    name="tetrio",
+    base="tournaments",
+    name="add_tetrio",
     guild_ids= botGuilds,
     description="Add a tournament for tetr.io integrated game.",
     options=[

@@ -40,8 +40,8 @@ from utils import OptionTypes, extractQuotedSubstrs, setupButtonNavigation
 registrationListeners = {}
 
 @slash.subcommand(
-    base="openRegistration",
-    name="inChat",
+    base="registration",
+    name="open_in_chat",
     guild_ids= botGuilds,
     options=[
         create_option(
@@ -94,8 +94,9 @@ async def openRegistrationInChat(ctx:CustomContext,tournament:str,channel:discor
     await ctx.sendLocalized(StringsNames.REGISTRATION_OPEN_CHAT, tournament=tournamentObj.name, chat=channel.mention)
 
 
-@slash.slash(
-    name="closeRegistration",
+@slash.subcommand(
+    base="registration",
+    name="close",
     guild_ids=botGuilds,
     options=[
         create_option(
@@ -132,8 +133,9 @@ async def closeRegistration(ctx:CustomContext, tournament:str):
     await ctx.sendLocalized(StringsNames.REGISTRATION_CLOSED, tournament=tournament)
 
 
-@slash.slash(
-    name="delete_tournament",
+@slash.subcommand(
+    base="tournaments",
+    name="delete",
     options=[
         create_option(name="tournament",description="Tournament to delete",
                         option_type=OptionTypes.STRING, required=True)
@@ -160,8 +162,9 @@ async def deleteTournament(ctx:CustomContext, tournament:str):
         await ctx.sendLocalized(StringsNames.DB_DROP_ERROR)
     
 
-@slash.slash(
-    name="see_tournaments",
+@slash.subcommand(
+    base="tournaments",
+    name="view",
     options=[
         create_option(name="tournament",description="Get the details for one tournament",
                         option_type=OptionTypes.STRING,required=False)
@@ -222,8 +225,8 @@ async def getTournaments(ctx: CustomContext, tournament:str = None):
         await ctx.send(embed=embed)
 
 @slash.subcommand(
-    base="register_player_as",
-    name="with_message",
+    base="participants",
+    name="register_as_with_message",
     options=[
         create_option(name="tournament", description="Tournament to register player in",
                         option_type=OptionTypes.STRING, required=True),
@@ -266,8 +269,8 @@ async def registerPlayerWithDiscord(ctx:CustomContext, tournament:str, discord_i
         await ctx.send(utilStrs.ERROR.format(e))
 
 @slash.subcommand(
-    base="delete_participant",
-    name="with_discord_id",
+    base="participants",
+    name="delete_with_discord_id",
     options=[
         create_option(name="tournament", description="Tournament in which participant is registered",
                         option_type=OptionTypes.STRING, required=True),
@@ -301,8 +304,9 @@ async def deleteParticipant(ctx:CustomContext, tournament:str, discord_id:str):
     else:
         await ctx.sendLocalized(StringsNames.PARTICIPANT_UNEXISTING, username=f"id: {discord_id}", tournament=tournament)
 
-@slash.slash(
-    name="see_participants",
+@slash.subcommand(
+    base="participants",
+    name="view",
     description="See who's registered in your tournament",
     guild_ids=botGuilds,
     options=[
@@ -374,8 +378,9 @@ async def refreshParticipants(ctx:CustomContext, tournament:str, update:bool = F
             await ctx.sendLocalized(StringsNames.PARTICIPANTS_ROLE_REMOVED, _as_reply=False, rolename=role.name)
 
 
-@slash.slash(
-    name="readCheckInFromReaction",
+@slash.subcommand(
+    base="check_in",
+    name="read_from_reaction",
     description="Register people who reacted to a certain message as checked in",
     guild_ids=botGuilds,
     options= [
@@ -446,8 +451,9 @@ async def readCheckIns(ctx:CustomContext,
     await ctx.send(file=File(StringIO(df.to_csv()), filename= f"Participants_{datetime.utcnow()}.csv"))
 
 
-@slash.slash(
-    name="seedBy",
+@slash.subcommand(
+    base="participants",
+    name="seed_by",
     description="Seed a player file by the given column",
     guild_ids=botGuilds,
     options=[
