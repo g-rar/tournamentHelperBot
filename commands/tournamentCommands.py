@@ -294,6 +294,10 @@ async def deleteParticipant(ctx:CustomContext, tournament:str, discord_id:str):
     participant = participantController.deleteParticipant(tournamentData._id, userId)
     if participant:
         await ctx.sendLocalized(StringsNames.PARTICIPANT_DELETED, username=f"id: {discord_id}", tournament=tournament)
+        if tournamentData.registration.participantRole:
+            member:Member = ctx.guild.get_member(participant.discordId)
+            role = ctx.guild.get_role(tournamentData.registration.participantRole)
+            await member.remove_roles(role, reason='Manually disqualified by TOs')
     else:
         await ctx.sendLocalized(StringsNames.PARTICIPANT_UNEXISTING, username=f"id: {discord_id}", tournament=tournament)
 
