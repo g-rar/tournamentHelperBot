@@ -20,16 +20,16 @@ class BotSettings:
     DEV = bool(os.getenv("DEV"))
 
 
-
 bot = Bot(command_prefix=BotSettings.PREFIX, intents=discord.Intents.all())
 
 
 CONF = BotSettings()
 botGuilds = None if not CONF.DEV else CONF.TEST_GUILDS
+devGuild = os.getenv("DEV_GUILD")
 
 client:MongoClient = MongoClient(os.getenv("DB_CONNECTIONSTR"))
-db:Database = client.get_database(name=CONF.DB_NAME)
 slash:SlashCommand = SlashCommand(bot,sync_commands=True)
+db:Database = client.get_database(name=CONF.DB_NAME)
 
 
 @bot.listen('on_ready')
