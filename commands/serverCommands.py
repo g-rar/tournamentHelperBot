@@ -66,7 +66,7 @@ async def setServerLanguage(ctx: CustomContext, language:str):
         return
     server = serverController.getServer(guildId)
     if server is None:
-        server = Server(serverId=guildId, language=language)
+        server = Server(serverId=guildId, language=language, serverName=ctx.guild.name)
         if not serverController.addServer(server):
             await ctx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
         return
@@ -75,6 +75,30 @@ async def setServerLanguage(ctx: CustomContext, language:str):
         await ctx.sendLocalized(StringsNames.LANGUAGE_CHANGED)
     else:
         await ctx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
+
+@slash.subcommand(
+    base="config",
+    name="log_channel",
+    description="Set the log channel so the bot sends notifications. Such as dq reasons, or updates/maintenance.",
+    guild_ids=botGuilds,
+    options=[
+        create_option(name="channel", description="Channel to which send log messages",
+                        option_type=OptionTypes.CHANNEL, required=True)
+    ]
+)
+@adminCommand
+@localized
+async def setLogChannel(ctx:CustomContext, channel:TextChannel):
+    if channel.type != discord.ChannelType.text:
+        await ctx.sendLocalized(StringsNames.VALUE_SHOULD_BE_TEXT_CHANNEL, option="channel")
+        return
+    server:Server = serverController.getServer(ctx.guild_id)
+    if not server:
+        server = Server(serverId=ctx.guild_id, logChannel=channel.id, serverName=ctx.guild.name)
+        if not serverController.addServer(server):
+            await ctx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
+        return
+    # continue here
 
 
 @slash.slash(
