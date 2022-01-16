@@ -1,7 +1,7 @@
 from controllers.adminContoller import adminCommand
 from controllers.serverController import serverController
 from discord_slash.utils.manage_commands import create_option
-from local.localContext import CustomContext, localized
+from customContext import CustomContext, customContext
 from local.names import StringsNames
 
 from utils import OptionTypes
@@ -23,7 +23,7 @@ from bot import slash, botGuilds
     ]
 )
 @adminCommand
-@localized
+@customContext
 async def addOperatorRole(ctx:CustomContext, role:discord.Role):
     if ctx.guild_id is None:
         await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
@@ -59,7 +59,7 @@ async def addOperatorRole(ctx:CustomContext, role:discord.Role):
     ]
 )
 @adminCommand
-@localized
+@customContext
 async def removeOperatorRole(ctx:CustomContext, role:discord.Role):
     if ctx.guild_id is None:
         await ctx.sendLocalized(StringsNames.NOT_FOR_DM)

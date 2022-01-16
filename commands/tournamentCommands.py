@@ -21,7 +21,7 @@ import requests
 
 from bot import bot, botGuilds, slash
 from local.lang.utils import utilStrs
-from local.localContext import CustomContext, localized
+from customContext import CustomContext, customContext
 from local.names import StringsNames
 
 from models.tournamentModels import Tournament, TournamentRegistration, TournamentStatus
@@ -58,7 +58,7 @@ registrationListeners = {}
         )
     ])
 @adminCommand
-@localized
+@customContext
 async def openRegistrationInChat(ctx:CustomContext,tournament:str,channel:discord.TextChannel, participant_role:discord.Role = None):
     global registrationListeners
     #check stuff is correct
@@ -108,7 +108,7 @@ async def openRegistrationInChat(ctx:CustomContext,tournament:str,channel:discor
     ]
 )
 @adminCommand
-@localized
+@customContext
 async def closeRegistration(ctx:CustomContext, tournament:str):
     global registrationListeners
     if ctx.guild_id is None:
@@ -144,7 +144,7 @@ async def closeRegistration(ctx:CustomContext, tournament:str):
     description="Deletes a tournament from existence"
 )
 @adminCommand
-@localized
+@customContext
 async def deleteTournament(ctx:CustomContext, tournament:str):
     if ctx.guild_id is None:
         await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
@@ -172,7 +172,7 @@ async def deleteTournament(ctx:CustomContext, tournament:str):
     guild_ids= botGuilds,
     description="Shows a list of the tournaments made by this server"
 )
-@localized
+@customContext
 async def getTournaments(ctx: CustomContext, tournament:str = None):
     #TODO this can be further pretified
     guild:discord.Guild = ctx.guild
@@ -239,7 +239,7 @@ async def getTournaments(ctx: CustomContext, tournament:str = None):
     description="Register a player as if they registered themselves with a message."
 )
 @adminCommand
-@localized
+@customContext
 async def registerPlayerWithDiscord(ctx:CustomContext, tournament:str, discord_id:str, msg_content:str):
     if ctx.guild_id is None:
         await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
@@ -281,7 +281,7 @@ async def registerPlayerWithDiscord(ctx:CustomContext, tournament:str, discord_i
     description="Delete a participant from a tournament. You get to decide why you do that."
 )
 @adminCommand
-@localized
+@customContext
 async def deleteParticipant(ctx:CustomContext, tournament:str, discord_id:str):
     if ctx.guild_id is None:
         await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
@@ -316,7 +316,7 @@ async def deleteParticipant(ctx:CustomContext, tournament:str, discord_id:str):
         )
     ]
 )
-@localized
+@customContext
 async def getTournamentParticipants(ctx:CustomContext, tournament:str):
     tournamentObj = tournamentController.getTournamentFromName(ctx.guild_id,tournament)
     tournamentCtrl = factories.getControllerFor(tournamentObj)
@@ -347,7 +347,7 @@ async def getTournamentParticipants(ctx:CustomContext, tournament:str):
     ]
 )
 @adminCommand
-@localized
+@customContext
 async def refreshParticipants(ctx:CustomContext, tournament:str, update:bool = False):
     tournamentObj = tournamentController.getTournamentFromName(ctx.guild_id,tournament)
     tournamentCtrl = factories.getControllerFor(tournamentObj)
@@ -403,7 +403,7 @@ async def refreshParticipants(ctx:CustomContext, tournament:str, update:bool = F
     ]
 )
 @adminCommand
-@localized
+@customContext
 async def readCheckIns(ctx:CustomContext,
         tournament:str, 
         # reaction:str, 
@@ -475,7 +475,7 @@ async def readCheckIns(ctx:CustomContext,
         ),
     ]
 )
-@localized
+@customContext
 async def seedBy(ctx:CustomContext, column:str, order:str, message_id:str):
     order = bool(order)
     if not message_id.isdecimal():

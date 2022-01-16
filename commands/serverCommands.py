@@ -4,7 +4,7 @@ from io import StringIO
 from datetime import datetime
 from controllers.adminContoller import adminCommand
 from controllers.serverController import Server, serverController
-from local.localContext import localized, CustomContext
+from customContext import customContext, CustomContext
 from local.names import StringsNames
 
 import discord
@@ -25,7 +25,7 @@ from utils import OptionTypes
     guild_ids = botGuilds,
     options=[]
 )
-@localized
+@customContext
 @adminCommand
 async def slashRegisterServer(ctx:CustomContext):
     guildId = ctx.guild_id
@@ -58,7 +58,7 @@ async def slashRegisterServer(ctx:CustomContext):
     ]
 )
 @adminCommand
-@localized
+@customContext
 async def setServerLanguage(ctx: CustomContext, language:str):
     guildId = ctx.guild_id
     if guildId is None:
@@ -87,7 +87,7 @@ async def setServerLanguage(ctx: CustomContext, language:str):
     ]
 )
 @adminCommand
-@localized
+@customContext
 async def setLogChannel(ctx:CustomContext, channel:TextChannel):
     if channel.type != discord.ChannelType.text:
         await ctx.sendLocalized(StringsNames.VALUE_SHOULD_BE_TEXT_CHANNEL, option="channel")
@@ -120,7 +120,7 @@ async def setLogChannel(ctx:CustomContext, channel:TextChannel):
         ),
     ]
 )
-@localized
+@customContext
 async def getReactions(ctx:CustomContext, channel:TextChannel, message_id:str):
     if channel.type != discord.ChannelType.text:
         await ctx.sendLocalized(StringsNames.VALUE_SHOULD_BE_TEXT_CHANNEL, option="channel")

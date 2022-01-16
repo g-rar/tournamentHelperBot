@@ -5,7 +5,7 @@ from discord_slash.utils.manage_commands import create_choice, create_option
 
 from bot import slash, devGuilds, CONF, bot
 from controllers.serverController import serverController
-from local.localContext import CustomContext, localized
+from customContext import CustomContext, customContext
 from local.names import StringsNames
 from local.lang.utils import utilStrs
 from utils import OptionTypes
@@ -39,7 +39,7 @@ def devCommand(f):
                         ])
     ]
 )
-@localized
+@customContext
 @devCommand
 async def sendNotificationToServers(ctx:CustomContext, message_id:str, channel:TextChannel, language:str = None):
     if channel.type != discord.ChannelType.text:

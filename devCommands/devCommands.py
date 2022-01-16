@@ -1,6 +1,6 @@
 from discord_slash.context import SlashContext
 from bot import bot, CONF, db, slash, botGuilds
-from local.localContext import CustomContext, localized
+from customContext import CustomContext, customContext
 from local.names import StringsNames
 from utils import getQueryAsList
 
@@ -77,7 +77,7 @@ async def see_commands(ctx:SlashContext):
     guild_ids=botGuilds,
     options=[]
 )
-@localized
+@customContext
 async def testLocalized(ctx:CustomContext):
     print("Hola")
     await ctx.sendLocalized(StringsNames.SERVER_REGISTERED)

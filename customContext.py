@@ -20,7 +20,7 @@ class CustomContext(SlashContext):
                 return await send(s)
         return await send(language[s].value.format(**kwargs))
 
-def localized(f):
+def customContext(f):
     async def wrapper(ctx:SlashContext, *args, **kwargs):
         ctx.sendLocalized = lambda s, **kargs: CustomContext.sendLocalized(ctx, s, **kargs)
         await f(ctx, *args, **kwargs)
