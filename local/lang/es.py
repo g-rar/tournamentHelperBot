@@ -19,6 +19,7 @@ class SpanishStrs(Enum):
     CANT_REGISTER_DM = "Este no es un servidor. No uno que pueda registrar al menos ¯\\\_(ツ)_/¯"
     SERVER_ALREADY_IN = "Este serividor ya está registrado. No puedes estar más registrado de lo que ya estás ( ´･･)ﾉ(._.`)"
     SERVER_REGISTERED = "Gracias por recibirme en el server, espero ser de ayuda ( •̀ ω •́ )✧"
+    SERVER_UPDATED = "¡La información del servidor se ha actualizado!"
     ADDED_OPERATOR_ROLE = "Se ha añadido el rol '{role}' como operador de este servidor (＾u＾)ノ~"
     REMOVED_OPERATOR_ROLE = "Se ha quitado el rol '{role}' como operador de este servidor..."
     OPERATOR_ROLE_ALREADY_EXISTS = "Ese rol '{role}' ya es un rol de operador para empezar (＾v＾u)..."

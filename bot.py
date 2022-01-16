@@ -25,7 +25,7 @@ bot = Bot(command_prefix=BotSettings.PREFIX, intents=discord.Intents.all())
 
 CONF = BotSettings()
 botGuilds = None if not CONF.DEV else CONF.TEST_GUILDS
-devGuilds = list(map(lambda x: int(x), os.getenv("DEV_GUILDS").split(","))) if os.getenv("TEST_GUILDS") else []
+devGuilds = list(map(lambda x: int(x), os.getenv("DEV_GUILDS").split(","))) if os.getenv("DEV_GUILDS") else []
 
 
 client:MongoClient = MongoClient(os.getenv("DB_CONNECTIONSTR"))

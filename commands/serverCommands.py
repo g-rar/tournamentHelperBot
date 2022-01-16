@@ -98,7 +98,11 @@ async def setLogChannel(ctx:CustomContext, channel:TextChannel):
         if not serverController.addServer(server):
             await ctx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
         return
-    # continue here
+    server.logChannel = channel.id
+    if serverController.updateServer(server):
+        await ctx.sendLocalized(StringsNames.SERVER_UPDATED)
+    else:
+        await ctx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
 
 
 @slash.slash(

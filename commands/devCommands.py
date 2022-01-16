@@ -66,4 +66,4 @@ async def sendNotificationToServers(ctx:CustomContext, message_id:str, channel:T
         operatorStr = ", ".join(f"<@&{rId}>" for rId in server.adminRoles)
         oprStr = f"[ {operatorStr} ]\n" if operatorStr else ""
         await chn.send(content=f"{oprStr}{str(msg.content)}")
-    ctx.send("Finished sending messages.")
+    await ctx.send("Finished sending messages.")

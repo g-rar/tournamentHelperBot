@@ -19,6 +19,7 @@ class EnglishStrs(Enum):
     CANT_REGISTER_DM = "This is not a server. Not one that can be registered anyways ¯\\\_(ツ)_/¯"
     SERVER_ALREADY_IN = "This server is already registered. You can't be registered anymore than you are already ( ´･･)ﾉ(._.`)"
     SERVER_REGISTERED = "Thanks for receiving me on your server, hope to be helpfull ( •̀ ω •́ )✧"
+    SERVER_UPDATED = "The server's information was updated!"
     ADDED_OPERATOR_ROLE = "The role '{role}' was added as bot operator on this server (＾u＾)ノ~"
     REMOVED_OPERATOR_ROLE = "The role '{role}' was removed as bot operator on this server..."
     OPERATOR_ROLE_ALREADY_EXISTS = "The role '{role}' is an operator role already (＾v＾u)..."
