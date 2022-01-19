@@ -10,7 +10,7 @@ from games.factories import addModule
 from games.default import BaseGameController, BasePlayer
 
 from baseModel import BaseModel
-from customContext import CustomContext, customContext
+from contextExtentions.customContext import CustomContext, customContext
 from local.names import StringsNames
 from models.tournamentModels import Tournament
 from models.registrationModels import Participant, RegistrationError, RegistrationField, RegistrationTemplate

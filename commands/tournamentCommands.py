@@ -20,8 +20,10 @@ from discord_slash.utils.manage_commands import create_choice, create_option
 import requests
 
 from bot import bot, botGuilds, slash
+from contextExtentions.contextServer import getContextServerFromServer
+from contextExtentions.contextTournament import ContexTournament
 from local.lang.utils import utilStrs
-from customContext import CustomContext, customContext
+from contextExtentions.customContext import CustomContext, customContext
 from local.names import StringsNames
 
 from models.tournamentModels import Tournament, TournamentRegistration, TournamentStatus
@@ -29,6 +31,7 @@ from models.registrationModels import Participant, RegistrationField, Registrati
 
 from controllers.adminContoller import adminCommand
 from controllers.playerController import participantController
+from controllers.serverController import serverController
 from controllers.tournamentController import TournamentController, tournamentController
 from games import factories
 
@@ -544,6 +547,8 @@ def setupMessageRegistration(channel:discord.TextChannel, tournament:Tournament,
     if (channel.guild.id, tournament.name) in registrationListeners: 
         #prevent from setting two identical listeners
         return
+    s = serverController.getServer(channel.guild.id)
+    server = getContextServerFromServer(s, channel.guild)
     @bot.listen()
     async def on_message(msg:discord.Message):
         if msg.channel.id != channel.id:
@@ -567,6 +572,7 @@ def setupMessageRegistration(channel:discord.TextChannel, tournament:Tournament,
         except RegistrationError as e:
             # TODO proper error message
             await msg.add_reaction("❌")
+            await server.sendLog(StringsNames.PARTICIPANT_REGISTRATION_FAILED, name=msg.author.display_name, reason=str(e))
         except Forbidden as e:
             await msg.add_reaction("🤷‍♂️")
     registrationListeners[(channel.guild.id, tournament.name)] = on_message

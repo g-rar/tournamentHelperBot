@@ -42,6 +42,7 @@ class SpanishStrs(Enum):
     PARTICIPANT_UNEXISTING = "No se ha encontrado el participante `{username}` en el torneo **{tournament}** (u •_•)"
     PARTICIPANT_DELETED = "Se ha eliminado el participante `{username}` del torneo **{tournament}** ヾ(^▽^*)"
     PARTICIPANTS_DELETED = "Se han eliminado `{amount}` participantes:"
+    PARTICIPANT_REGISTRATION_FAILED = "No se pudo registrar a `{name}`. Esta es la razón: `{reason}`"
     REGISTRATION_OPEN_CHAT = "Se ha abierto el registro para el torneo `{tournament}` en el chat {chat}."
     REGISTRATION_OPEN_ALREADY = "Ya el registro está abierto para el torneo `{tournament}` en el chat {chat}."
     REGISTRATION_CLOSED = "Se ha cerrado el registro para el torneo `{tournament}`."

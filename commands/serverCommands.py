@@ -4,7 +4,7 @@ from io import StringIO
 from datetime import datetime
 from controllers.adminContoller import adminCommand
 from controllers.serverController import Server, serverController
-from customContext import customContext, CustomContext
+from contextExtentions.customContext import customContext, CustomContext
 from local.names import StringsNames
 
 import discord

@@ -41,6 +41,8 @@ class EnglishStrs(Enum):
     PLAYER_REGISTERED = "There player **{username}** has been registered in the tournament **{tournament}** ( •̀ ω •́ )✧"
     PARTICIPANT_UNEXISTING = "Couldn't find the participant `{username}` in the tournament **{tournament}** (u •_•)"
     PARTICIPANT_DELETED = "Participant `{username}` has been deleted from the tournament **{tournament}** ヾ(^▽^*)"
+    PARTICIPANTS_DELETED = "The following `{amount}` participants were deleted:"
+    PARTICIPANT_REGISTRATION_FAILED = "No se pudo registrar a `{name}`. Esta es la razón: `{reason}`"
     REGISTRATION_OPEN_CHAT = "Sign ups for the tournament `{tournament}` are now open on the chat {chat}."
     REGISTRATION_OPEN_ALREADY = "Sign ups for the tournament `{tournament}` were already open on {chat}."
     REGISTRATION_CLOSED = "Sign ups for the tournament `{tournament}` have been closed."

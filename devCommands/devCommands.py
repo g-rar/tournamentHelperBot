@@ -1,6 +1,6 @@
 from discord_slash.context import SlashContext
 from bot import bot, CONF, db, slash, botGuilds
-from customContext import CustomContext, customContext
+from contextExtentions.customContext import CustomContext, customContext
 from local.names import StringsNames
 from utils import getQueryAsList
 

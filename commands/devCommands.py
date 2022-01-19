@@ -5,7 +5,7 @@ from discord_slash.utils.manage_commands import create_choice, create_option
 
 from bot import slash, devGuilds, CONF, bot
 from controllers.serverController import serverController
-from customContext import CustomContext, customContext
+from contextExtentions.customContext import CustomContext, customContext
 from local.names import StringsNames
 from local.lang.utils import utilStrs
 from utils import OptionTypes

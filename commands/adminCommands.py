@@ -1,7 +1,7 @@
 from controllers.adminContoller import adminCommand
 from controllers.serverController import serverController
 from discord_slash.utils.manage_commands import create_option
-from customContext import CustomContext, customContext
+from contextExtentions.customContext import CustomContext, customContext
 from local.names import StringsNames
 
 from utils import OptionTypes
