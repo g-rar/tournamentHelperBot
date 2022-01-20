@@ -559,22 +559,29 @@ def setupMessageRegistration(channel:discord.TextChannel, tournament:Tournament,
             return
         content = extractQuotedSubstrs(msg.content)
         fields: List[RegistrationField] = tournament.registrationTemplate.participantFields
-        for i in range(len(content)):
-            fields[i].value = content[i]
         try:
+            for i in range(len(content)):
+                fields[i].value = content[i]
             if await tournamentController.registerPlayer(tournament, fields, msg.author):
                 await msg.add_reaction("✅")
                 if role:
                     await msg.author.add_roles(role)
             else:
                 logging.error("Failed to upload to db.")
+                await server.sendLog(StringsNames.PARTICIPANT_REGISTRATION_FAILED, name=msg.author.display_name, reason="DB UPLOAD ERROR")
                 await msg.add_reaction("🆘")
         except RegistrationError as e:
-            # TODO proper error message
             await msg.add_reaction("❌")
             await server.sendLog(StringsNames.PARTICIPANT_REGISTRATION_FAILED, name=msg.author.display_name, reason=str(e))
+        except IndexError as e:
+            await msg.add_reaction("❌")
+            await server.sendLog(StringsNames.PARTICIPANT_REGISTRATION_FAILED, name=msg.author.display_name, reason="Registration Fields don't match tournament template")
         except Forbidden as e:
             await msg.add_reaction("🤷‍♂️")
+            if 'roles' in e.response.real_url.path and e.response.method == 'PUT':
+                await server.sendLog(StringsNames.CANT_ASSIGN_ROLE_TO_USER, username=msg.author.display_name, role=role.name)
+            else:
+                await server.sendLog(StringsNames.PARTICIPANT_REGISTRATION_FAILED, username=msg.author.display_name, reason=str(e))
     registrationListeners[(channel.guild.id, tournament.name)] = on_message
 
 

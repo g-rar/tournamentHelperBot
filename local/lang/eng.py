@@ -28,6 +28,7 @@ class EnglishStrs(Enum):
     NOT_AN_OPERATOR_ROLE = "The role '{role}' is not an operator role (u •_•)"
     NEED_MANAGE_ROLES = "For that I need permission to manage roles. Also moving my role higher in the hierarchy could help (＾v＾u)..."
     LANGUAGE_CHANGED = "The language for this server has been changed to English. We're up for having nice conversations!"
+    CANT_ASSIGN_ROLE_TO_USER = "Couldn't assign the role `{role}` to the user `{username}`. Please check if I have permission to manage roles, also check the roles hierarchy (＾v＾u)..."
 
     #Tournament
     TOURNAMENT_UNEXISTING = "Couldn't find a tournament with the name `{name}`, check if you typed the name correctly (._.`)・・・"
