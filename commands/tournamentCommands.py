@@ -524,7 +524,6 @@ async def setListenersBackUp():
                 regChannel:discord.TextChannel = bot.get_channel(tournament.registration.channelId)
                 regRole:discord.Guild = regChannel.guild.get_role(tournament.registration.participantRole)
                 if not regChannel: #channel got deleted or something
-                    #TODO send message to log channel in server
                     logging.error(f"Didnt find channel for tournament: {tournament.name}")
                     raise Exception()
                 #TODO if api change changes guild.get_role returning None if not found
@@ -534,7 +533,10 @@ async def setListenersBackUp():
             tournament.registration.status = TournamentStatus.REGISTRATION_CLOSED
             tournament.registration.channelId = None
             tournamentController.updateRegistrationForTournament(tournament, tournament.registration)
-
+            s = serverController.getServer(tournament.hostServerId)
+            guild:Guild = bot.get_guild(s.serverId)
+            server = getContextServerFromServer(s, guild)
+            await server.sendLog(StringsNames.REG_CHANNEL_NOT_FOUND, tournament=tournament.name)
     logging.info("Tournament listeners ready!")
     pass
 

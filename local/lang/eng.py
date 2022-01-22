@@ -48,6 +48,7 @@ class EnglishStrs(Enum):
     REGISTRATION_OPEN_ALREADY = "Sign ups for the tournament `{tournament}` were already open on {chat}."
     REGISTRATION_CLOSED = "Sign ups for the tournament `{tournament}` have been closed."
     REGISTRATION_CLOSED_ALREADY = "Sign ups for the tournament `{tournament}` were closed already."
+    REG_CHANNEL_NOT_FOUND = "I couldn't find the registration channel that was set up for the tournament `{tournament}`. I'm going to close sign ups for this tournament. You can reopen them at any time"
     PARTICIPANTS_ROLE_REMOVED = "The role \"@{rolename}\" was also removed from the disqualified servers."
 
     #Tetr.io
