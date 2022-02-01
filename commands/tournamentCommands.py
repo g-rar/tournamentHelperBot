@@ -244,6 +244,7 @@ async def getTournaments(ctx: CustomContext, tournament:str = None):
 @adminCommand
 @customContext
 async def registerPlayerWithDiscord(ctx:CustomContext, tournament:str, discord_id:str, msg_content:str):
+    # await ctx.send(utilStrs.ERROR.format("This is an error"))
     if ctx.guild_id is None:
         await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
         return
@@ -455,9 +456,9 @@ async def readCheckIns(ctx:CustomContext,
 
 
 @slash.subcommand(
-    base="participants",
-    name="seed_by",
-    description="Seed a player file by the given column",
+    base="csv",
+    name="sort_by",
+    description="Sort a csv file by the given column",
     guild_ids=botGuilds,
     options=[
         create_option(
@@ -476,10 +477,14 @@ async def readCheckIns(ctx:CustomContext,
             name="message_id", description="Message in which the file is",
             option_type=OptionTypes.STRING, required=True
         ),
+        create_option(
+            name="get_columns", description="If present, show only specified columns. Sepparate with commas.",
+            option_type=OptionTypes.STRING, required=False
+        )
     ]
 )
 @customContext
-async def seedBy(ctx:CustomContext, column:str, order:str, message_id:str):
+async def seedBy(ctx:CustomContext, column:str, order:str, message_id:str, get_columns:str = None):
     order = bool(order)
     if not message_id.isdecimal():
         await ctx.sendLocalized(StringsNames.VALUE_SHOULD_BE_DEC, option="message_id")
@@ -500,7 +505,53 @@ async def seedBy(ctx:CustomContext, column:str, order:str, message_id:str):
         playersDF.sort_values(column, ascending=order, ignore_index=True, inplace=True)
         playersDF["Seed"] = playersDF.index + 1
 
-        dfcsv = playersDF.to_csv(index=False)
+        columnsList = None if not get_columns else get_columns.split(",")
+        dfcsv = playersDF.to_csv(
+            index=False,
+            columns=columnsList,
+            header= not columnsList or len(columnsList)!=1
+        )
+        await ctx.send(
+            content= utilStrs.INFO.format("File generated"),
+            file= File(fp=StringIO(dfcsv), filename="Seeding.csv")
+        )
+        
+    except Exception as e:
+        await ctx.send(utilStrs.ERROR.format(e))
+
+@slash.subcommand(
+    base="csv",
+    name="get_columns",
+    description="Given a csv file in this text channel, get the columns as a sepparate file",
+    guild_ids=botGuilds,
+    options=[
+        create_option(
+            name="columns", description="The columns to get. Sepparate using commas.",
+            option_type=OptionTypes.STRING, required=True
+        ),
+        create_option(
+            name="message_id", description="Message in which the file is",
+            option_type=OptionTypes.STRING, required=True
+        ),
+    ]
+)
+@customContext
+async def getColumn(ctx:CustomContext, columns:str, message_id:str):
+    if not message_id.isdecimal():
+        await ctx.sendLocalized(StringsNames.VALUE_SHOULD_BE_DEC, option="message_id")
+        return
+    messageId = int(message_id)
+    chn:channel.TextChannel = ctx.channel
+    try:
+        msg:Message = await chn.fetch_message(messageId)
+    except Exception as e:
+        await ctx.sendLocalized(StringsNames.MESSAGE_NOT_FOUND, data=type(e).__name__)
+        return
+    try:
+        csvs:str = await getCsvTextFromMsg(msg)
+        playersDF:pd.DataFrame = pd.read_csv(StringIO(csvs))
+        columnList = columns.split(",")
+        dfcsv = playersDF.to_csv(index=False, columns=columnList, header=(len(columnList)!=1))
         await ctx.send(
             content= utilStrs.INFO.format("File generated"),
             file= File(fp=StringIO(dfcsv), filename="Seeding.csv")
