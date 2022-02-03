@@ -36,12 +36,22 @@ def devCommand(f):
                         choices=[
                             create_choice(name="English", value="ENGLISH"),
                             create_choice(name="Español", value="SPANISH")
-                        ])
+                        ]),
+        create_option(name="ping_operators", description="If True, it pings all the operator roles. No matter how many people that is.",
+                        option_type=OptionTypes.BOOLEAN, required=False),
+        create_option(name="server_ids", description="If present, only send the notification to these servers (comma separated)",
+                        option_type=OptionTypes.STRING, required=False)
     ]
 )
 @customContext
 @devCommand
-async def sendNotificationToServers(ctx:CustomContext, message_id:str, channel:TextChannel, language:str = None):
+async def sendNotificationToServers(
+        ctx:CustomContext,
+        message_id:str,
+        channel:TextChannel,
+        language:str = None,
+        ping_operators:bool = False,
+        server_ids:str = ""):
     if channel.type != discord.ChannelType.text:
         await ctx.sendLocalized(StringsNames.VALUE_SHOULD_BE_TEXT_CHANNEL, option="channel")
         return
@@ -53,7 +63,16 @@ async def sendNotificationToServers(ctx:CustomContext, message_id:str, channel:T
     except Exception as e:
         await ctx.sendLocalized(StringsNames.MESSAGE_NOT_FOUND, data=type(e).__name__)
         return
-    servers = serverController.getServers(options={"language": language, "logChannel":{"$ne":None}} if language else {})
+    options = {"logChannel":{"$ne":None}}
+    if language:
+        options["language"] = language
+    serverIds = server_ids.split(",")
+    if not all(map(lambda x: x.isdecimal(), serverIds)):
+        await ctx.sendLocalized(StringsNames.VALUE_SHOULD_BE_DEC, option="message_id")
+        return
+    elif server_ids:
+        options["serverId"] = {"$in":list(map(lambda x: int(x), serverIds))}
+    servers = serverController.getServers(options=options)
     for server in servers:
         guild:discord.Guild = bot.get_guild(server.serverId)
         if not guild:
@@ -64,6 +83,6 @@ async def sendNotificationToServers(ctx:CustomContext, message_id:str, channel:T
             ctx.channel.send(f"Channel with `id: {server.logChannel}` for server with `id:{server.serverId}` not found!")
             continue
         operatorStr = ", ".join(f"<@&{rId}>" for rId in server.adminRoles)
-        oprStr = f"[ {operatorStr} ]\n" if operatorStr else ""
+        oprStr = f"[ {operatorStr} ]\n" if operatorStr and ping_operators else ""
         await chn.send(content=f"{oprStr}{str(msg.content)}")
     await ctx.send("Finished sending messages.")
