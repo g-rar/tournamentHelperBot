@@ -39,7 +39,7 @@ class EnglishStrs(Enum):
     NO_REACTION_IN_MSG = "There's no one who reacted with {reaction} :thinking:..."
 
     #Registration
-    PLAYER_REGISTERED = "There player **{username}** has been registered in the tournament **{tournament}** ( •̀ ω •́ )✧"
+    PLAYER_REGISTERED = "The player **{username}** has been registered in the tournament **{tournament}** ( •̀ ω •́ )✧"
     PARTICIPANT_UNEXISTING = "Couldn't find the participant `{username}` in the tournament **{tournament}** (u •_•)"
     PARTICIPANT_DELETED = "Participant `{username}` has been deleted from the tournament **{tournament}** ヾ(^▽^*)"
     PARTICIPANTS_DELETED = "The following `{amount}` participants were deleted:"
