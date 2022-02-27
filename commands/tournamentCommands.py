@@ -266,6 +266,9 @@ async def registerPlayerWithDiscord(ctx:CustomContext, tournament:str, discord_i
         fields[i].value = content[i]
     try:
         if await tournamentController.registerPlayer(tournamentData, fields, member):
+            if tournamentData.registration.participantRole:
+                regRole: discord.Role = ctx.guild.get_role(tournamentData.registration.participantRole)
+                await member.add_roles(regRole)
             await ctx.sendLocalized(StringsNames.PLAYER_REGISTERED, username=member.display_name, tournament=tournament)
         else:
             await ctx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
