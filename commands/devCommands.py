@@ -67,7 +67,7 @@ async def sendNotificationToServers(
     if language:
         options["language"] = language
     serverIds = server_ids.split(",")
-    if not all(map(lambda x: x.isdecimal(), serverIds)):
+    if server_ids and not all(map(lambda x: x.isdecimal(), serverIds)):
         await ctx.sendLocalized(StringsNames.VALUE_SHOULD_BE_DEC, option="message_id")
         return
     elif server_ids:
