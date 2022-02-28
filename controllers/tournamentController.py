@@ -81,11 +81,11 @@ class TournamentController:
 
     # TODO need to add method to register player without it being discord member
 
-    async def registerPlayer(self, tournament:Tournament, fields:list, member:Member = None, displayName:str = None):
+    async def registerPlayer(self, tournament:Tournament, fields:list, member:Member = None, displayName:str = None, overrideReq:bool = False):
         if tournament.registration.status == TournamentStatus.REGISTRATION_CLOSED:
             raise RegistrationError("Registration for this tournament is currently closed",4)
         gameController = factories.getControllerFor(tournament)
-        newFields, playerData = await gameController.validateFields(fields, tournament)
+        newFields, playerData = await gameController.validateFields(fields, tournament, override=overrideReq)
         if member:
             if participantController.getParticipantFromDiscordId(member._user.id, tournament._id):
                 raise RegistrationError("Discord user already registered in tournament", 3)

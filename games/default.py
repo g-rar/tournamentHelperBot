@@ -29,7 +29,7 @@ class BaseGameController:
             d[field.name] = field.value
         return d
 
-    async def validateFields(self, fields:List[RegistrationField], tournament:Tournament, review:bool=False):
+    async def validateFields(self, fields:List[RegistrationField], tournament:Tournament, review:bool=False, override=False):
         newFields = []
         for field in fields:
             # if validation fails for some field throws error

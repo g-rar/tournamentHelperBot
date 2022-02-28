@@ -153,11 +153,11 @@ class TetrioController(BaseGameController):
         base["Tetr.io_ID"] = player.info._id
         return base
 
-    async def validateFields(self, fields:List[RegistrationField], tournament:TetrioTournament, review=False, session=None):
+    async def validateFields(self, fields:List[RegistrationField], tournament:TetrioTournament, review=False, session=None, override=False):
         newFields = []
         for field in fields:
             if field.name == "Tetr.io username":
-                playerData = await self.validatePlayer(field.value, tournament, review, session=session)
+                playerData = await self.validatePlayer(field.value, tournament, review, session=session, override=override)
             # if validation fails for some field throws error
             res = self.validateField(field, review)
             newFields.append(res[0])
@@ -181,7 +181,7 @@ class TetrioController(BaseGameController):
 
         return newParticipants, failed
 
-    async def validatePlayer(self, username:str, tournament:TetrioTournament, review=False, session=None) -> TetrioPlayer:
+    async def validatePlayer(self, username:str, tournament:TetrioTournament, review=False, session=None, override=False) -> TetrioPlayer:
         try:
             player:TetrioPlayer  
             news:dict 
@@ -189,7 +189,7 @@ class TetrioController(BaseGameController):
         except:
             raise RegistrationError("Invalid playername", self.INVALID_PLAYER)
 
-        if any([tournament.trBottom, tournament.trTop, tournament.rankBottom, tournament.rankTop]) \
+        if not override and any([tournament.trBottom, tournament.trTop, tournament.rankBottom, tournament.rankTop]) \
             and player.info.league.rank == 'z':
             raise RegistrationError("Unranked", self.UNRANKED)
 
@@ -197,13 +197,14 @@ class TetrioController(BaseGameController):
             raise RegistrationError("Invalid playername", self.INVALID_PLAYER)
         if not review and participantController.getParticipantFromData(tournament._id, {"info._id":player.info._id}):
             raise RegistrationError("Tetrio account already registered", self.ALREADY_REGISTERED)
-        if tournament.trTop and player.info.league.rating > tournament.trTop:
-            raise RegistrationError("TR over cap", self.TR_OVER_TOP)
-        if tournament.trBottom and player.info.league.rating < tournament.trBottom:
-            raise RegistrationError("TR under floor", self.TR_UNDER_BOTTOM)
+        if not override:
+            if tournament.trTop and player.info.league.rating > tournament.trTop:
+                raise RegistrationError("TR over cap", self.TR_OVER_TOP)
+            if tournament.trBottom and player.info.league.rating < tournament.trBottom:
+                raise RegistrationError("TR under floor", self.TR_UNDER_BOTTOM)
         
         rankTop, rankBottom = tournament.rankTop, tournament.rankBottom
-        if rankTop or rankBottom:
+        if not override and (rankTop or rankBottom):
             achievedOverBottom = False
             if (tournament.rankTop and
                     tetrioRanks.index(player.info.league.rank) > tetrioRanks.index(tournament.rankTop)):

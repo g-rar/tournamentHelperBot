@@ -37,7 +37,8 @@ class Participant(BaseModel):
     checkedIn:datetime = None
     position:int = None
     fields:list = field(default_factory=list)
-    playerData:Any = field(default_factory=dict) # this is for game specific data, actuallyv should type BasePlayer
+    overrideChecks:bool = False
+    playerData:Any = field(default_factory=dict) # this is for game specific data, actually should type BasePlayer
 
     @staticmethod
     def fromDict(d):

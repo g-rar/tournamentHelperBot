@@ -236,14 +236,16 @@ async def getTournaments(ctx: CustomContext, tournament:str = None):
         create_option(name="discord_id", description="Discord Id of the player to register",
                         option_type=OptionTypes.STRING, required=True),
         create_option(name="msg_content", description="Content of the message the player would input to register",
-                        option_type=OptionTypes.STRING, required=True)
+                        option_type=OptionTypes.STRING, required=True),
+        create_option(name="override_req", description="If True, registers the player despite registration criteria",
+                        option_type=OptionTypes.BOOLEAN, required=False)
     ],
     guild_ids=botGuilds,
     description="Register a player as if they registered themselves with a message."
 )
 @adminCommand
 @customContext
-async def registerPlayerWithDiscord(ctx:CustomContext, tournament:str, discord_id:str, msg_content:str):
+async def registerPlayerWithDiscord(ctx:CustomContext, tournament:str, discord_id:str, msg_content:str, override_req:bool=False):
     # await ctx.send(utilStrs.ERROR.format("This is an error"))
     if ctx.guild_id is None:
         await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
@@ -265,7 +267,7 @@ async def registerPlayerWithDiscord(ctx:CustomContext, tournament:str, discord_i
     for i in range(len(content)):
         fields[i].value = content[i]
     try:
-        if await tournamentController.registerPlayer(tournamentData, fields, member):
+        if await tournamentController.registerPlayer(tournamentData, fields, member, overrideReq=override_req):
             if tournamentData.registration.participantRole:
                 regRole: discord.Role = ctx.guild.get_role(tournamentData.registration.participantRole)
                 await member.add_roles(regRole)
