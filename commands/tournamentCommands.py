@@ -9,6 +9,7 @@ from datetime import datetime
 from io import StringIO
 from pprint import pformat
 from typing import List
+from copy import deepcopy
 import logging
 
 import discord
@@ -21,7 +22,6 @@ import requests
 
 from bot import bot, botGuilds, slash
 from contextExtentions.contextServer import getContextServerFromServer
-from contextExtentions.contextTournament import ContexTournament
 from local.lang.utils import utilStrs
 from contextExtentions.customContext import CustomContext, customContext
 from local.names import StringsNames
@@ -32,7 +32,7 @@ from models.registrationModels import Participant, RegistrationField, Registrati
 from controllers.adminContoller import adminCommand
 from controllers.playerController import participantController
 from controllers.serverController import serverController
-from controllers.tournamentController import TournamentController, tournamentController
+from controllers.tournamentController import tournamentController
 from games import factories
 
 from utils import OptionTypes, extractQuotedSubstrs, setupButtonNavigation
@@ -616,7 +616,7 @@ def setupMessageRegistration(channel:discord.TextChannel, tournament:Tournament,
             await msg.add_reaction("❓")
             return
         content = extractQuotedSubstrs(msg.content)
-        fields: List[RegistrationField] = tournament.registrationTemplate.participantFields
+        fields: List[RegistrationField] = deepcopy(tournament.registrationTemplate.participantFields)
         try:
             for i in range(len(content)):
                 fields[i].value = content[i]

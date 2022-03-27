@@ -127,9 +127,6 @@ class TetrioTournament(Tournament):
 
 class TetrioController(BaseGameController):
     GAME:str = "tetr.io"
-    PLAYER_FIELDS:list = [
-        RegistrationField(name="Tetr.io username", fieldType=OptionTypes.STRING, required=True)
-    ]
     TEAM_FIELDS:list = None
     TR_OVER_TOP:int = 100
     TR_UNDER_BOTTOM:int = 101
@@ -140,6 +137,10 @@ class TetrioController(BaseGameController):
 
     def __init__(self):
         super().__init__()
+        self.PLAYER_FIELDS:list = [
+            RegistrationField(name="Tetr.io username", fieldType=OptionTypes.STRING, required=True)
+        ]
+
 
     def getParticipantView(self, p:Participant):
         base = super().getParticipantView(p)
