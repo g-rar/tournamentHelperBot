@@ -79,9 +79,9 @@ async def openRegistrationInChat(ctx:CustomContext,tournament:str,channel:discor
         registrationChat:TextChannel = await bot.fetch_channel(tournamentObj.registration.channelId)
         await ctx.sendLocalized(StringsNames.REGISTRATION_OPEN_ALREADY, tournament=tournament, chat=registrationChat.mention)
         return
-    if tournamentObj.registrationTemplate.teamSize != 1:
-        # TODO add logic for team games
-        pass
+    # if tournamentObj.registrationTemplate.teamSize != 1:
+    #     # TODO add logic for team games
+    #     pass
     if participant_role:
         if not ctx.me.guild_permissions.manage_roles:
             await ctx.sendLocalized(StringsNames.NEED_MANAGE_ROLES)
@@ -618,8 +618,11 @@ def setupMessageRegistration(channel:discord.TextChannel, tournament:Tournament,
         content = extractQuotedSubstrs(msg.content)
         fields: List[RegistrationField] = deepcopy(tournament.registrationTemplate.participantFields)
         try:
-            for i in range(len(content)):
-                fields[i].value = content[i]
+            if fields:
+                for i in range(len(content)):
+                    fields[i].value = content[i]
+            else:
+                fields.append(RegistrationField("msg", OptionTypes.STRING, True, value=msg.content))
             if await tournamentController.registerPlayer(tournament, fields, msg.author):
                 await msg.add_reaction("✅")
                 if role:

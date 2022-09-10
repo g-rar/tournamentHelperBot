@@ -169,9 +169,18 @@ class TetrioController(BaseGameController):
         failed = []
         async def validatePlayer(participant:Participant, tournament, session):
             try:
+                # this is to catch possible name changes                 
+                tetrioNameField = next(filter(lambda f: f.name == "Tetr.io username", participant.fields))
+                tetrioNameField.value = participant.playerData._id
+
                 newFields, playerData = await self.validateFields(participant.fields, tournament, review=True, session=session)
                 participant.playerData = playerData
                 participant.fields = newFields
+
+                # set the registration field back to the player name
+                tetrioNameField = next(filter(lambda f: f.name == "Tetr.io username", newFields))
+                tetrioNameField.value = participant.playerData.info.username
+                 
                 newParticipants.append(participant)
             except Exception as e:
                 failed.append((participant,str(e)))

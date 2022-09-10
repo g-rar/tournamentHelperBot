@@ -7,7 +7,6 @@ from utils import OptionTypes
 
 from baseModel import BaseModel
 from models.registrationModels import RegistrationField
-import pandas as pd
 
 class BaseGameController:
     GAME:str = None
@@ -33,7 +32,7 @@ class BaseGameController:
         newFields = []
         for field in fields:
             # if validation fails for some field throws error
-            res = BaseGameController.validateField(field, review)
+            res = self.validateField(field, review)
             newFields.append(res[0])
         return (newFields, None)
 

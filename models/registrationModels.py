@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List
 from baseModel import BaseModel
 from dataclasses import dataclass
 from dataclasses import field, asdict
@@ -25,30 +25,6 @@ class RegistrationTemplate:
         return base
 
 @dataclass
-class Participant(BaseModel):
-    """"Represents a registered player in a tournament"""
-    # TODO need to make discordId not required,
-    discordId:int
-    discordDisplayname:str
-    registeredTime:datetime
-    tournament:ObjectId
-    _id:ObjectId = field(default_factory=ObjectId)
-    template:ObjectId = None
-    checkedIn:datetime = None
-    position:int = None
-    fields:list = field(default_factory=list)
-    overrideChecks:bool = False
-    playerData:Any = field(default_factory=dict) # this is for game specific data, actually should type BasePlayer
-
-    @staticmethod
-    def fromDict(d):
-        base = BaseModel.fromDict(d, Participant)
-        if base.fields:
-            base.fields = list(map(lambda x: BaseModel.fromDict(x, RegistrationField), base.fields))
-        return base
-    
-
-@dataclass
 class RegistrationField:
     name:str
     fieldType:int
@@ -61,8 +37,29 @@ class RegistrationField:
         base.value = d.get("value",None)
         return base
 
+@dataclass
+class Participant(BaseModel):
+    """"Represents a registered player in a tournament"""
+    # TODO need to make discordId not required,
+    discordId:int
+    discordDisplayname:str
+    registeredTime:datetime
+    tournament:ObjectId
+    _id:ObjectId = field(default_factory=ObjectId)
+    template:ObjectId = None
+    checkedIn:datetime = None
+    position:int = None
+    fields:List[RegistrationField] = field(default_factory=list)
+    overrideChecks:bool = False
+    playerData:Any = field(default_factory=dict) # this is for game specific data, actually should type BasePlayer
 
-
+    @staticmethod
+    def fromDict(d):
+        base = BaseModel.fromDict(d, Participant)
+        if base.fields:
+            base.fields = list(map(lambda x: BaseModel.fromDict(x, RegistrationField), base.fields))
+        return base
+    
 
 class RegistrationError(Exception):
     def __init__(self, data, errorType:int):    
