@@ -1,4 +1,4 @@
-from games.default import BaseGameController, BasePlayer
+from games.base_game_classes import BaseGameController, BasePlayer
 from models.tournamentModels import Tournament
 from typing import Dict, Union
 

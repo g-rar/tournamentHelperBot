@@ -1,12 +1,9 @@
-from dataclasses import dataclass
 from models.registrationModels import RegistrationTemplate
 from models.tournamentModels import Tournament
 
 from utils import OptionTypes
 
-from baseModel import BaseModel
 from local.names import StringsNames
-from games.default import BasePlayer
 
 from contextExtentions.customContext import CustomContext, customContext
 from controllers.tournamentController import tournamentController
@@ -15,17 +12,9 @@ from controllers.adminContoller import adminCommand
 from bot import botGuilds, slash
 from discord_slash.utils.manage_commands import create_option
 
-@dataclass
-class BasePlayer:
-    game:str = None
-
-    @staticmethod
-    def fromDict(d):
-        return BaseModel.fromDict(d, BasePlayer)
-
 @slash.subcommand(
     base="tournaments",
-    name="add_plain",
+    name="add_generic",
     guild_ids= botGuilds,
     description="Run registration for any tournament, really.",
     options=[
@@ -36,7 +25,7 @@ class BasePlayer:
     ])
 @adminCommand
 @customContext
-async def addTournamentPlain(ctx:CustomContext, name:str, game:str=""):
+async def addTournamentPlain(ctx:CustomContext, name:str, game:str="🎮"):
     if ctx.guild_id is None:
         await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
         return

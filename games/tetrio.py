@@ -7,7 +7,7 @@ import pandas as pd
 import asyncio
 
 from games.factories import addModule
-from games.default import BaseGameController, BasePlayer
+from games.base_game_classes import BaseGameController, BasePlayer
 
 from baseModel import BaseModel
 from contextExtentions.customContext import CustomContext, customContext
