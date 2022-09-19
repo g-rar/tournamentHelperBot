@@ -263,9 +263,12 @@ async def registerPlayerWithDiscord(ctx:CustomContext, tournament:str, discord_i
         await ctx.sendLocalized(StringsNames.TOURNAMENT_UNEXISTING, name=tournament)
         return
     content = extractQuotedSubstrs(msg_content)
-    fields:List[RegistrationField] = tournamentData.registrationTemplate.participantFields
-    for i in range(len(content)):
-        fields[i].value = content[i]
+    fields:List[RegistrationField] = deepcopy(tournamentData.registrationTemplate.participantFields)
+    if fields:
+        for i in range(len(content)):
+            fields[i].value = content[i]
+    else:
+        fields.append(RegistrationField("msg", OptionTypes.STRING, True, value=msg_content))
     try:
         if await tournamentController.registerPlayer(tournamentData, fields, member, overrideReq=override_req):
             if tournamentData.registration.participantRole:
