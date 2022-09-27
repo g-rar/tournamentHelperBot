@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 import logging
-import discord
-from discord.ext.commands import Bot
-from discord_slash import SlashCommand
+import interactions
+from interactions.api.models.flags import Intents
+# import discord
+# from discord.ext.commands import Bot
+# from discord_slash import SlashCommand
 from pymongo import MongoClient
 from pymongo.database import Database
 
@@ -19,8 +21,9 @@ class BotSettings:
     TEST_GUILDS = testGuilds
     DEV = bool(os.getenv("DEV"))
 
+# TODO add prefifx to commands that use it
 
-bot = Bot(command_prefix=BotSettings.PREFIX, intents=discord.Intents.all())
+bot = interactions.Client(token= BotSettings.TOKEN, intents=Intents.ALL)
 
 
 CONF = BotSettings()
@@ -29,11 +32,10 @@ devGuilds = list(map(lambda x: int(x), os.getenv("DEV_GUILDS").split(","))) if o
 
 
 client:MongoClient = MongoClient(os.getenv("DB_CONNECTIONSTR"))
-slash:SlashCommand = SlashCommand(bot,sync_commands=True)
 db:Database = client.get_database(name=CONF.DB_NAME)
 
 
-@bot.listen('on_ready')
+@bot.event(name='on_ready')
 async def on_ready():
     logging.info("Connected to discord")
     print("Connected to discord")
