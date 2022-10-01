@@ -1,7 +1,8 @@
-from discord.member import Member
-from discord.user import User
+# from discord.member import Member
+# from discord.user import User
 from dataclasses import asdict
 from typing import List
+from interactions import Member, User
 
 from pymongo.collection import Collection
 from pymongo.database import Database

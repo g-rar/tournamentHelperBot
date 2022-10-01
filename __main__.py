@@ -6,20 +6,19 @@ import logging
 from bot import bot
 
 # import to register commands
-import commands
+# import commands
 
 # import to register game modules
-import games.tetrio
-import games.generic
+# import games.tetrio
+# import games.generic
 
 if os.getenv("DEV"):
     import devCommands
 
-logging.basicConfig(level=logging.INFO,format="%(asctime)s - %(funcName)s:%(lineno)d - %(levelname)s: %(message)s", filename="output.log", filemode="a")
+# logging.basicConfig(level=logging.INFO,format="%(asctime)s - %(funcName)s:%(lineno)d - %(levelname)s: %(message)s", filename="output.log", filemode="a")
 
 def main():
-    bot.run(os.getenv("BOT_TOKEN"))
-
+    bot.start()
 
 if __name__ == "__main__":
     main()

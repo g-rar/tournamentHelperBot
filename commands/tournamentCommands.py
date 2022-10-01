@@ -21,9 +21,9 @@ from discord_slash.utils.manage_commands import create_choice, create_option
 import requests
 
 from bot import bot, botGuilds, slash
-from contextExtentions.contextServer import getContextServerFromServer
+from contextExtentions.contextServer import getServerGuild
 from local.lang.utils import utilStrs
-from contextExtentions.customContext import CustomContext, customContext
+from contextExtentions.customContext import ServerContext, customContext
 from local.names import StringsNames
 
 from models.tournamentModels import Tournament, TournamentRegistration, TournamentStatus
@@ -62,7 +62,7 @@ registrationListeners = {}
     ])
 @adminCommand
 @customContext
-async def openRegistrationInChat(ctx:CustomContext,tournament:str,channel:discord.TextChannel, participant_role:discord.Role = None):
+async def openRegistrationInChat(ctx:ServerContext,tournament:str,channel:discord.TextChannel, participant_role:discord.Role = None):
     global registrationListeners
     #check stuff is correct
     if ctx.guild_id is None:
@@ -112,7 +112,7 @@ async def openRegistrationInChat(ctx:CustomContext,tournament:str,channel:discor
 )
 @adminCommand
 @customContext
-async def closeRegistration(ctx:CustomContext, tournament:str):
+async def closeRegistration(ctx:ServerContext, tournament:str):
     global registrationListeners
     if ctx.guild_id is None:
         await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
@@ -148,7 +148,7 @@ async def closeRegistration(ctx:CustomContext, tournament:str):
 )
 @adminCommand
 @customContext
-async def deleteTournament(ctx:CustomContext, tournament:str):
+async def deleteTournament(ctx:ServerContext, tournament:str):
     if ctx.guild_id is None:
         await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
         return
@@ -176,7 +176,7 @@ async def deleteTournament(ctx:CustomContext, tournament:str):
     description="Shows a list of the tournaments made by this server"
 )
 @customContext
-async def getTournaments(ctx: CustomContext, tournament:str = None):
+async def getTournaments(ctx: ServerContext, tournament:str = None):
     #TODO this can be further pretified
     guild:discord.Guild = ctx.guild
     if tournament:
@@ -245,7 +245,7 @@ async def getTournaments(ctx: CustomContext, tournament:str = None):
 )
 @adminCommand
 @customContext
-async def registerPlayerWithDiscord(ctx:CustomContext, tournament:str, discord_id:str, msg_content:str, override_req:bool=False):
+async def registerPlayerWithDiscord(ctx:ServerContext, tournament:str, discord_id:str, msg_content:str, override_req:bool=False):
     # await ctx.send(utilStrs.ERROR.format("This is an error"))
     if ctx.guild_id is None:
         await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
@@ -294,7 +294,7 @@ async def registerPlayerWithDiscord(ctx:CustomContext, tournament:str, discord_i
 )
 @adminCommand
 @customContext
-async def deleteParticipant(ctx:CustomContext, tournament:str, discord_id:str):
+async def deleteParticipant(ctx:ServerContext, tournament:str, discord_id:str):
     if ctx.guild_id is None:
         await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
         return
@@ -329,7 +329,7 @@ async def deleteParticipant(ctx:CustomContext, tournament:str, discord_id:str):
     ]
 )
 @customContext
-async def getTournamentParticipants(ctx:CustomContext, tournament:str):
+async def getTournamentParticipants(ctx:ServerContext, tournament:str):
     tournamentObj = tournamentController.getTournamentFromName(ctx.guild_id,tournament)
     tournamentCtrl = factories.getControllerFor(tournamentObj)
     if tournamentObj is None:
@@ -360,7 +360,7 @@ async def getTournamentParticipants(ctx:CustomContext, tournament:str):
 )
 @adminCommand
 @customContext
-async def refreshParticipants(ctx:CustomContext, tournament:str, update:bool = False):
+async def refreshParticipants(ctx:ServerContext, tournament:str, update:bool = False):
     tournamentObj = tournamentController.getTournamentFromName(ctx.guild_id,tournament)
     tournamentCtrl = factories.getControllerFor(tournamentObj)
     if tournamentObj is None:
@@ -416,7 +416,7 @@ async def refreshParticipants(ctx:CustomContext, tournament:str, update:bool = F
 )
 @adminCommand
 @customContext
-async def readCheckIns(ctx:CustomContext,
+async def readCheckIns(ctx:ServerContext,
         tournament:str, 
         # reaction:str, 
         message_id:str,
@@ -492,7 +492,7 @@ async def readCheckIns(ctx:CustomContext,
     ]
 )
 @customContext
-async def seedBy(ctx:CustomContext, column:str, order:str, message_id:str, get_columns:str = None):
+async def seedBy(ctx:ServerContext, column:str, order:str, message_id:str, get_columns:str = None):
     order = bool(order)
     if not message_id.isdecimal():
         await ctx.sendLocalized(StringsNames.VALUE_SHOULD_BE_DEC, option="message_id")
@@ -544,7 +544,7 @@ async def seedBy(ctx:CustomContext, column:str, order:str, message_id:str, get_c
     ]
 )
 @customContext
-async def getColumn(ctx:CustomContext, columns:str, message_id:str):
+async def getColumn(ctx:ServerContext, columns:str, message_id:str):
     if not message_id.isdecimal():
         await ctx.sendLocalized(StringsNames.VALUE_SHOULD_BE_DEC, option="message_id")
         return
@@ -594,7 +594,7 @@ async def setListenersBackUp():
             tournamentController.updateRegistrationForTournament(tournament, tournament.registration)
             s = serverController.getServer(tournament.hostServerId)
             guild:Guild = bot.get_guild(s.serverId)
-            server = getContextServerFromServer(s, guild)
+            server = getServerGuild(s, guild)
             await server.sendLog(StringsNames.REG_CHANNEL_NOT_FOUND, tournament=tournament.name)
     logging.info("Tournament listeners ready!")
     pass
@@ -609,7 +609,7 @@ def setupMessageRegistration(channel:discord.TextChannel, tournament:Tournament,
         #prevent from setting two identical listeners
         return
     s = serverController.getServer(channel.guild.id)
-    server = getContextServerFromServer(s, channel.guild)
+    server = getServerGuild(s, channel.guild)
     @bot.listen()
     async def on_message(msg:discord.Message):
         if msg.channel.id != channel.id:

@@ -1,83 +1,71 @@
-from discord_slash.context import SlashContext
-from bot import bot, CONF, db, slash, botGuilds
-from contextExtentions.customContext import CustomContext, customContext
+# from discord_slash.context import SlashContext
+from interactions import CommandContext, Message, Option, OptionType
+import interactions
+from bot import bot, CONF, db, botGuilds, devGuilds
+from contextExtentions.customContext import ServerContext, customContext
 from local.names import StringsNames
 from utils import getQueryAsList
 
-import discord
-import discord.ext.commands as cmds
+# import discord
+# import discord.ext.commands as cmds
 
 from pymongo.collection import Collection
 
 from pprint import pformat
 
 def devCommand(f):
-    async def wrapper(ctx: cmds.Context, *args, **kargs):
+    async def wrapper(ctx: CommandContext, *args, **kargs):
+        print("ctx.author.id != CONF.DEV_ID ->",ctx.author.id, "!=", CONF.DEV_ID, " -> ", ctx.author.id != CONF.DEV_ID)
         if ctx.author.id != CONF.DEV_ID:
             return
         await f(ctx,*args, **kargs)
     return wrapper
 
+@bot.command(
+    name="ping",
+    scope=devGuilds
+)
 @devCommand    
+async def devTestCommand(ctx: CommandContext):
+    await ctx.send("pong")
+
+
 @bot.command(
-    name="devTest"
+    name = "test-database",
+    scope=devGuilds,
+    options=[
+        Option(name="msg", description="Message to test db", type=OptionType.STRING)
+    ]
 )
-async def devTestCommand(ctx: cmds.Context):
-    await ctx.send("Hola mundo en dev")
-
-
 @devCommand
-@bot.command(
-    name = "testDB"
-)
-async def devTest(ctx:cmds.Context):
-    testCollection: Collection = db.get_collection("test")
-    message:discord.Message = ctx.message
-    
-    testCollection.insert({"testMessage":message.content if message.content  else "Actually nothing"})
+async def devTest(ctx:CommandContext, msg:str):
+    testCollection: Collection = db.get_collection("test")    
+    testCollection.insert_one({"testMessage": msg if msg  else "Actually nothing"})
     insertedDoc = getQueryAsList(testCollection.find())
     await ctx.send("The message was " + insertedDoc[0]["testMessage"])
     testCollection.drop()
 
-@slash.slash(
-    name="ping",
-    description="Test sending a message",
-    guild_ids=botGuilds
-)
-async def ping(ctx:SlashContext):
-    await ctx.send("pong")
 
-@slash.slash(
+@bot.command(
     name="see_commands",
     description="see bot commands",
-    guild_ids=botGuilds
+    scope=devGuilds
 )
-async def see_commands(ctx:SlashContext):
+async def see_commands(ctx:CommandContext):
+    interactions.get()
     await ctx.send(f'''
 ```py
-{pformat(slash.commands)}
+{pformat(bot._commands)}
 ```
 ''')
 
-@slash.slash(
-    name="see_subcommands",
-    description="see bot subcommands",
-    guild_ids=botGuilds
-)
-async def see_commands(ctx:SlashContext):
-    await ctx.send(f'''
-```py
-{pformat(slash.subcommands)}
-```
-''')
 
-@slash.slash(
+@bot.command(
     name="test_local",
     description="test language diversity",
-    guild_ids=botGuilds,
+    scope=devGuilds,
     options=[]
 )
 @customContext
-async def testLocalized(ctx:CustomContext):
-    print("Hola")
-    await ctx.sendLocalized(StringsNames.SERVER_REGISTERED)
+async def testLocalized(ctx:CommandContext, scx:ServerContext):
+    await scx.sendLocalized(StringsNames.SERVER_REGISTERED)

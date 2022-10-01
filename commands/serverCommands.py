@@ -4,7 +4,7 @@ from io import StringIO
 from datetime import datetime
 from controllers.adminContoller import adminCommand
 from controllers.serverController import Server, serverController
-from contextExtentions.customContext import customContext, CustomContext
+from contextExtentions.customContext import customContext, ServerContext
 from local.names import StringsNames
 
 import discord
@@ -27,7 +27,7 @@ from utils import OptionTypes
 )
 @customContext
 @adminCommand
-async def slashRegisterServer(ctx:CustomContext):
+async def slashRegisterServer(ctx:ServerContext):
     guildId = ctx.guild_id
     if guildId is None:
         await ctx.sendLocalized(StringsNames.CANT_REGISTER_DM)
@@ -59,7 +59,7 @@ async def slashRegisterServer(ctx:CustomContext):
 )
 @adminCommand
 @customContext
-async def setServerLanguage(ctx: CustomContext, language:str):
+async def setServerLanguage(ctx: ServerContext, language:str):
     guildId = ctx.guild_id
     if guildId is None:
         await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
@@ -88,7 +88,7 @@ async def setServerLanguage(ctx: CustomContext, language:str):
 )
 @adminCommand
 @customContext
-async def setLogChannel(ctx:CustomContext, channel:TextChannel):
+async def setLogChannel(ctx:ServerContext, channel:TextChannel):
     if channel.type != discord.ChannelType.text:
         await ctx.sendLocalized(StringsNames.VALUE_SHOULD_BE_TEXT_CHANNEL, option="channel")
         return
@@ -121,7 +121,7 @@ async def setLogChannel(ctx:CustomContext, channel:TextChannel):
     ]
 )
 @customContext
-async def getReactions(ctx:CustomContext, channel:TextChannel, message_id:str):
+async def getReactions(ctx:ServerContext, channel:TextChannel, message_id:str):
     if channel.type != discord.ChannelType.text:
         await ctx.sendLocalized(StringsNames.VALUE_SHOULD_BE_TEXT_CHANNEL, option="channel")
         return

@@ -5,7 +5,7 @@ from utils import OptionTypes
 
 from local.names import StringsNames
 
-from contextExtentions.customContext import CustomContext, customContext
+from contextExtentions.customContext import ServerContext, customContext
 from controllers.tournamentController import tournamentController
 from controllers.adminContoller import adminCommand
 
@@ -25,7 +25,7 @@ from discord_slash.utils.manage_commands import create_option
     ])
 @adminCommand
 @customContext
-async def addTournamentPlain(ctx:CustomContext, name:str, game:str="🎮"):
+async def addTournamentPlain(ctx:ServerContext, name:str, game:str="🎮"):
     if ctx.guild_id is None:
         await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
         return

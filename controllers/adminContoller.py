@@ -1,8 +1,9 @@
+from interactions import CommandContext, Guild, Member
 from local.lang.eng import EnglishStrs
 from local.lang.utils import utilStrs
 
-import discord
-from discord_slash.context import SlashContext
+# import discord
+# from discord_slash.context import SlashContext
 
 from controllers.serverController import serverController
 
@@ -10,8 +11,8 @@ from controllers.serverController import serverController
 
 class AdminController:
 
-    def isAdmin(server:discord.Guild,user:discord.Member) -> bool:
-        if user.guild_permissions.administrator:
+    def isAdmin(server:Guild,user:Member) -> bool:
+        if user.permissions.ADMINISTRATOR:
             return True
         serverObj = serverController.getServer(server.id)
         if not serverObj:
@@ -25,7 +26,7 @@ class AdminController:
 # adminController = AdminController()
 
 def adminCommand(f):
-    async def wrapper(ctx: SlashContext, *args, **kargs):
+    async def wrapper(ctx: CommandContext, *args, **kargs):
         if AdminController.isAdmin(ctx.guild,ctx.author):
             await f(ctx, *args, **kargs)
         else:

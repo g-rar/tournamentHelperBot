@@ -10,7 +10,7 @@ from games.factories import addModule
 from games.base_game_classes import BaseGameController, BasePlayer
 
 from baseModel import BaseModel
-from contextExtentions.customContext import CustomContext, customContext
+from contextExtentions.customContext import ServerContext, customContext
 from local.names import StringsNames
 from models.tournamentModels import Tournament
 from models.registrationModels import Participant, RegistrationError, RegistrationField, RegistrationTemplate
@@ -306,7 +306,7 @@ class TetrioController(BaseGameController):
     ])
 @adminCommand
 @customContext
-async def addTournamentTetrio(ctx:CustomContext, name:str, rank_cap:str=None, rank_floor:str=None, tr_cap:int=None, tr_floor:int=None):
+async def addTournamentTetrio(ctx:ServerContext, name:str, rank_cap:str=None, rank_floor:str=None, tr_cap:int=None, tr_floor:int=None):
     game = "tetr.io"
     if ctx.guild_id is None:
         await ctx.sendLocalized(StringsNames.NOT_FOR_DM)

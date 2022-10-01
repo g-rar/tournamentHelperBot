@@ -1,11 +1,14 @@
 from dataclasses import asdict, dataclass
 from controllers.serverController import Server
+from bot import bot
 import local.names as strs
 import logging
-from discord import Guild, TextChannel
+import interactions
+from interactions import Guild, Channel
+# from discord import Guild, TextChannel
 
 @dataclass
-class ContextServer(Server):
+class ServerGuild(Server):
 
     guild:Guild = None
 
@@ -29,10 +32,10 @@ class ContextServer(Server):
     async def sendLog(self, s, **kwargs):
         if not self.logChannel:
             return
-        logChannel:TextChannel = self.guild.get_channel(self.logChannel)
+        logChannel:Channel = await interactions.get(bot, Channel, object_id=self.logChannel)
         msg = self.getStr(s, **kwargs)
         return await logChannel.send(msg)
     
-def getContextServerFromServer(server:Server, guild:Guild):
-    res = ContextServer(**asdict(server), guild=guild)
+def getServerGuild(server:Server, guild:Guild):
+    res = ServerGuild(**asdict(server), guild=guild)
     return res
