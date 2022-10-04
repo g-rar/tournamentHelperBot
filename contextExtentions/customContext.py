@@ -1,12 +1,11 @@
 # from discord.channel import TextChannel
 # from discord_slash import SlashContext
 from dataclasses import dataclass
-from interactions import CommandContext
+import functools
+from interactions import BaseResult, CommandContext
 from contextExtentions.contextServer import ServerGuild, getServerGuild
-import logging
 # from controllers.serverController import Server
 
-import local.names as strs
 from controllers import serverController
 
 @dataclass
@@ -30,11 +29,18 @@ class ServerContext:
         return await self.server.sendLog(s, **kwargs)
 
         
-def customContext(f):
+def customContext(f, includeBaseResult=False): #gonna just filter out the BaseResult
+    @functools.wraps(f)
     async def wrapper(ctx:CommandContext, *args, **kwargs):
         s = serverController.getServer(int(ctx.guild_id), upsert=True)
         serverGuild = getServerGuild(s, ctx.guild)
-        scx = ServerContext(server=serverGuild, context=ctx)
-        await f(ctx, *args, scx=scx, **kwargs)
+        kwargs['scx'] = ServerContext(server=serverGuild, context=ctx)
+        if not includeBaseResult: # in cas that I need it
+            new_args = []
+            for elem in args:
+                if not isinstance(elem, BaseResult):
+                    new_args.append(elem)
+            args = new_args
+        await f(ctx, *args, **kwargs)
         return f
     return wrapper

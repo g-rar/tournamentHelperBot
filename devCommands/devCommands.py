@@ -1,4 +1,3 @@
-# from discord_slash.context import SlashContext
 from interactions import CommandContext, Message, Option, OptionType
 import interactions
 from bot import bot, CONF, db, botGuilds, devGuilds
@@ -6,16 +5,12 @@ from contextExtentions.customContext import ServerContext, customContext
 from local.names import StringsNames
 from utils import getQueryAsList
 
-# import discord
-# import discord.ext.commands as cmds
-
 from pymongo.collection import Collection
 
 from pprint import pformat
 
 def devCommand(f):
     async def wrapper(ctx: CommandContext, *args, **kargs):
-        print("ctx.author.id != CONF.DEV_ID ->",ctx.author.id, "!=", CONF.DEV_ID, " -> ", ctx.author.id != CONF.DEV_ID)
         if ctx.author.id != CONF.DEV_ID:
             return
         await f(ctx,*args, **kargs)
@@ -69,3 +64,21 @@ async def see_commands(ctx:CommandContext):
 @customContext
 async def testLocalized(ctx:CommandContext, scx:ServerContext):
     await scx.sendLocalized(StringsNames.SERVER_REGISTERED)
+
+@bot.command(
+    name="test_logchannel",
+    description="Test the log channel for this server",
+    scope=botGuilds,
+    options=[
+        Option(name="msg", description="Message to send to the log channel", 
+               type=OptionType.STRING, required=False)
+    ]
+)
+@devCommand
+@customContext
+async def test_logChannel(ctx:CommandContext, scx:ServerContext, msg:str = None):
+    if msg == None:
+        msg = "Hello world"
+    
+    await scx.sendLog(msg)
+    await ctx.send("If no message was sent to the channel, check that there's a log channel configured")

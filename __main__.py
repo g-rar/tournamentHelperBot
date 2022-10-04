@@ -6,7 +6,7 @@ import logging
 from bot import bot
 
 # import to register commands
-# import commands
+import commands
 
 # import to register game modules
 # import games.tetrio
