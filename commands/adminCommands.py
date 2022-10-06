@@ -1,81 +1,104 @@
+from datetime import datetime
+from interactions import CommandContext, Option, OptionType, Role
+import interactions
 from controllers.adminContoller import adminCommand
 from controllers.serverController import serverController
-from discord_slash.utils.manage_commands import create_option
 from contextExtentions.customContext import ServerContext, customContext
 from local.names import StringsNames
 
-from utils import OptionTypes
+from bot import bot, botGuilds
 
-import discord
+@bot.command(name="operators", scope=botGuilds)
+async def operators(ctx:CommandContext): pass
 
-from bot import slash, botGuilds
-
-
-@slash.subcommand(
-    base="operators",
+@operators.subcommand(
     name="add_role",
-    guild_ids=botGuilds,
     options=[
-        create_option(
+        Option(
             name="role", description="Role that will allow users to operate this bot as admin.",
-            option_type=OptionTypes.ROLE, required=True
+            type=OptionType.ROLE, required=True
         )
     ]
 )
 @adminCommand
 @customContext
-async def addOperatorRole(ctx:ServerContext, role:discord.Role):
+async def addOperatorRole(ctx:CommandContext, scx: ServerContext, role:Role):
     if ctx.guild_id is None:
-        await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
+        await scx.sendLocalized(StringsNames.NOT_FOR_DM)
         return
-    server = serverController.getServer(ctx.guild_id, upsert=True)
+    server = serverController.getServer(int(ctx.guild_id), upsert=True)
     if not server:
-        await ctx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
+        await scx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
         return
     if role.id in server.adminRoles:
-        await ctx.sendLocalized(StringsNames.OPERATOR_ROLE_ALREADY_EXISTS, role=role.name)
+        await scx.sendLocalized(StringsNames.OPERATOR_ROLE_ALREADY_EXISTS, role=role.name)
         return
-    server.adminRoles.append(role.id)
+    server.adminRoles.append(int(role.id))
     res = serverController.updateServer(server)
     if res:
-        await ctx.sendLocalized(StringsNames.ADDED_OPERATOR_ROLE, role=role.name)
-        if len(role.members) > 10:
-            await ctx.sendLocalized(StringsNames.MANY_PEOPLE_WITH_ROLE, rolecount=len(role.members))
+        await scx.sendLocalized(StringsNames.ADDED_OPERATOR_ROLE, role=role.name)
+        # TODO check how to get members from role
+        # if len(role.members) > 10:
+        #     await scx.sendLocalized(StringsNames.MANY_PEOPLE_WITH_ROLE, rolecount=len(role.members))
         return
     else:
-        await ctx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
+        await scx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
         return
 
 
-@slash.subcommand(
-    base="operators",
+@operators.subcommand(
     name="remove_role",
-    guild_ids=botGuilds,
     options=[
-        create_option(
+        Option(
             name="role", description="Role that allows users to operate this bot as admin.",
-            option_type=OptionTypes.ROLE, required=True
+            type=OptionType.ROLE, required=True
         )
     ]
 )
 @adminCommand
 @customContext
-async def removeOperatorRole(ctx:ServerContext, role:discord.Role):
+async def removeOperatorRole(ctx:CommandContext, scx: ServerContext, role:Role):
     if ctx.guild_id is None:
-        await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
+        await scx.sendLocalized(StringsNames.NOT_FOR_DM)
         return
-    server = serverController.getServer(ctx.guild_id)
+    server = serverController.getServer(int(ctx.guild_id))
     if not server or len(server.adminRoles) == 0:
-        await ctx.sendLocalized(StringsNames.NO_OPERATOR_ROLES)
+        await scx.sendLocalized(StringsNames.NO_OPERATOR_ROLES)
         return
     if role.id not in server.adminRoles:
-        await ctx.sendLocalized(StringsNames.NOT_AN_OPERATOR_ROLE, role=role.name)
+        await scx.sendLocalized(StringsNames.NOT_AN_OPERATOR_ROLE, role=role.name)
         return
-    server.adminRoles.remove(role.id)
+    server.adminRoles.remove(int(role.id))
     res = serverController.updateServer(server)
     if res:
-        await ctx.sendLocalized(StringsNames.REMOVED_OPERATOR_ROLE, role=role.name)
+        await scx.sendLocalized(StringsNames.REMOVED_OPERATOR_ROLE, role=role.name)
         return
     else:
-        await ctx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
+        await scx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
         return
+
+@operators.subcommand(
+    name="list_roles"
+)
+@adminCommand
+@customContext
+async def listOperatorRoles(ctx:CommandContext, scx:ServerContext):
+    if ctx.guild_id is None:
+        await scx.sendLocalized(StringsNames.NOT_FOR_DM)
+        return
+    server = serverController.getServer(int(ctx.guild_id))
+    if len(server.adminRoles) == 0:
+        ctx.channel.send("This server has no operator roles")
+    roles = list(filter(
+        lambda x: int(x.id) in server.adminRoles, 
+        ctx.guild.roles
+    ))
+    rolesStr = "\n  -  " + "\n  -  ".join(list(map(lambda r: f"`@{r.name}`", roles)))
+    embed  = interactions.Embed(
+        title=f"Operator roles for {ctx.guild.name}:\n",
+        description=rolesStr,
+        color=0xFFBA00,
+        timestamp=datetime.utcnow()
+    )
+    await ctx.send(embeds=[embed])
+

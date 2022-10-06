@@ -19,7 +19,7 @@ async def configRegisterServer(ctx:CommandContext, scx:ServerContext):
     i = 0
     guildId = int(ctx.guild_id)
     if guildId is None:
-        await scx.sendLocalized(StringsNames.CANT_REGISTER_DM)
+        await ctx.send(scx.getStr(StringsNames.CANT_REGISTER_DM))
         return
     if serverController.getServer(guildId) is not None:
         await scx.sendLocalized(StringsNames.SERVER_ALREADY_IN)
@@ -49,7 +49,7 @@ async def configRegisterServer(ctx:CommandContext, scx:ServerContext):
 async def setServerLanguage(ctx: CommandContext, scx: ServerContext=None, language:str=None):
     guildId = int(ctx.guild_id)
     if guildId is None:
-        await scx.sendLocalized(StringsNames.NOT_FOR_DM)
+        await ctx.send(scx.getStr(StringsNames.NOT_FOR_DM))
         return
     server = serverController.getServer(guildId)
     if server is None:
@@ -76,6 +76,10 @@ async def setServerLanguage(ctx: CommandContext, scx: ServerContext=None, langua
 @customContext
 async def setLogChannel(ctx: CommandContext, scx:ServerContext, channel:Channel):
     guild_id = int(ctx.guild_id)
+    if guild_id is None:
+        await ctx.send(scx.getStr(StringsNames.NOT_FOR_DM))
+        return
+
     channel_id = int(channel.id)
     if channel.type != ChannelType.GUILD_TEXT:
         await scx.sendLocalized(StringsNames.VALUE_SHOULD_BE_TEXT_CHANNEL, option="channel")
