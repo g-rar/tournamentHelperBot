@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import logging
 import interactions
+from interactions.ext import wait_for
 from interactions.api.models.flags import Intents
 # import discord
 # from discord.ext.commands import Bot
@@ -24,7 +25,8 @@ class BotSettings:
 # TODO add prefifx to commands that use it
 
 bot = interactions.Client(token= BotSettings.TOKEN, intents=Intents.ALL)
-
+httpClient = interactions.HTTPClient(BotSettings.TOKEN)
+wait_for.setup(bot=bot)
 
 CONF = BotSettings()
 botGuilds = None if not CONF.DEV else CONF.TEST_GUILDS

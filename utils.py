@@ -2,11 +2,6 @@ from typing import List
 from pymongo.cursor import Cursor
 import re
 import asyncio
-# from discord_slash.context import ComponentContext, SlashContext
-# from discord_slash.utils import manage_components as mc
-
-# from discord_components import ButtonStyle
-# from discord.ext import commands
 
 
 # async def setupButtonNavigation(ctx:SlashContext,paginationList:list,bot:commands.Bot):

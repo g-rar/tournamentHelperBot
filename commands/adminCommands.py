@@ -38,12 +38,11 @@ async def addOperatorRole(ctx:CommandContext, scx: ServerContext, role:Role):
     if res:
         await scx.sendLocalized(StringsNames.ADDED_OPERATOR_ROLE, role=role.name)
         # TODO check how to get members from role
-        # if len(role.members) > 10:
-        #     await scx.sendLocalized(StringsNames.MANY_PEOPLE_WITH_ROLE, rolecount=len(role.members))
-        return
+        roleMemebers = interactions.search_iterable(ctx.guild.members, lambda m: int(role.id) in m.roles)
+        if len(roleMemebers) > 10:
+            await scx.sendLocalized(StringsNames.MANY_PEOPLE_WITH_ROLE, rolecount=len(role.members))
     else:
         await scx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
-        return
 
 
 @operators.subcommand(
