@@ -1,8 +1,8 @@
 # from discord.member import Member
 # from discord.user import User
 from dataclasses import asdict
-from typing import List
-from interactions import Member, User
+from typing import List, Union
+from interactions import Member, Snowflake, User
 
 from pymongo.collection import Collection
 from pymongo.database import Database
@@ -42,15 +42,15 @@ class TournamentController:
         obj = Tournament.fromDict(c)
         return obj
 
-    def getTournamentFromName(self, serverId: int, name:str) -> Tournament:
-        c = self.collection.find_one({"hostServerId":serverId,"name":name})
+    def getTournamentFromName(self, serverId: Union[int, Snowflake], name:str) -> Tournament:
+        c = self.collection.find_one({"hostServerId":int(serverId),"name":name})
         if c is None:
             return None
         obj = factories.getGameTournament(c["game"], c)
         return obj
 
-    def getTournamentsForServer(self, serverId:int) -> List[Tournament]:
-        c = self.collection.find({"hostServerId":serverId}, sort=[("createdAt", -1)])
+    def getTournamentsForServer(self, serverId:Union[int, Snowflake]) -> list[Tournament]:
+        c = self.collection.find({"hostServerId":int(serverId)}, sort=[("createdAt", -1)])
         d = getQueryAsList(c) if c is not None else []
         res = list(map(lambda x: factories.getGameTournament(x.get("game"), x), d))
         return res
@@ -82,17 +82,16 @@ class TournamentController:
 
     # TODO need to add method to register player without it being discord member
 
-    async def registerPlayer(self, tournament:Tournament, fields:list, member:Member = None, displayName:str = None, overrideReq:bool = False):
+    async def registerPlayer(self, tournament:Tournament, fields:list, member:User = None, displayName:str = None, overrideReq:bool = False):
         if tournament.registration.status == TournamentStatus.REGISTRATION_CLOSED:
             raise RegistrationError("Registration for this tournament is currently closed",4)
         gameController = factories.getControllerFor(tournament)
         newFields, playerData = await gameController.validateFields(fields, tournament, override=overrideReq)
         if member:
-            if participantController.getParticipantFromDiscordId(member._user.id, tournament._id):
+            if participantController.getParticipantFromDiscordId(int(member.id), tournament._id):
                 raise RegistrationError("Discord user already registered in tournament", 3)
-            usr:User = member._user
-            usr_id = usr.id
-            displayName = f"{usr.display_name}#{usr.discriminator}"
+            usr_id = int(member.id)
+            displayName = f"{member.username}#{member.discriminator}"
         elif displayName:
             usr_id = None
         else:

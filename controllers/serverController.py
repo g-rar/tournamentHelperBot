@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from dataclasses import field, asdict
-from typing import List
+from typing import List, Union
+from interactions import Snowflake
 
 from pymongo.collection import Collection
 from pymongo.database import Database
@@ -42,7 +43,8 @@ class ServerController:
         res = self.collection.insert_one(asdict(server))
         return res.acknowledged
 
-    def getServer(self, serverId: int, upsert:bool = False) -> Server:
+    def getServer(self, serverId: Union[int, Snowflake], upsert:bool = False) -> Server:
+        serverId = int(serverId)
         c = self.collection.find_one({"serverId":serverId})
         if c is None:
             if not upsert:
