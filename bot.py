@@ -3,9 +3,6 @@ import logging
 import interactions
 from interactions.ext import wait_for
 from interactions.api.models.flags import Intents
-# import discord
-# from discord.ext.commands import Bot
-# from discord_slash import SlashCommand
 from pymongo import MongoClient
 from pymongo.database import Database
 

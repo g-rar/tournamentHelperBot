@@ -9,7 +9,7 @@ from bot import bot
 import commands
 
 # import to register game modules
-# import games.tetrio
+import games.tetrio
 # import games.generic
 
 if os.getenv("DEV"):

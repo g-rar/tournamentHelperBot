@@ -1,10 +1,12 @@
+import asyncio
 from dataclasses import asdict, dataclass
+from typing import Union
 from controllers.serverController import Server
 from bot import bot
 import local.names as strs
 import logging
 import interactions
-from interactions import Guild, Channel
+from interactions import Guild, Channel, Snowflake
 # from discord import Guild, TextChannel
 
 @dataclass
@@ -36,6 +38,8 @@ class ServerGuild(Server):
         msg = self.getStr(s, **kwargs)
         return await logChannel.send(msg)
     
-def getServerGuild(server:Server, guild:Guild):
+async def getServerGuild(server:Server, guild:Union[Guild, int, Snowflake]):
+    if not isinstance(guild, Guild):
+        guild = await interactions.get(bot, Guild, object_id=guild)
     res = ServerGuild(**asdict(server), guild=guild)
     return res

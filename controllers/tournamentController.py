@@ -35,11 +35,11 @@ class TournamentController:
         res = self.collection.insert_one(asdict(tourney))
         return res.acknowledged
 
-    def getTournamentFromId(self, tourney: ObjectId):
+    def getTournamentFromId(self, tourney: ObjectId) -> Tournament:
         c = self.collection.find_one({"_id":tourney})
         if c is None:
             return None
-        obj = Tournament.fromDict(c)
+        obj = factories.getGameTournament(c.get("game"), c)
         return obj
 
     def getTournamentFromName(self, serverId: Union[int, Snowflake], name:str) -> Tournament:

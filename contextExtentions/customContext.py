@@ -33,7 +33,7 @@ def customContext(f, includeBaseResult=False): #gonna just filter out the BaseRe
     @functools.wraps(f)
     async def wrapper(ctx:CommandContext, *args, **kwargs):
         s = serverController.getServer(int(ctx.guild_id), upsert=True)
-        serverGuild = getServerGuild(s, ctx.guild)
+        serverGuild = await getServerGuild(s, ctx.guild)
         kwargs['scx'] = ServerContext(server=serverGuild, context=ctx)
         if not includeBaseResult: # in cas that I need it
             new_args = []

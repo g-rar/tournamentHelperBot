@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 from typing import List
 import aiohttp
+from interactions import CommandContext, Option
 
-import requests
 import pandas as pd
 import asyncio
+from commands.tournamentCommands import tournamentBaseCommand
 
 from games.factories import addModule
 from games.base_game_classes import BaseGameController, BasePlayer
@@ -20,8 +21,7 @@ from controllers.playerController import participantController
 from controllers.adminContoller import adminCommand
 from controllers.playerController import participantController
 
-from bot import botGuilds, slash
-from discord_slash.utils.manage_commands import create_option
+from bot import botGuilds
 
 from utils import OptionTypes
 
@@ -198,7 +198,8 @@ class TetrioController(BaseGameController):
             player, news = await TetrioController.getTetrioPlayer(username, session)
         except:
             raise RegistrationError("Invalid playername", self.INVALID_PLAYER)
-
+        
+        print(tournament)
         if not override and any([tournament.trBottom, tournament.trTop, tournament.rankBottom, tournament.rankTop]) \
             and player.info.league.rank == 'z':
             raise RegistrationError("Unranked", self.UNRANKED)
@@ -232,10 +233,6 @@ class TetrioController(BaseGameController):
 
     async def getTetrioPlayer(username:str, session):
         api = "https://ch.tetr.io/api/"
-        if session:
-            s = session
-        else:
-            s = aiohttp.ClientSession()
 
         async def getPlayerProfile(username:str):
             async with s.get(api + f"users/{username}") as r:
@@ -248,91 +245,100 @@ class TetrioController(BaseGameController):
         async def getPlayerNews(id:str):
             async with s.get(api + f"news/user_{id}") as r:
                 return r.status, await r.json()
-        
-        usr = username.lower()
-        resCode, reqData = await getPlayerProfile(usr)
 
-        if resCode != 200:
-            # await ctx.send(strs.ERROR.format(f"Error {resCode}"))
-            raise RegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
+        if session:
+            s = session
+        else:
+            s = aiohttp.ClientSession()
 
-        if not reqData["success"]:
-            # await ctx.send(f"⚠ The player '{username}' doesn't seem to exist in tetr.io :/")
-            raise RegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
+        try:            
+            usr = username.lower()
+            resCode, reqData = await getPlayerProfile(usr)
 
-        
-        # get records, checks only to be sure
-        resCode, reqRecData = await getPlayerRecords(usr)
-        if resCode != 200:
-            # await ctx.send(strs.ERROR.format(f"Error {resCode}"))
-            raise RegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
+            if resCode != 200:
+                # await ctx.send(strs.ERROR.format(f"Error {resCode}"))
+                raise RegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
 
-        if not reqRecData["success"]:
-            # await ctx.send(f"⚠ The player '{username}' doesn't seem to exist in tetr.io :/")
-            raise RegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
+            if not reqData["success"]:
+                # await ctx.send(f"⚠ The player '{username}' doesn't seem to exist in tetr.io :/")
+                raise RegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
+
+            
+            # get records, checks only to be sure
+            resCode, reqRecData = await getPlayerRecords(usr)
+            if resCode != 200:
+                # await ctx.send(strs.ERROR.format(f"Error {resCode}"))
+                raise RegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
+
+            if not reqRecData["success"]:
+                # await ctx.send(f"⚠ The player '{username}' doesn't seem to exist in tetr.io :/")
+                raise RegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
 
 
-        playerData = reqData["data"]["user"]
-        playerRecords = reqRecData["data"]["records"]
-        playerDict = {"info":playerData, "records":playerRecords}
+            playerData = reqData["data"]["user"]
+            playerRecords = reqRecData["data"]["records"]
+            playerDict = {"info":playerData, "records":playerRecords}
 
-        player:TetrioPlayer = TetrioPlayer.fromDict(playerDict)
+            player:TetrioPlayer = TetrioPlayer.fromDict(playerDict)
 
-        resCode, reqRecData = await getPlayerNews(player._id)
+            resCode, reqRecData = await getPlayerNews(player._id)
 
-        playerNews = reqRecData["data"]["news"]
-        
-        if not session:
-            await s.close()
+            playerNews = reqRecData["data"]["news"]
+            if not session:
+                await s.close()
+            return player, playerNews
+        except Exception as e:
+            if not session:
+                await s.close()
+            raise e
 
-        return player, playerNews
 
-@slash.subcommand(
-    base="tournaments",
+
+
+@tournamentBaseCommand.subcommand(
     name="add_tetrio",
-    guild_ids= botGuilds,
     description="Add a tournament for tetr.io integrated game.",
     options=[
-        create_option(  name="name", description="The tournament's name.",
-                        option_type=OptionTypes.STRING, required=True),
-        create_option(  name="rank_cap", description="Maximun lowercase rank a player can have to register",
-                        option_type=OptionTypes.STRING, required=False),
-        create_option(  name="rank_floor", description="Minimum lowercase rank a player can have to register",
-                        option_type=OptionTypes.STRING, required=False),
-        create_option(  name="tr_cap", description="Maximun TR a player can have to register",
-                        option_type=OptionTypes.INTEGER, required=False),
-        create_option(  name="tr_floor", description="Minimum TR a player can have to register",
-                        option_type=OptionTypes.INTEGER, required=False)
+        Option(  name="name", description="The tournament's name.",
+                        type=OptionTypes.STRING, required=True),
+        Option(  name="rank_cap", description="Maximun lowercase rank a player can have to register",
+                        type=OptionTypes.STRING, required=False),
+        Option(  name="rank_floor", description="Minimum lowercase rank a player can have to register",
+                        type=OptionTypes.STRING, required=False),
+        Option(  name="tr_cap", description="Maximun TR a player can have to register",
+                        type=OptionTypes.INTEGER, required=False),
+        Option(  name="tr_floor", description="Minimum TR a player can have to register",
+                        type=OptionTypes.INTEGER, required=False)
     ])
 @adminCommand
 @customContext
-async def addTournamentTetrio(ctx:ServerContext, name:str, rank_cap:str=None, rank_floor:str=None, tr_cap:int=None, tr_floor:int=None):
+async def addTournamentTetrio(ctx:CommandContext, scx:ServerContext, name:str, rank_cap:str=None, rank_floor:str=None, tr_cap:int=None, tr_floor:int=None):
     game = "tetr.io"
     if ctx.guild_id is None:
-        await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
+        await scx.sendLocalized(StringsNames.NOT_FOR_DM)
         return
     if tournamentController.getTournamentFromName(ctx.guild_id, name):
-        await ctx.sendLocalized(StringsNames.TOURNAMENT_EXISTS_ALREADY, name=name)
+        await scx.sendLocalized(StringsNames.TOURNAMENT_EXISTS_ALREADY, name=name)
         return
     
     #rank checks
     if rank_cap:
         rank_cap = rank_cap.lower()
         if rank_cap not in tetrioRanks:
-            await ctx.sendLocalized(StringsNames.UNEXISTING_TETRIORANK, rank=rank_cap)
+            await scx.sendLocalized(StringsNames.UNEXISTING_TETRIORANK, rank=rank_cap)
             return
     if rank_floor:
         rank_floor = rank_floor.lower()
         if rank_floor not in tetrioRanks:
-            await ctx.sendLocalized(StringsNames.UNEXISTING_TETRIORANK, rank=rank_floor)
+            await scx.sendLocalized(StringsNames.UNEXISTING_TETRIORANK, rank=rank_floor)
             return
     if (rank_cap and rank_floor) and tetrioRanks.index(rank_floor) > tetrioRanks.index(rank_cap):
-        await ctx.sendLocalized(StringsNames.TETRIORANKCAP_LOWERTHAN_RANKFLOOR, rank_cap=rank_cap, rank_floor=rank_floor)
+        await scx.sendLocalized(StringsNames.TETRIORANKCAP_LOWERTHAN_RANKFLOOR, rank_cap=rank_cap, rank_floor=rank_floor)
         return
     
     #tr checks
     if (tr_cap and tr_floor) and tr_floor > tr_cap:
-        await ctx.sendLocalized(StringsNames.TETRIOTRCAP_LOWERTHAN_TRFLOOR, tr_cap=tr_cap, tr_floor=tr_floor)
+        await scx.sendLocalized(StringsNames.TETRIOTRCAP_LOWERTHAN_TRFLOOR, tr_cap=tr_cap, tr_floor=tr_floor)
         return
 
     controller = TetrioController()
@@ -340,10 +346,10 @@ async def addTournamentTetrio(ctx:ServerContext, name:str, rank_cap:str=None, ra
     # customTemplate = templatesController.getTemplate(ctx.guild_id, template) # returns [] if doesnt exist
     # customTemplate.participantFields += controller.PLAYER_FIELDS
     templateFields = controller.PLAYER_FIELDS 
-    regTemplate = RegistrationTemplate(name=name,serverId=ctx.guild_id,participantFields=templateFields)
+    regTemplate = RegistrationTemplate(name=name,serverId=int(ctx.guild_id),participantFields=templateFields)
     tournament = TetrioTournament(name=name, 
         game=game, 
-        hostServerId=ctx.guild_id, 
+        hostServerId=int(ctx.guild_id), 
         registrationTemplate=regTemplate, 
         rankTop=rank_cap, 
         rankBottom=rank_floor,
@@ -351,9 +357,9 @@ async def addTournamentTetrio(ctx:ServerContext, name:str, rank_cap:str=None, ra
         trBottom=tr_floor
     )
     if tournamentController.addTournament(tournament):
-        await ctx.sendLocalized(StringsNames.TOURNAMENT_ADDED, name=name, game=game)
+        await scx.sendLocalized(StringsNames.TOURNAMENT_ADDED, name=name, game=game)
     else:
-        await ctx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
+        await scx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
 
 
 
