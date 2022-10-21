@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 import logging
 import interactions
-from interactions.ext import wait_for
 from interactions.ext import wait_for, files
 from interactions.api.models.flags import Intents
 from pymongo import MongoClient

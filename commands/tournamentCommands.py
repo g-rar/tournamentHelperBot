@@ -486,7 +486,7 @@ async def seedBy(ctx:CommandContext, scx:ServerContext, column:str, order:str, m
     messageId = int(message_id)
     chn:Channel = ctx.channel
     try:
-        msg:Message = await interactions.get(bot, Message, object_id=messageId, parent_id=ctx.channel_id)
+        msg:Message = await chn.get_message(message_id=messageId)
     except Exception as e:
         await scx.sendLocalized(StringsNames.MESSAGE_NOT_FOUND, data=type(e).__name__)
         return
@@ -511,46 +511,43 @@ async def seedBy(ctx:CommandContext, scx:ServerContext, column:str, order:str, m
         await ctx.send(utilStrs.ERROR.format(e))
         raise e
 
-# @slash.subcommand(
-#     base="csv",
-#     name="get_columns",
-#     description="Given a csv file in this text channel, get the columns as a sepparate file",
-#     guild_ids=botGuilds,
-#     options=[
-#         create_option(
-#             name="columns", description="The columns to get. Sepparate using commas.",
-#             option_type=OptionTypes.STRING, required=True
-#         ),
-#         create_option(
-#             name="message_id", description="Message in which the file is",
-#             option_type=OptionTypes.STRING, required=True
-#         ),
-#     ]
-# )
-# @customContext
-# async def getColumn(ctx:ServerContext, columns:str, message_id:str):
-#     if not message_id.isdecimal():
-#         await scx.sendLocalized(StringsNames.VALUE_SHOULD_BE_DEC, option="message_id")
-#         return
-#     messageId = int(message_id)
-#     chn:channel.TextChannel = ctx.channel
-#     try:
-#         msg:Message = await chn.fetch_message(messageId)
-#     except Exception as e:
-#         await scx.sendLocalized(StringsNames.MESSAGE_NOT_FOUND, data=type(e).__name__)
-#         return
-#     try:
-#         csvs:str = await getCsvTextFromMsg(msg)
-#         playersDF:pd.DataFrame = pd.read_csv(StringIO(csvs))
-#         columnList = columns.split(",")
-#         dfcsv = playersDF.to_csv(index=False, columns=columnList, header=(len(columnList)!=1))
-#         await ctx.send(
-#             content= utilStrs.INFO.format("File generated"),
-#             file= File(fp=StringIO(dfcsv), filename="Seeding.csv")
-#         )
-        
-#     except Exception as e:
-#         await ctx.send(utilStrs.ERROR.format(e))
+@csvBaseCommand.subcommand(
+    name="get_columns",
+    description="Given a csv file in this text channel, get the columns as a sepparate file",
+    options=[
+        Option(
+            name="columns", description="The columns to get. Sepparate using commas.",
+            type=OptionType.STRING, required=True
+        ),
+        Option(
+            name="message_id", description="Message in which the file is",
+            type=OptionType.STRING, required=True
+        ),
+    ]
+)
+@customContext
+async def getColumn(ctx:CommandContext, scx:ServerContext, columns:str, message_id:str):
+    if not message_id.isdecimal():
+        await scx.sendLocalized(StringsNames.VALUE_SHOULD_BE_DEC, option="message_id")
+        return
+    messageId = int(message_id)
+    chn:Channel = ctx.channel
+    try:
+        msg:Message = await chn.get_message(messageId)
+    except Exception as e:
+        await scx.sendLocalized(StringsNames.MESSAGE_NOT_FOUND, data=type(e).__name__)
+        return
+    try:
+        csvs:str = await getCsvTextFromMsg(msg)
+        playersDF:pd.DataFrame = pd.read_csv(StringIO(csvs))
+        columnList = columns.split(",")
+        dfcsv = playersDF.to_csv(index=False, columns=columnList, header=(len(columnList)!=1))
+        await files.command_send(ctx,
+            content=utilStrs.INFO.format("File generated"),
+            files=[File(fp=StringIO(dfcsv), filename="Seeding.csv")]
+        )
+    except Exception as e:
+        await ctx.send(utilStrs.ERROR.format(e))
 
 
 @bot.event(name='on_ready')
