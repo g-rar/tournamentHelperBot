@@ -3,7 +3,7 @@ from datetime import datetime
 from io import StringIO
 from interactions import Channel, ChannelType, Choice, CommandContext, File, MessageReaction, Option, OptionType, Message
 import interactions
-from interactions.ext import wait_for
+from interactions.ext import wait_for, files
 from controllers.adminContoller import adminCommand
 from controllers.serverController import Server, serverController
 from contextExtentions.customContext import customContext, ServerContext
@@ -155,8 +155,7 @@ async def getReactions(ctx: CommandContext, scx:ServerContext, channel:Channel, 
     for user in reactions:
         participants.append(f"{user['username']}#{user['discriminator']}")
     df = pd.DataFrame(participants)
-    await res1.delete()
-    await ctx.channel.send( '-'*20 + f'[ {inputReaction.emoji.name} ]' + '-'*20,
+    await files.command_send(ctx, content='-'*20 + f'[ {inputReaction.emoji.name} ]' + '-'*20,
         files=[
             File(filename=f"Reactions_{datetime.utcnow()}.csv", fp=StringIO(df.to_csv(index=False,header=False)))
         ]

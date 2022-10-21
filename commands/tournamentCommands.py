@@ -1,7 +1,8 @@
 import asyncio
-from interactions import Channel, ChannelType, CommandContext, Embed, File, Guild, LibraryException, Member, Message, Option, OptionType, Role
+from interactions import Channel, ChannelType, Choice, CommandContext, Embed, File, Guild, LibraryException, Member, Message, Option, OptionType, Role
 import interactions
 from interactions.ext.paginator import Page, Paginator
+from interactions.ext import files
 import pandas as pd
 from dataclasses import asdict
 from datetime import datetime
@@ -9,6 +10,8 @@ from io import StringIO
 from pprint import pformat, pprint
 from copy import deepcopy
 import logging
+
+import requests
 
 # import requests
 
@@ -40,18 +43,12 @@ async def registrationBase(ctx:CommandContext): pass
 @registrationBase.subcommand(
     name="open_in_chat",
     options=[
-        Option(
-            name="tournament", description="Tournament to open registration",
-            type=OptionType.STRING, required=True
-        ),
-        Option(
-            name="channel", description="Channel in which participants register",
-            required=True, type=OptionType.CHANNEL
-        ),
-        Option(
-            name="participant_role", description="Role that registered players will be given once they register",
-            type=OptionType.ROLE, required=False
-        )
+        Option(name="tournament", description="Tournament to open registration",
+            type=OptionType.STRING, required=True),
+        Option(name="channel", description="Channel in which participants register",
+            required=True, type=OptionType.CHANNEL),
+        Option(name="participant_role", description="Role that registered players will be given once they register",
+            type=OptionType.ROLE, required=False)
     ])
 @adminCommand
 @customContext
@@ -92,18 +89,12 @@ async def openRegistrationInChat(ctx:CommandContext, scx:ServerContext, tourname
 @registrationBase.subcommand(
     name="close",
     options=[
-        Option(
-            name="tournament",
-            description="Tournament to close registration for",
-            type=OptionType.STRING,
-            required=True
-        )
+        Option(name="tournament", description="Tournament to close registration for",
+            type=OptionType.STRING, required=True)
     ]
 )
 @adminCommand
 @customContext
-async def closeRegistrationCommand(ctx:CommandContext, scx:ServerContext, tournament:str):
-    await closeRegistration(ctx, scx, tournament)
 async def closeRegistration(ctx:CommandContext, scx:ServerContext, tournament:str):
     global openRegistrationChannels
     if ctx.guild_id is None:
@@ -153,8 +144,7 @@ async def deleteTournament(ctx:CommandContext, scx:ServerContext, tournament:str
         await scx.sendLocalized(StringsNames.TOURNAMENT_UNEXISTING, name=tournament)
         return
     if tournamentData.registration.status != TournamentStatus.REGISTRATION_CLOSED:
-        print("registration is not closed")
-        await closeRegistration(ctx, scx=scx, tournament = tournament)
+        await registrationBase.coroutines['close'](ctx, scx=scx, tournament = tournament) #, scx, tournament)
     if tournamentController.deleteTournament(tournamentData):
         await scx.sendLocalized(StringsNames.TOURNAMENT_DELETED, name=tournament)
     else:
@@ -227,58 +217,60 @@ async def getTournaments(ctx: CommandContext, scx: ServerContext, tournament:str
 @bot.command(name="participants", scope=botGuilds)
 async def particpantsBaseCommand(ctx:CommandContext): pass
 
-# @slash.subcommand(
-#     base="participants",
-#     name="register_as_with_message",
-#     options=[
-#         create_option(name="tournament", description="Tournament to register player in",
-#                         option_type=OptionTypes.STRING, required=True),
-#         create_option(name="discord_id", description="Discord Id of the player to register",
-#                         option_type=OptionTypes.STRING, required=True),
-#         create_option(name="msg_content", description="Content of the message the player would input to register",
-#                         option_type=OptionTypes.STRING, required=True),
-#         create_option(name="override_req", description="If True, registers the player despite registration criteria",
-#                         option_type=OptionTypes.BOOLEAN, required=False)
-#     ],
-#     guild_ids=botGuilds,
-#     description="Register a player as if they registered themselves with a message."
-# )
-# @adminCommand
-# @customContext
-# async def registerPlayerWithDiscord(ctx:ServerContext, tournament:str, discord_id:str, msg_content:str, override_req:bool=False):
-#     # await ctx.send(utilStrs.ERROR.format("This is an error"))
-#     if ctx.guild_id is None:
-#         await scx.sendLocalized(StringsNames.NOT_FOR_DM)
-#         return
-#     if not discord_id.isnumeric():
-#         await scx.sendLocalized(StringsNames.VALUE_SHOULD_BE_DEC, option="discord_id")
-#         return
-#     userId = int(discord_id)
-#     member:Member = ctx.guild.get_member(userId)
-#     if member is None:
-#         await scx.sendLocalized(StringsNames.MEMBER_NOT_FOUND_BY_ID, id=discord_id)
-#         return
-#     tournamentData = tournamentController.getTournamentFromName(ctx.guild_id, tournament)
-#     if not tournamentData:
-#         await scx.sendLocalized(StringsNames.TOURNAMENT_UNEXISTING, name=tournament)
-#         return
-#     content = extractQuotedSubstrs(msg_content)
-#     fields:list[RegistrationField] = deepcopy(tournamentData.registrationTemplate.participantFields)
-#     if fields:
-#         for i in range(len(content)):
-#             fields[i].value = content[i]
-#     else:
-#         fields.append(RegistrationField("msg", OptionTypes.STRING, True, value=msg_content))
-#     try:
-#         if await tournamentController.registerPlayer(tournamentData, fields, member, overrideReq=override_req):
-#             if tournamentData.registration.participantRole:
-#                 regRole: discord.Role = ctx.guild.get_role(tournamentData.registration.participantRole)
-#                 await member.add_roles(regRole)
-#             await scx.sendLocalized(StringsNames.PLAYER_REGISTERED, username=member.display_name, tournament=tournament)
-#         else:
-#             await scx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
-#     except Exception as e:
-#         await ctx.send(utilStrs.ERROR.format(e))
+@particpantsBaseCommand.subcommand(
+    name="register_as_with_message",
+    options=[
+        Option(name="tournament", description="Tournament to register player in",
+                type=OptionType.STRING, required=True),
+        Option(name="discord_id", description="Discord Id of the player to register",
+                type=OptionType.STRING, required=True),
+        Option(name="msg_content", description="Content of the message the player would input to register",
+                type=OptionType.STRING, required=True),
+        Option(name="override_req", description="If True, registers the player despite registration criteria",
+                type=OptionType.BOOLEAN, required=False)
+    ],
+    description="Register a player as if they registered themselves with a message."
+)
+@adminCommand
+@customContext
+async def registerPlayerWithDiscord(ctx:CommandContext, scx:ServerContext, tournament:str, discord_id:str, msg_content:str, override_req:bool=False):
+    # await ctx.send(utilStrs.ERROR.format("This is an error"))
+    if ctx.guild_id is None:
+        await scx.sendLocalized(StringsNames.NOT_FOR_DM)
+        return
+    if not discord_id.isnumeric():
+        await scx.sendLocalized(StringsNames.VALUE_SHOULD_BE_DEC, option="discord_id")
+        return
+    userId = int(discord_id)
+    member:Member = await ctx.guild.get_member(userId)
+    if member is None:
+        await scx.sendLocalized(StringsNames.MEMBER_NOT_FOUND_BY_ID, id=discord_id)
+        return
+    tournamentData = tournamentController.getTournamentFromName(ctx.guild_id, tournament)
+    if not tournamentData:
+        await scx.sendLocalized(StringsNames.TOURNAMENT_UNEXISTING, name=tournament)
+        return
+    content = extractQuotedSubstrs(msg_content)
+    fields:list[RegistrationField] = deepcopy(tournamentData.registrationTemplate.participantFields)
+    if fields:
+        for i in range(len(content)):
+            fields[i].value = content[i]
+    else:
+        fields.append(RegistrationField("msg", OptionTypes.STRING, True, value=msg_content))
+    try:
+        if await tournamentController.registerPlayer(tournamentData, fields, member, overrideReq=override_req):
+            if tournamentData.registration.participantRole:
+                regRole: Role = await interactions.get(
+                    bot, Role,
+                    object_id=tournamentData.registration.participantRole,
+                    parent_id=tournamentData.hostServerId
+                )
+                await member.add_role(regRole)
+            await scx.sendLocalized(StringsNames.PLAYER_REGISTERED, username=member.nick, tournament=tournament)
+        else:
+            await scx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
+    except Exception as e:
+        await ctx.send(utilStrs.ERROR.format(e))
 
 @particpantsBaseCommand.subcommand(
     name="delete_with_discord_id",
@@ -318,10 +310,8 @@ async def deleteParticipant(ctx:CommandContext, scx:ServerContext, tournament:st
     name="view",
     description="See who's registered in your tournament",
     options=[
-        Option( 
-            name="tournament", description="Tournament to check to registered players",
-            type=OptionType.STRING, required=True
-        )
+        Option(name="tournament", description="Tournament to check to registered players",
+               type=OptionType.STRING, required=True)
     ]
 )
 @customContext
@@ -336,7 +326,7 @@ async def getTournamentParticipants(ctx:CommandContext, scx:ServerContext, tourn
     for p in participants:
         partList.append(tournamentCtrl.getParticipantView(p))
     df = pd.DataFrame(partList)
-    await ctx.channel.send(files=[File(fp=StringIO(df.to_csv()), filename= f"Participants_{datetime.utcnow()}.csv")])
+    await files.command_send(ctx, files=[File(fp=StringIO(df.to_csv()), filename= f"Participants_{datetime.utcnow()}.csv")])
 
 # @slash.subcommand(
 #     base="participants",
@@ -458,70 +448,68 @@ async def getTournamentParticipants(ctx:CommandContext, scx:ServerContext, tourn
 #     df = pd.DataFrame(participants)    
 #     await ctx.send(file=File(StringIO(df.to_csv()), filename= f"Participants_{datetime.utcnow()}.csv"))
 
+@bot.command(name="csv", scope=botGuilds)
+async def csvBaseCommand(ctx:CommandContext): pass
 
-# @slash.subcommand(
-#     base="csv",
-#     name="sort_by",
-#     description="Sort a csv file by the given column",
-#     guild_ids=botGuilds,
-#     options=[
-#         create_option(
-#             name="column", description="The column to seed by.",
-#             option_type=OptionTypes.STRING, required=True
-#         ),
-#         create_option(
-#             name="order", description="The order to aply",
-#             option_type=OptionTypes.STRING, required=True,
-#             choices=[
-#                 create_choice(name="ascending", value="a"),
-#                 create_choice(name="descending", value="")
-#             ]
-#         ),
-#         create_option(
-#             name="message_id", description="Message in which the file is",
-#             option_type=OptionTypes.STRING, required=True
-#         ),
-#         create_option(
-#             name="get_columns", description="If present, show only specified columns. Sepparate with commas.",
-#             option_type=OptionTypes.STRING, required=False
-#         )
-#     ]
-# )
-# @customContext
-# async def seedBy(ctx:ServerContext, column:str, order:str, message_id:str, get_columns:str = None):
-#     order = bool(order)
-#     if not message_id.isdecimal():
-#         await scx.sendLocalized(StringsNames.VALUE_SHOULD_BE_DEC, option="message_id")
-#         return
-#     messageId = int(message_id)
-#     chn:channel.TextChannel = ctx.channel
-#     try:
-#         msg:Message = await chn.fetch_message(messageId)
-#     except Exception as e:
-#         await scx.sendLocalized(StringsNames.MESSAGE_NOT_FOUND, data=type(e).__name__)
-#         return
+@csvBaseCommand.subcommand(
+    name="sort_by",
+    description="Sort a csv file by the given column",
+    options=[
+        Option(
+            name="column", description="The column to seed by.",
+            type=OptionType.STRING, required=True
+        ),
+        Option(
+            name="order", description="The order to aply",
+            type=OptionType.STRING, required=True,
+            choices=[
+                Choice(name="ascending", value="a"),
+                Choice(name="descending", value="")
+            ]
+        ),
+        Option(
+            name="message_id", description="Message in which the file is",
+            type=OptionType.STRING, required=True
+        ),
+        Option(
+            name="get_columns", description="If present, show only specified columns. Sepparate with commas.",
+            type=OptionType.STRING, required=False
+        )
+    ]
+)
+@customContext
+async def seedBy(ctx:CommandContext, scx:ServerContext, column:str, order:str, message_id:str, get_columns:str = None):
+    order = bool(order)
+    if not message_id.isdecimal():
+        await scx.sendLocalized(StringsNames.VALUE_SHOULD_BE_DEC, option="message_id")
+        return
+    messageId = int(message_id)
+    chn:Channel = ctx.channel
+    try:
+        msg:Message = await interactions.get(bot, Message, object_id=messageId, parent_id=ctx.channel_id)
+    except Exception as e:
+        await scx.sendLocalized(StringsNames.MESSAGE_NOT_FOUND, data=type(e).__name__)
+        return
     
-#     try:
-#         csvs:str = await getCsvTextFromMsg(msg)
-#         playersDF:pd.DataFrame = pd.read_csv(StringIO(csvs))
+    try:
+        csvs:str = await getCsvTextFromMsg(msg)
+        playersDF:pd.DataFrame = pd.read_csv(StringIO(csvs))
 
-#         await ctx.send(utilStrs.INFO.format("Seeding players..."))
-#         playersDF.sort_values(column, ascending=order, ignore_index=True, inplace=True)
-#         playersDF["Seed"] = playersDF.index + 1
+        await ctx.send(utilStrs.INFO.format("Seeding players..."))
+        playersDF.sort_values(column, ascending=order, ignore_index=True, inplace=True)
+        playersDF["Seed"] = playersDF.index + 1
 
-#         columnsList = None if not get_columns else get_columns.split(",")
-#         dfcsv = playersDF.to_csv(
-#             index=False,
-#             columns=columnsList,
-#             header= not columnsList or len(columnsList)!=1
-#         )
-#         await ctx.send(
-#             content= utilStrs.INFO.format("File generated"),
-#             file= File(fp=StringIO(dfcsv), filename="Seeding.csv")
-#         )
+        columnsList = None if not get_columns else get_columns.split(",")
+        dfcsv = playersDF.to_csv(
+            index=False,
+            columns=columnsList,
+            header= not columnsList or len(columnsList)!=1
+        )
+        await files.command_send(ctx, content= utilStrs.INFO.format("File generated"), files=[File(fp=StringIO(dfcsv), filename="Seeding.csv")])
         
-#     except Exception as e:
-#         await ctx.send(utilStrs.ERROR.format(e))
+    except Exception as e:
+        await ctx.send(utilStrs.ERROR.format(e))
+        raise e
 
 # @slash.subcommand(
 #     base="csv",
@@ -654,13 +642,12 @@ async def on_message(msg:Message):
             await server.sendLog(StringsNames.PARTICIPANT_REGISTRATION_FAILED, username=msg.member.nick, tournament=tournament.name, reason=str(e))
 
 
-# async def getCsvTextFromMsg(msg:discord.Message):
-#     if msg.attachments:
-#         file_url = msg.attachments[0]
-#     else:
-#         raise Exception("Did not find any CSV file")
-#     req = requests.get(file_url)
-#     if req.status_code == 200:
-#         return req.content.decode('utf-8')
-#     else:
-#         raise Exception("Could not read CSV file")
+async def getCsvTextFromMsg(msg:Message):
+    if not msg.attachments:
+        raise Exception("Did not find any CSV file")
+    file_url = msg.attachments[0].url
+    req = requests.get(file_url)
+    if req.status_code == 200:
+        return req.content.decode('utf-8')
+    else:
+        raise Exception("Could not read CSV file")

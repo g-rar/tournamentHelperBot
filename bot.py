@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import logging
 import interactions
 from interactions.ext import wait_for
+from interactions.ext import wait_for, files
 from interactions.api.models.flags import Intents
 from pymongo import MongoClient
 from pymongo.database import Database
@@ -24,6 +25,7 @@ class BotSettings:
 bot = interactions.Client(token= BotSettings.TOKEN, intents=Intents.ALL)
 httpClient = interactions.HTTPClient(BotSettings.TOKEN)
 wait_for.setup(bot=bot)
+files.setup(bot)
 
 CONF = BotSettings()
 botGuilds = None if not CONF.DEV else CONF.TEST_GUILDS
