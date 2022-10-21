@@ -14,9 +14,7 @@ from bot import botGuilds, bot
 from commands.tournamentCommands import tournamentBaseCommand
 
 @tournamentBaseCommand.subcommand(
-    base="tournaments",
     name="add_generic",
-    scope=botGuilds,
     description="Run registration for any tournament, really.",
     options=[
         Option(  name="name", description="The tournament's name.",
@@ -27,23 +25,22 @@ from commands.tournamentCommands import tournamentBaseCommand
 @adminCommand
 @customContext
 async def addTournamentPlain(ctx:CommandContext, scx:ServerContext, name:str, game:str="🎮"):
-    pass
-    # if ctx.guild_id is None:
-    #     await ctx.sendLocalized(StringsNames.NOT_FOR_DM)
-    #     return
-    # if tournamentController.getTournamentFromName(ctx.guild_id, name):
-    #     await ctx.sendLocalized(StringsNames.TOURNAMENT_EXISTS_ALREADY, name=name)
-    #     return
+    if ctx.guild_id is None:
+        await scx.sendLocalized(StringsNames.NOT_FOR_DM)
+        return
+    if tournamentController.getTournamentFromName(ctx.guild_id, name):
+        await scx.sendLocalized(StringsNames.TOURNAMENT_EXISTS_ALREADY, name=name)
+        return
     # uncomment on completing template implementation
     # customTemplate = templatesController.getTemplate(ctx.guild_id, template) # returns [] if doesnt exist
     # customTemplate.participantFields += controller.PLAYER_FIELDS
-    # tournament = Tournament(
-    #     name=name,
-    #     hostServerId=ctx.guild_id,
-    #     game= game if game else "any",
-    #     registrationTemplate= RegistrationTemplate(name, ctx.guild_id)
-    # )
-    # if tournamentController.addTournament(tournament):
-    #     await ctx.sendLocalized(StringsNames.TOURNAMENT_ADDED, name=name, game=game)
-    # else:
-    #     await ctx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
+    tournament = Tournament(
+        name=name,
+        hostServerId=int(ctx.guild_id),
+        game= game if game else "any",
+        registrationTemplate= RegistrationTemplate(name, int(ctx.guild_id))
+    )
+    if tournamentController.addTournament(tournament):
+        await scx.sendLocalized(StringsNames.TOURNAMENT_ADDED, name=name, game=game)
+    else:
+        await scx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)

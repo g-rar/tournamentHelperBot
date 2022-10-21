@@ -102,6 +102,8 @@ async def openRegistrationInChat(ctx:CommandContext, scx:ServerContext, tourname
 )
 @adminCommand
 @customContext
+async def closeRegistrationCommand(ctx:CommandContext, scx:ServerContext, tournament:str):
+    await closeRegistration(ctx, scx, tournament)
 async def closeRegistration(ctx:CommandContext, scx:ServerContext, tournament:str):
     global openRegistrationChannels
     if ctx.guild_id is None:
@@ -124,41 +126,39 @@ async def closeRegistration(ctx:CommandContext, scx:ServerContext, tournament:st
         tournamentController.updateRegistrationForTournament(tournamentObj, tournamentObj.registration)
     await scx.sendLocalized(StringsNames.REGISTRATION_CLOSED, tournament=tournament)
 
-
-# @slash.subcommand(
-#     base="tournaments",
-#     name="delete",
-#     options=[
-#         create_option(name="tournament",description="Tournament to delete",
-#                         option_type=OptionTypes.STRING, required=True)
-#     ],
-#     guild_ids=botGuilds,
-#     description="Deletes a tournament from existence"
-# )
-# @adminCommand
-# @customContext
-# async def deleteTournament(ctx:ServerContext, tournament:str):
-#     if ctx.guild_id is None:
-#         await scx.sendLocalized(StringsNames.NOT_FOR_DM)
-#         return
-#     guild:discord.Guild = ctx.guild
-#     tournamentData = tournamentController.getTournamentFromName(guild.id, tournament)
-#     if not tournamentData:
-#         await scx.sendLocalized(StringsNames.TOURNAMENT_UNEXISTING, name=tournament)
-#         return
-#     if tournamentData.registration.status != TournamentStatus.REGISTRATION_CLOSED:
-#         await closeRegistration.invoke(ctx, tournament = tournament)
-#     if tournamentController.deleteTournament(tournamentData):
-#         await scx.sendLocalized(StringsNames.TOURNAMENT_DELETED, name=tournament)
-#     else:
-#         await scx.sendLocalized(StringsNames.DB_DROP_ERROR)
-
 ##############################################################################################
 # ===================================== TOURNAMENTS ======================================== #
 ##############################################################################################
 
 @bot.command(name="tournaments", scope=botGuilds)
 async def tournamentBaseCommand(ctx:CommandContext): pass
+
+@tournamentBaseCommand.subcommand(
+    name="delete",
+    options=[
+        Option(name="tournament",description="Tournament to delete",
+                type=OptionType.STRING, required=True)
+    ],
+    description="Deletes a tournament from existence"
+)
+@adminCommand
+@customContext
+async def deleteTournament(ctx:CommandContext, scx:ServerContext, tournament:str):
+    if ctx.guild_id is None:
+        await scx.sendLocalized(StringsNames.NOT_FOR_DM)
+        return
+    guild:Guild = ctx.guild # this could be None
+    tournamentData = tournamentController.getTournamentFromName(guild.id, tournament)
+    if not tournamentData:
+        await scx.sendLocalized(StringsNames.TOURNAMENT_UNEXISTING, name=tournament)
+        return
+    if tournamentData.registration.status != TournamentStatus.REGISTRATION_CLOSED:
+        print("registration is not closed")
+        await closeRegistration(ctx, scx=scx, tournament = tournament)
+    if tournamentController.deleteTournament(tournamentData):
+        await scx.sendLocalized(StringsNames.TOURNAMENT_DELETED, name=tournament)
+    else:
+        await scx.sendLocalized(StringsNames.DB_DROP_ERROR)
 
 @tournamentBaseCommand.subcommand(
     name="view",
@@ -607,9 +607,6 @@ async def setupMessageRegistration(tournament:Tournament): # this asumes that re
 
 @bot.event(name="on_message_create")
 async def on_message(msg:Message):
-    print(f"int(msg.channel_id) not in openRegistrationChannels -> "
-            f"{int(msg.channel_id)} not in {openRegistrationChannels} -> "
-            f"{int(msg.channel_id) not in openRegistrationChannels}")
     if int(msg.channel_id) not in openRegistrationChannels:
         return
     if not msg.content:
@@ -653,10 +650,8 @@ async def on_message(msg:Message):
         await msg.create_reaction("🤷‍♂️")
         if e.code == 50013: # 'Missing Permissions'
             await server.sendLog(StringsNames.CANT_ASSIGN_ROLE_TO_USER, username=msg.member.nick, role=role.name)
-
-    # except Forbindden as e:
-    #     else:
-    #         await server.sendLog(StringsNames.PARTICIPANT_REGISTRATION_FAILED, username=msg.author.display_name, tournament=tournament.name, reason=str(e))
+        else:
+            await server.sendLog(StringsNames.PARTICIPANT_REGISTRATION_FAILED, username=msg.member.nick, tournament=tournament.name, reason=str(e))
 
 
 # async def getCsvTextFromMsg(msg:discord.Message):
