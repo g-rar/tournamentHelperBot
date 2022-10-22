@@ -1,8 +1,8 @@
 import asyncio
-from interactions import Channel, ChannelType, Choice, CommandContext, Embed, File, Guild, LibraryException, Member, Message, Option, OptionType, Role
+from interactions import Channel, ChannelType, Choice, CommandContext, Embed, File, Guild, LibraryException, Member, Message, MessageReaction, Option, OptionType, Role
 import interactions
 from interactions.ext.paginator import Page, Paginator
-from interactions.ext import files
+from interactions.ext import files, wait_for
 import pandas as pd
 from dataclasses import asdict
 from datetime import datetime
@@ -17,6 +17,7 @@ import requests
 
 from bot import bot, botGuilds
 from contextExtentions.contextServer import getServerGuild
+from httpClient import getAllUsersFromReaction
 from local.lang.utils import utilStrs
 from contextExtentions.customContext import ServerContext, customContext
 from local.names import StringsNames
@@ -328,125 +329,110 @@ async def getTournamentParticipants(ctx:CommandContext, scx:ServerContext, tourn
     df = pd.DataFrame(partList)
     await files.command_send(ctx, files=[File(fp=StringIO(df.to_csv()), filename= f"Participants_{datetime.utcnow()}.csv")])
 
-# @slash.subcommand(
-#     base="participants",
-#     name="refresh",
-#     description="View the latest registration criteria for participants. Useful with deeply integrated games.",
-#     guild_ids=botGuilds,
-#     options=[
-#         create_option(
-#             name="tournament", description="Tournament for which check players",
-#             option_type=OptionTypes.STRING, required=True
-#         ),
-#         create_option(
-#             name="update", description="Wether to make player data permanent or not.",
-#             option_type=OptionTypes.BOOLEAN, required=False 
-#         )
-#     ]
-# )
-# @adminCommand
-# @customContext
-# async def refreshParticipants(ctx:ServerContext, tournament:str, update:bool = False):
-#     tournamentObj = tournamentController.getTournamentFromName(ctx.guild_id,tournament)
-#     tournamentCtrl = factories.getControllerFor(tournamentObj)
-#     if tournamentObj is None:
-#         await scx.sendLocalized(StringsNames.TOURNAMENT_UNEXISTING, name=tournament)
-#         return
-#     await scx.sendLocalized(StringsNames.MAY_TAKE_LONG)
-#     participants = participantController.getParticipantsForTournament(tournamentObj._id)
-#     async with ctx.channel.typing():
-#         newParticipants, failed = await tournamentCtrl.checkParticipants(participants, tournamentObj)
-#     pViews = list(map(lambda p: tournamentCtrl.getParticipantView(p), newParticipants))
-#     fViews = [{'reason':r, **tournamentCtrl.getParticipantView(p)} for p,r in failed]
-#     participantViews = pd.DataFrame(pViews)
-#     failedViews = pd.DataFrame(fViews)
-#     await ctx.channel.send(file=File(StringIO(participantViews.to_csv()), filename= f"Participants_{datetime.utcnow()}.csv"))
-#     if update:
-#         participantController.updateParticipants(newParticipants)
-#         participantController.deleteParticipants([p for p,_ in failed])
-#     if len(failed) != 0:
-#         await ctx.channel.send(file=File(StringIO(failedViews.to_csv()), filename= f"Disqualified_{datetime.utcnow()}.csv"))
-#         if update:
-#             await scx.sendLocalized(StringsNames.PARTICIPANTS_DELETED, _as_reply=False, amount=len(failed))
-#             if tournamentObj.registration.participantRole:
-#                 role:discord.Role = ctx.guild.get_role(tournamentObj.registration.participantRole)
-#                 for p,r in failed:
-#                     member:Member = ctx.guild.get_member(p.discordId)
-#                     await member.remove_roles(role, reason=f"Disquialified for: {r}")
-#                 await scx.sendLocalized(StringsNames.PARTICIPANTS_ROLE_REMOVED, _as_reply=False, rolename=role.name)
+@particpantsBaseCommand.subcommand(
+    name="refresh",
+    description="View the latest registration criteria for participants. Useful with deeply integrated games.",
+    options=[
+        Option(name="tournament", description="Tournament for which check players",
+            type=OptionType.STRING, required=True),
+        Option(name="update", description="Wether to make player data permanent or not.",
+            type=OptionType.BOOLEAN, required=False)
+    ]
+)
+@adminCommand
+@customContext
+async def refreshParticipants(ctx:CommandContext, scx:ServerContext, tournament:str, update:bool = False):
+    tournamentObj = tournamentController.getTournamentFromName(ctx.guild_id,tournament)
+    tournamentCtrl = factories.getControllerFor(tournamentObj)
+    if tournamentObj is None:
+        await scx.sendLocalized(StringsNames.TOURNAMENT_UNEXISTING, name=tournament)
+        return
+    await scx.sendLocalized(StringsNames.MAY_TAKE_LONG)
+    participants = participantController.getParticipantsForTournament(tournamentObj._id)
+    async with ctx.channel.typing:
+        newParticipants, failed = await tournamentCtrl.checkParticipants(participants, tournamentObj)
+    pViews = list(map(lambda p: tournamentCtrl.getParticipantView(p), newParticipants))
+    fViews = [{'reason':r, **tournamentCtrl.getParticipantView(p)} for p,r in failed]
+    participantViews = pd.DataFrame(pViews)
+    failedViews = pd.DataFrame(fViews)
+    await files.command_edit(ctx, content="", files=[File(fp=StringIO(participantViews.to_csv()), filename= f"Participants_{datetime.utcnow()}.csv")])
+    if update:
+        participantController.updateParticipants(newParticipants)
+        participantController.deleteParticipants([p for p,_ in failed])
+    if len(failed) != 0:
+        if update:
+            await scx.sendLocalized(StringsNames.PARTICIPANTS_DELETED, _as_reply=False, amount=len(failed))
+            if tournamentObj.registration.participantRole:
+                role:Role = await interactions.get(bot, Role, object_id=tournamentObj.registration.participantRole, parent_id=ctx.guild_id)
+                for p,r in failed:
+                    member:Member = await ctx.guild.get_member(p.discordId)
+                    await member.remove_role(role, reason=f"Disquialified for: {r}")
+                await scx.sendLocalized(StringsNames.PARTICIPANTS_ROLE_REMOVED, _as_reply=False, rolename=role.name)
+        await ctx.channel.send(files=[File(fp=StringIO(failedViews.to_csv()), filename= f"Disqualified_{datetime.utcnow()}.csv")])
 
+@bot.command(name="check-in", scope=botGuilds)
+async def checkInBaseCommand(ctx:CommandContext): pass
 
-# @slash.subcommand(
-#     base="check_in",
-#     name="read_from_reaction",
-#     description="Register people who reacted to a certain message as checked in",
-#     guild_ids=botGuilds,
-#     options= [
-#         create_option(
-#             name="tournament", description="The tournament for which this check in counts for.",
-#             option_type=OptionTypes.STRING, required=True
-#         ),
-#         # create_option(
-#         #     name="reaction", description="utf-8 emoji that counts for the check-in",
-#         #     option_type=OptionTypes.STRING, required=True
-#         # ),
-#         create_option(
-#             name="message_id", description="Message id at which users reacted for check-in, (you can get this by right clicking the message)",
-#             option_type=OptionTypes.STRING, required=True
-#         ),
-#         create_option(
-#             name="channel", description="The channel in which the specified message is",
-#             option_type=OptionTypes.CHANNEL, required=True
-#         )
-#     ]
-# )
-# @adminCommand
-# @customContext
-# async def readCheckIns(ctx:ServerContext,
-#         tournament:str, 
-#         # reaction:str, 
-#         message_id:str,
-#         channel:TextChannel):
-#     tournamentObj = tournamentController.getTournamentFromName(ctx.guild_id,tournament)
-#     tournamentCtrl = factories.getControllerFor(tournamentObj)
-#     if tournamentObj is None:
-#         await scx.sendLocalized(StringsNames.TOURNAMENT_UNEXISTING, name=tournament)
-#         return
-#     if not message_id.isdecimal():
-#         await scx.sendLocalized(StringsNames.VALUE_SHOULD_BE_DEC, option="message_id")
-#         return
-#     messageId = int(message_id)
-#     if channel.type != discord.ChannelType.text:
-#         await scx.sendLocalized(StringsNames.VALUE_SHOULD_BE_TEXT_CHANNEL, option="channel")
-#         return
-#     try:
-#         msg:Message = await channel.fetch_message(messageId)
-#     except Exception as e:
-#         await scx.sendLocalized(StringsNames.MESSAGE_NOT_FOUND, data=type(e).__name__)
-#         return
+@checkInBaseCommand.subcommand(
+    name="read_from_reaction",
+    description="Register people who reacted to a certain message as checked in",
+    options= [
+        Option(name="tournament", description="The tournament for which this check in counts for.",
+               type=OptionType.STRING, required=True),
+        Option(name="message_id", description="Message id at which users reacted for check-in, (you can get this by right clicking the message)",
+               type=OptionType.STRING, required=True),
+        Option(name="channel", description="The channel in which the specified message is",
+               type=OptionType.CHANNEL, required=True)
+    ]
+)
+@adminCommand
+@customContext
+async def readCheckIns(ctx:CommandContext,
+        tournament:str, 
+        scx:ServerContext,
+        message_id:str,
+        channel:Channel):
+    tournamentObj = tournamentController.getTournamentFromName(ctx.guild_id,tournament)
+    tournamentCtrl = factories.getControllerFor(tournamentObj)
+    if tournamentObj is None:
+        await scx.sendLocalized(StringsNames.TOURNAMENT_UNEXISTING, name=tournament)
+        return
+    if not message_id.isdecimal():
+        await scx.sendLocalized(StringsNames.VALUE_SHOULD_BE_DEC, option="message_id")
+        return
+    messageId = int(message_id)
+    if channel.type != ChannelType.GUILD_TEXT:
+        await scx.sendLocalized(StringsNames.VALUE_SHOULD_BE_TEXT_CHANNEL, option="channel")
+        return
+    try:
+        msg:Message = await channel.get_message(messageId)
+    except Exception as e:
+        await scx.sendLocalized(StringsNames.MESSAGE_NOT_FOUND, data=type(e).__name__)
+        return
     
-#     def check(_, user):
-#         return user == ctx.author
-#     try:
-#         res1 = await scx.sendLocalized(StringsNames.INPUT_CHECK_IN_REACTION)
-#         inputReaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=check)
-#     except asyncio.TimeoutError:
-#         await scx.sendLocalized(StringsNames.REACTION_TIMEOUT, time="60")
-#         return
-#     reaction = list(filter(lambda x: x.emoji == inputReaction.emoji, msg.reactions))
-#     if reaction == []:
-#         await scx.sendLocalized(StringsNames.NO_REACTION_IN_MSG, reaction=str(inputReaction.emoji))
-#         return
-#     reaction = reaction[0]
-#     participants = []
-#     async for user in reaction.users():
-#         p = participantController.getParticipantFromDiscordId(user.id, tournamentObj._id)
-#         if p is None: continue
-#         pData = tournamentCtrl.getParticipantView(p)
-#         participants.append(pData)
+    def check(reaction:MessageReaction):
+        return int(reaction.user_id) == int(ctx.author.id)
+    try:
+        res1 = await scx.sendLocalized(StringsNames.INPUT_CHECK_IN_REACTION)
+        inputReaction:MessageReaction= await wait_for.wait_for(bot, 'on_message_reaction_add', timeout=60.0, check=check)
+    except asyncio.TimeoutError:
+        await scx.sendLocalized(StringsNames.REACTION_TIMEOUT, time="60")
+        return
+    reaction = await getAllUsersFromReaction(
+        int(channel.id), int(msg.id) , inputReaction.emoji.name
+    )
+    if reaction == []:
+        await scx.sendLocalized(StringsNames.NO_REACTION_IN_MSG, reaction=str(inputReaction.emoji))
+        return
+    participants = []
+    for user in reaction:
+        p = participantController.getParticipantFromDiscordId(int(user.get('id')), tournamentObj._id)
+        if p is None: continue
+        pData = tournamentCtrl.getParticipantView(p)
+        participants.append(pData)
 
-#     df = pd.DataFrame(participants)    
-#     await ctx.send(file=File(StringIO(df.to_csv()), filename= f"Participants_{datetime.utcnow()}.csv"))
+    df = pd.DataFrame(participants)
+    await files.command_send(ctx, files=[File(fp=StringIO(df.to_csv()), filename= f"Participants_{datetime.utcnow()}.csv")])
 
 @bot.command(name="csv", scope=botGuilds)
 async def csvBaseCommand(ctx:CommandContext): pass

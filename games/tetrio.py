@@ -199,7 +199,6 @@ class TetrioController(BaseGameController):
         except:
             raise RegistrationError("Invalid playername", self.INVALID_PLAYER)
         
-        print(tournament)
         if not override and any([tournament.trBottom, tournament.trTop, tournament.rankBottom, tournament.rankTop]) \
             and player.info.league.rank == 'z':
             raise RegistrationError("Unranked", self.UNRANKED)
