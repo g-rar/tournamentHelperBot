@@ -1,7 +1,16 @@
 from pymongo.cursor import Cursor
 import re
 import asyncio
+from interactions import Button, ButtonStyle
+from interactions.ext.paginator import ButtonKind
 
+paginatorButtons = {
+        "first": Button(style=ButtonStyle.SUCCESS, label="↞"), 
+        "prev": Button(style=ButtonStyle.SUCCESS, label="←"), 
+        "index": Button(style=ButtonStyle.SECONDARY, label="-"), 
+        "next": Button(style=ButtonStyle.SUCCESS, label="→"), 
+        "last": Button(style=ButtonStyle.SUCCESS, label="↠")
+    }
 
 # async def setupButtonNavigation(ctx:SlashContext,paginationList:list,bot:commands.Bot):
 #     #Set up stuff

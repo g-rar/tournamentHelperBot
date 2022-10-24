@@ -31,7 +31,7 @@ from controllers.serverController import serverController
 from controllers.tournamentController import tournamentController
 from games import factories
 
-from utils import OptionTypes, extractQuotedSubstrs
+from utils import OptionTypes, extractQuotedSubstrs, paginatorButtons
 
 
 # this actaully scales better
@@ -193,7 +193,7 @@ async def getTournaments(ctx: CommandContext, scx: ServerContext, tournament:str
                 pageList.append(Page(f"{guild.name} (P. #{page})", embed))
                 embedTournaments = []
                 page += 1
-        await Paginator(bot, ctx, pageList).run()
+        await Paginator(bot, ctx, pageList, use_index=True, buttons=paginatorButtons).run()
     else:
         tournamentStr = ""
         for t in tournaments:
