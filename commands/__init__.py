@@ -1,4 +1,7 @@
 import commands.adminCommands
-import commands.serverCommands
-import commands.tournamentCommands
+import commands.csvCommands
 import commands.devCommands
+import commands.serverCommands
+import commands.participantCommands
+import commands.registrationCommands
+import commands.tournamentCommands
