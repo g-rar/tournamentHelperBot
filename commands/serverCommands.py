@@ -2,7 +2,6 @@ import asyncio
 from datetime import datetime
 from io import StringIO
 from interactions import Channel, ChannelType, Choice, CommandContext, File, MessageReaction, Option, OptionType, Message
-import interactions
 from interactions.ext import wait_for, files
 from controllers.adminContoller import adminCommand
 from controllers.serverController import Server, serverController

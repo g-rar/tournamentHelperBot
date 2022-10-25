@@ -2,8 +2,6 @@ from dataclasses import asdict, dataclass
 from contextExtentions.contextServer import ServerGuild
 from controllers.serverController import Server
 from models.tournamentModels import Tournament
-import logging
-import local.names as strs
 
 @dataclass
 class ContexTournament(Tournament):

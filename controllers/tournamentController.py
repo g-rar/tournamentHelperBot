@@ -2,7 +2,7 @@
 # from discord.user import User
 from dataclasses import asdict
 from typing import List, Union
-from interactions import Member, Snowflake, User
+from interactions import Snowflake, User
 
 from pymongo.collection import Collection
 from pymongo.database import Database
@@ -11,7 +11,7 @@ from bson.objectid import ObjectId
 from bot import db
 
 from models.tournamentModels import Tournament, TournamentRegistration, TournamentStatus
-from models.registrationModels import Participant, RegistrationError, RegistrationField
+from models.registrationModels import Participant, RegistrationError
 
 from controllers.playerController import participantController
 from games import factories

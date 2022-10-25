@@ -2,15 +2,12 @@ from interactions import CommandContext, Option, OptionType
 from models.registrationModels import RegistrationTemplate
 from models.tournamentModels import Tournament
 
-from utils import OptionTypes
-
 from local.names import StringsNames
 
 from contextExtentions.customContext import ServerContext, customContext
 from controllers.tournamentController import tournamentController
 from controllers.adminContoller import adminCommand
 
-from bot import botGuilds, bot
 from commands.tournamentCommands import tournamentBaseCommand
 
 @tournamentBaseCommand.subcommand(

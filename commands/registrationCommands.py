@@ -1,31 +1,23 @@
 from interactions import Channel, ChannelType, CommandContext, Guild, LibraryException, Message, Option, OptionType, Role
 import interactions
 from dataclasses import asdict
-from datetime import datetime
-from io import StringIO
 from pprint import pformat, pprint
 from copy import deepcopy
 import logging
 
-import requests
-
 from bot import bot, botGuilds
 from contextExtentions.contextServer import getServerGuild
-from httpClient import getAllUsersFromReaction
-from local.lang.utils import utilStrs
 from contextExtentions.customContext import ServerContext, customContext
 from local.names import StringsNames
 
-from models.tournamentModels import Tournament, TournamentRegistration, TournamentStatus
-from models.registrationModels import Participant, RegistrationField, RegistrationTemplate, RegistrationError
+from models.tournamentModels import Tournament, TournamentStatus
+from models.registrationModels import RegistrationField, RegistrationError
 
 from controllers.adminContoller import adminCommand
-from controllers.playerController import participantController
 from controllers.serverController import serverController
 from controllers.tournamentController import tournamentController
-from games import factories
 
-from utils import OptionTypes, extractQuotedSubstrs, paginatorButtons
+from utils import OptionTypes, extractQuotedSubstrs
 
 
 # structure follows {channelId: tournamentId}
