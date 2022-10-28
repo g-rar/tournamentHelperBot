@@ -1,4 +1,8 @@
-dotenv
-discord-py-slash-command
-discord-interactions
+requests
+python-dotenv
+discord-py-interactions
+dinteractions-Paginator
+interactions-files
+interactions-wait-for
 pandas
+pymongo
