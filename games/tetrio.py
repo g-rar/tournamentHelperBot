@@ -3,7 +3,6 @@ from typing import List
 import aiohttp
 from interactions import CommandContext, Option
 
-import pandas as pd
 import asyncio
 from commands.tournamentCommands import tournamentBaseCommand
 
@@ -37,6 +36,7 @@ class TetrioLeague(BaseModel):
     rank:str
     prev_rank:str
     next_rank:str
+    bestrank:str
     apm:float
     pps:float
     vs:float
@@ -219,11 +219,11 @@ class TetrioController(BaseGameController):
             if (tournament.rankTop and
                     tetrioRanks.index(player.info.league.rank) > tetrioRanks.index(tournament.rankTop)):
                 raise RegistrationError("Overranked", self.OVERRANKED)
-            for new in news:
-                if rankTop and new["type"] == "rankup" and tetrioRanks.index(new["data"]["rank"]) > tetrioRanks.index(rankTop):
-                    raise RegistrationError("Overranked", self.OVERRANKED)
-                if rankBottom and new["type"] == "rankup" and tetrioRanks.index(new["data"]["rank"]) >= tetrioRanks.index(rankBottom):
-                    achievedOverBottom = True
+            bestrank = player.info.league.bestrank
+            if rankTop and tetrioRanks.index(bestrank) > tetrioRanks.index(rankTop):
+                raise RegistrationError("Overranked", self.OVERRANKED)
+            if rankBottom and tetrioRanks.index(bestrank) >= tetrioRanks.index(rankBottom):
+                achievedOverBottom = True                
             if (rankBottom and not achievedOverBottom and
                     tetrioRanks.index(player.info.league.rank) < tetrioRanks.index(rankBottom)):
                 raise RegistrationError("Underranked", self.UNDERRANKED)
@@ -241,9 +241,9 @@ class TetrioController(BaseGameController):
             async with s.get(api + f"users/{username}/records") as r:
                 return r.status, await r.json()
 
-        async def getPlayerNews(id:str):
-            async with s.get(api + f"news/user_{id}") as r:
-                return r.status, await r.json()
+        # async def getPlayerNews(id:str):
+        #     async with s.get(api + f"news/user_{id}") as r:
+        #         return r.status, await r.json()
 
         if session:
             s = session
@@ -280,12 +280,9 @@ class TetrioController(BaseGameController):
 
             player:TetrioPlayer = TetrioPlayer.fromDict(playerDict)
 
-            resCode, reqRecData = await getPlayerNews(player._id)
-
-            playerNews = reqRecData["data"]["news"]
             if not session:
                 await s.close()
-            return player, playerNews
+            return player
         except Exception as e:
             if not session:
                 await s.close()
