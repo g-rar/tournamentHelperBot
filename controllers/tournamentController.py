@@ -49,7 +49,7 @@ class TournamentController:
         obj = factories.getGameTournament(c["game"], c)
         return obj
 
-    def getTournamentsForServer(self, serverId:Union[int, Snowflake]) -> list[Tournament]:
+    def getTournamentsForServer(self, serverId:Union[int, Snowflake]) -> List[Tournament]:
         c = self.collection.find({"hostServerId":int(serverId)}, sort=[("createdAt", -1)])
         d = getQueryAsList(c) if c is not None else []
         res = list(map(lambda x: factories.getGameTournament(x.get("game"), x), d))

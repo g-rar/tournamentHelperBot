@@ -1,3 +1,4 @@
+from typing import List
 from pymongo.cursor import Cursor
 import re
 import asyncio
@@ -70,7 +71,7 @@ def getQueryAsList(c:Cursor) -> list:
     ret = [val for val in c]
     return ret
 
-def extractQuotedSubstrs(s) -> list[str]:
+def extractQuotedSubstrs(s) -> List[str]:
     patter = r'"([^"]*)"'
 
     matches = re.findall(patter, s)

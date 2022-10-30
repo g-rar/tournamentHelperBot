@@ -1,3 +1,4 @@
+from typing import List
 from interactions import CommandContext, File, Member, Option, OptionType, Role
 import interactions
 from interactions.ext import files
@@ -58,7 +59,7 @@ async def registerPlayerWithDiscord(ctx:CommandContext, scx:ServerContext, tourn
         await scx.sendLocalized(StringsNames.TOURNAMENT_UNEXISTING, name=tournament)
         return
     content = extractQuotedSubstrs(msg_content)
-    fields:list[RegistrationField] = deepcopy(tournamentData.registrationTemplate.participantFields)
+    fields:List[RegistrationField] = deepcopy(tournamentData.registrationTemplate.participantFields)
     if fields:
         for i in range(len(content)):
             fields[i].value = content[i]

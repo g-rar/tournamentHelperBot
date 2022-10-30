@@ -1,4 +1,5 @@
 import asyncio
+from typing import List
 from interactions import Channel, ChannelType, CommandContext, Embed, File, Guild, Message, MessageReaction, Option, OptionType
 from interactions.ext.paginator import Page, Paginator
 from interactions.ext import files, wait_for
@@ -74,7 +75,7 @@ async def getTournaments(ctx: CommandContext, scx: ServerContext, tournament:str
         else:
             await scx.sendLocalized(StringsNames.TOURNAMENT_UNEXISTING, name=tournament)
         return
-    tournaments:list[Tournament] = tournamentController.getTournamentsForServer(ctx.guild_id)
+    tournaments:List[Tournament] = tournamentController.getTournamentsForServer(ctx.guild_id)
     if len(tournaments) > 20:
         pageList = []
         embedTournaments = []

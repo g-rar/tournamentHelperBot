@@ -116,7 +116,7 @@ class ParticipantController:
             return None
         return Participant.fromDict(partDict)
 
-    def deleteParticipants(self, participants:list[Participant]) -> bool:
+    def deleteParticipants(self, participants:List[Participant]) -> bool:
         if participants == []:
             return True
         res = self.collection.bulk_write([DeleteOne({"_id": p._id}) for p in participants])

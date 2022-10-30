@@ -1,3 +1,4 @@
+from typing import List
 from interactions import Channel, ChannelType, CommandContext, Guild, LibraryException, Message, Option, OptionType, Role
 import interactions
 from dataclasses import asdict
@@ -161,7 +162,7 @@ async def on_message(msg:Message):
             else None
 
     content = extractQuotedSubstrs(msg.content)
-    fields: list[RegistrationField] = deepcopy(tournament.registrationTemplate.participantFields)
+    fields: List[RegistrationField] = deepcopy(tournament.registrationTemplate.participantFields)
     try:
         if fields:
             for i in range(len(content)):
