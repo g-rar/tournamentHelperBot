@@ -140,7 +140,6 @@ async def setupMessageRegistration(tournament:Tournament): # this asumes that re
         #prevent from setting two identical listeners
         return
     openRegistrationChannels[tournament.registration.channelId] = tournament._id
-    pprint(openRegistrationChannels)
 
 @bot.event(name="on_message_create")
 async def on_message(msg:Message):
@@ -175,17 +174,17 @@ async def on_message(msg:Message):
                 await msg.member.add_role(role)
         else:
             logging.error("Failed to upload to db.")
-            await server.sendLog(StringsNames.PARTICIPANT_REGISTRATION_FAILED, name=msg.member.nick, tournament=tournament.name, reason="DB UPLOAD ERROR")
+            await server.sendLog(StringsNames.PARTICIPANT_REGISTRATION_FAILED, name=msg.member.name, tournament=tournament.name, reason="DB UPLOAD ERROR")
             await msg.create_reaction("🆘")
     except RegistrationError as e:
         await msg.create_reaction("❌")
-        await server.sendLog(StringsNames.PARTICIPANT_REGISTRATION_FAILED, name=msg.member.nick, tournament=tournament.name, reason=str(e))
+        await server.sendLog(StringsNames.PARTICIPANT_REGISTRATION_FAILED, name=msg.member.name, tournament=tournament.name, reason=str(e))
     except IndexError as e:
         await msg.create_reaction("❌")
-        await server.sendLog(StringsNames.PARTICIPANT_REGISTRATION_FAILED, name=msg.member.nick, tournament=tournament.name, reason="Registration Fields don't match tournament template")
+        await server.sendLog(StringsNames.PARTICIPANT_REGISTRATION_FAILED, name=msg.member.name, tournament=tournament.name, reason="Registration Fields don't match tournament template")
     except LibraryException as e:
         await msg.create_reaction("🤷‍♂️")
         if e.code == 50013: # 'Missing Permissions'
-            await server.sendLog(StringsNames.CANT_ASSIGN_ROLE_TO_USER, username=msg.member.nick, role=role.name)
+            await server.sendLog(StringsNames.CANT_ASSIGN_ROLE_TO_USER, username=msg.member.name, role=role.name)
         else:
-            await server.sendLog(StringsNames.PARTICIPANT_REGISTRATION_FAILED, username=msg.member.nick, tournament=tournament.name, reason=str(e))
+            await server.sendLog(StringsNames.PARTICIPANT_REGISTRATION_FAILED, username=msg.member.name, tournament=tournament.name, reason=str(e))

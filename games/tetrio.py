@@ -36,11 +36,11 @@ class TetrioLeague(BaseModel):
     rank:str
     prev_rank:str
     next_rank:str
-    bestrank:str
     apm:float
     pps:float
     vs:float
     rating:float
+    bestrank:str = 'z'
 
     @staticmethod
     def fromDict(d):
@@ -194,8 +194,7 @@ class TetrioController(BaseGameController):
     async def validatePlayer(self, username:str, tournament:TetrioTournament, review=False, session=None, override=False) -> TetrioPlayer:
         try:
             player:TetrioPlayer  
-            news:dict 
-            player, news = await TetrioController.getTetrioPlayer(username, session)
+            player = await TetrioController.getTetrioPlayer(username, session)
         except:
             raise RegistrationError("Invalid playername", self.INVALID_PLAYER)
         

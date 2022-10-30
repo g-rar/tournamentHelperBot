@@ -74,7 +74,7 @@ async def registerPlayerWithDiscord(ctx:CommandContext, scx:ServerContext, tourn
                     parent_id=tournamentData.hostServerId
                 )
                 await member.add_role(regRole)
-            await scx.sendLocalized(StringsNames.PLAYER_REGISTERED, username=member.nick, tournament=tournament)
+            await scx.sendLocalized(StringsNames.PLAYER_REGISTERED, username=member.name, tournament=tournament)
         else:
             await scx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
     except Exception as e:

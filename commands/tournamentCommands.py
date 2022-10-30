@@ -114,7 +114,7 @@ async def getTournaments(ctx: CommandContext, scx: ServerContext, tournament:str
             timestamp=datetime.utcnow())
         embed.set_thumbnail(url=guild.icon_url)
         embed.set_footer(text="TournamentHelper Bot")
-        await ctx.send(embed=embed)
+        await ctx.send(embeds=[embed])
 
 
 @bot.command(name="check-in", scope=botGuilds)

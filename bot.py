@@ -27,7 +27,7 @@ wait_for.setup(bot=bot)
 files.setup(bot)
 
 CONF = BotSettings()
-botGuilds = None if not CONF.DEV else CONF.TEST_GUILDS
+botGuilds = interactions.MISSING if not CONF.DEV else CONF.TEST_GUILDS
 devGuilds = list(map(lambda x: int(x), os.getenv("DEV_GUILDS").split(","))) if os.getenv("DEV_GUILDS") else []
 
 
