@@ -31,11 +31,13 @@ class ServerGuild(Server):
                 logging.error(f"Error when getting string '{s}' with kwargs '{kwargs}': ", e)
         return s
 
-    async def sendLog(self, s, **kwargs):
+    async def sendLog(self, s:str, localize=True, **kwargs):
         if not self.logChannel:
             return
         logChannel:Channel = await interactions.get(bot, Channel, object_id=self.logChannel)
-        msg = self.getStr(s, **kwargs)
+        msg = s
+        if localize:
+            msg = self.getStr(s, **kwargs)            
         return await logChannel.send(msg)
     
 async def getServerGuild(server:Server, guild:Union[Guild, int, Snowflake]):

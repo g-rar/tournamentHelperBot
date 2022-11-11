@@ -7,12 +7,12 @@ from copy import deepcopy
 import logging
 
 from bot import bot, botGuilds
-from contextExtentions.contextServer import getServerGuild
+from contextExtentions.contextServer import ServerGuild, getServerGuild
 from contextExtentions.customContext import ServerContext, customContext
 from local.names import StringsNames
 
 from models.tournamentModels import Tournament, TournamentStatus
-from models.registrationModels import RegistrationField, RegistrationError
+from models.registrationModels import Participant, RegistrationField, RegistrationError
 
 from controllers.adminContoller import adminCommand
 from controllers.serverController import serverController
@@ -141,6 +141,19 @@ async def setupMessageRegistration(tournament:Tournament): # this asumes that re
         return
     openRegistrationChannels[tournament.registration.channelId] = tournament._id
 
+def getWarningsMsg(server:ServerGuild, playerData:Participant):
+    warnings: list[str] = playerData.playerData.warnings
+    warning_msg = server.getStr(StringsNames.PARTICIPANT_HAS_WARNINGS, username=playerData.discordDisplayname)
+    for warning in warnings:
+        warning:str
+        str_name, *args = warning.split(':')
+        try:
+            warning_item = server.getStr(str_name).format(*args)
+            warning_msg += f"- {warning_item}\n"
+        except Exception:
+            warning_msg += f"- {str_name}\n" 
+    return warning_msg
+
 @bot.event(name="on_message_create")
 async def on_message(msg:Message):
     if int(msg.channel_id) not in openRegistrationChannels:
@@ -168,10 +181,14 @@ async def on_message(msg:Message):
                 fields[i].value = content[i]
         else:
             fields.append(RegistrationField("msg", OptionTypes.STRING, True, value=msg.content))
-        if await tournamentController.registerPlayer(tournament, fields, msg.author):
+        playerData = await tournamentController.registerPlayer(tournament, fields, msg.author)
+        if playerData:
             await msg.create_reaction("✅")
             if role:
                 await msg.member.add_role(role)
+            if len(playerData.playerData.warnings) != 0:
+                warnings_msg = getWarningsMsg(server, playerData)
+                await server.sendLog(warnings_msg, localize=False)
         else:
             logging.error("Failed to upload to db.")
             await server.sendLog(StringsNames.PARTICIPANT_REGISTRATION_FAILED, name=msg.member.name, tournament=tournament.name, reason="DB UPLOAD ERROR")

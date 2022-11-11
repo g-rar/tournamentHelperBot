@@ -49,9 +49,12 @@ class EnglishStrs(Enum):
     REGISTRATION_CLOSED = "Sign ups for the tournament `{tournament}` have been closed."
     REGISTRATION_CLOSED_ALREADY = "Sign ups for the tournament `{tournament}` were closed already."
     REG_CHANNEL_NOT_FOUND = "I couldn't find the registration channel that was set up for the tournament `{tournament}`. I'm going to close sign ups for this tournament. You can reopen them at any time"
+    PARTICIPANT_HAS_WARNINGS = "The participant `{username}` has the following warnings:\n"
     PARTICIPANTS_ROLE_REMOVED = "The role \"@{rolename}\" was also removed from the disqualified servers."
 
     #Tetr.io
     UNEXISTING_TETRIORANK = "There's no `{rank}` rank (._.`)・・・"
     TETRIORANKCAP_LOWERTHAN_RANKFLOOR = "The rank-cap `{rank_cap}` can't be lower than the rank-floor `{rank_floor}` (._.`)・・・"
     TETRIOTRCAP_LOWERTHAN_TRFLOOR = "The tr-cap `{tr_cap}` can't be lower than the tr-floor `{tr_floor}` (._.`)・・・"
+    #Tetr.io warnings
+    TETRIO_INACTIVE_FOR_A_WEEK = "This player hasn't played a tetra league game since `{}` days ago." 

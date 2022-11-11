@@ -1,4 +1,4 @@
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from models.tournamentModels import Tournament
 from models.registrationModels import Participant, RegistrationError
 from typing import List
@@ -77,6 +77,7 @@ class BaseGameController:
 @dataclass
 class BasePlayer:
     game:str = None
+    warnings: list[str] = field(default_factory=list)
 
     @staticmethod
     def fromDict(d):

@@ -108,7 +108,7 @@ class ParticipantController:
             fields=fields,
             playerData=playerData
         )
-        return self.addParticipant(newParticipant)
+        return newParticipant if self.addParticipant(newParticipant) else False
 
     def deleteParticipant(self, tournamentId:ObjectId, playerDiscordId:Union[int,Snowflake]) -> Participant:
         partDict = self.collection.find_one_and_delete({"discordId":int(playerDiscordId),"tournament":tournamentId})

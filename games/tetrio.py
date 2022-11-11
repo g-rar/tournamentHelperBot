@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import datetime
 from typing import List
 import aiohttp
 from interactions import CommandContext, Option
@@ -101,6 +102,7 @@ class TetrioPlayer(BasePlayer):
     _id:str = None
     info:TetrioPlayerInfo = None
     records:TetrioPlayerRecords = None
+    latest_game:str = None
     game:str = "tetr.io"
 
     @staticmethod
@@ -240,6 +242,10 @@ class TetrioController(BaseGameController):
             async with s.get(api + f"users/{username}/records") as r:
                 return r.status, await r.json()
 
+        async def getPlayerLatestMatches(id:str):
+            async with s.get(api + f"/streams/league_userrecent_{id}") as r:
+                return r.status, await r.json()
+
         # async def getPlayerNews(id:str):
         #     async with s.get(api + f"news/user_{id}") as r:
         #         return r.status, await r.json()
@@ -278,6 +284,16 @@ class TetrioController(BaseGameController):
             playerDict = {"info":playerData, "records":playerRecords}
 
             player:TetrioPlayer = TetrioPlayer.fromDict(playerDict)
+
+            # get latest matches
+            resCode, reqMatchData = await getPlayerLatestMatches(player.info._id)
+            if len(reqMatchData["data"]["records"]):
+                d = reqMatchData["data"]["records"][0]["ts"]
+                now = datetime.datetime.utcnow()
+                lastGame = datetime.datetime.strptime(d, '%Y-%m-%dT%H:%M:%S.%fZ')
+                dl = now - lastGame
+                if dl.days > 7:
+                    player.warnings.append(f"{StringsNames.TETRIO_INACTIVE_FOR_A_WEEK}:{dl.days}")
 
             if not session:
                 await s.close()

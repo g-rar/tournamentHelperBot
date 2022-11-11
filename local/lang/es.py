@@ -45,13 +45,16 @@ class SpanishStrs(Enum):
     PARTICIPANTS_DELETED = "Se han eliminado `{amount}` participantes:"
     PARTICIPANT_REGISTRATION_FAILED = "No se pudo registrar a `{name}` en el torneo `{tournament}`. Esta es la razón: `{reason}`"
     REGISTRATION_OPEN_CHAT = "Se ha abierto el registro para el torneo `{tournament}` en el chat {chat}."
-    REGISTRATION_OPEN_ALREADY = "El registro para el torneo `{tournament}` ya estaba abierto en el chat {chat}."
+    REGISTRATION_OPEN_ALREADY = "Ya el registro está abierto para el torneo `{tournament}` en el chat {chat}."
     REGISTRATION_CLOSED = "Se ha cerrado el registro para el torneo `{tournament}`."
     REGISTRATION_CLOSED_ALREADY = "El registro para el torneo `{tournament}` ya estaba cerrado."
     REG_CHANNEL_NOT_FOUND = "No pude encontrar el canal de registro para el torneo `{tournament}`. Voy a cerrar el registro para el torneo. Lo puedes volver a abrir en cualquier momento."
+    PARTICIPANT_HAS_WARNINGS = "El participante `{username}` tiene los siguientes warnings:\n"
     PARTICIPANTS_ROLE_REMOVED = "También se le ha quitado el rol \"@{rolename}\" a los participantes descalificados."
 
     #Tetr.io
     UNEXISTING_TETRIORANK = "No existe el rango `{rank}` (._.`)・・・"
     TETRIORANKCAP_LOWERTHAN_RANKFLOOR = "El rank-cap `{rank_cap}` no puede ser menor que el rank-floor `{rank_floor}` (._.`)・・・"
     TETRIOTRCAP_LOWERTHAN_TRFLOOR = "El tr-cap `{tr_cap}` no puede ser menor que el tr-floor `{tr_floor}` (._.`)・・・"
+    #Tetr.io warnings
+    TETRIO_INACTIVE_FOR_A_WEEK = "Este jugador no ha jugado un juego de tetra league desde hace `{}` días." 
