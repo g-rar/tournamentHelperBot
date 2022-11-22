@@ -57,4 +57,8 @@ class SpanishStrs(Enum):
     TETRIORANKCAP_LOWERTHAN_RANKFLOOR = "El rank-cap `{rank_cap}` no puede ser menor que el rank-floor `{rank_floor}` (._.`)・・・"
     TETRIOTRCAP_LOWERTHAN_TRFLOOR = "El tr-cap `{tr_cap}` no puede ser menor que el tr-floor `{tr_floor}` (._.`)・・・"
     #Tetr.io warnings
-    TETRIO_INACTIVE_FOR_A_WEEK = "Este jugador no ha jugado un juego de tetra league desde hace `{}` días." 
+    TETRIO_INACTIVE_FOR_A_WEEK = "Este jugador no ha jugado un juego de tetra league desde hace `{}` días."
+    TETRIO_PROMOTION_INMINENT = "Este jugador pronto va a subir de rango a `{}` si gana su siguiente juego de TL."
+    TETRIO_NEAR_PROMOTION = "Este jugador está cerca de subir de rango fuera del cap del torneo."
+    TETRIO_PLAYER_DECAYING = "La desviación de rating (RD) de este jugador está aumentando."
+    TETRIO_HIGH_RD = "Este jugador tiene una desviación de rating (RD) muy alta: `{}`." 

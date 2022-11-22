@@ -32,6 +32,9 @@ tetrioNamePttr = (
     r"(?=.*[a-z0-9].*)"        # has a letter or number somewhere
 )
 
+def _rankIndex(r:str):
+    return tetrioRanks.index(r)
+
 @dataclass
 class TetrioLeague(BaseModel):
     rank:str
@@ -41,7 +44,13 @@ class TetrioLeague(BaseModel):
     pps:float
     vs:float
     rating:float
+    prev_at:int = 0
+    next_at:int = 0
+    standing:int = 0
+    rd:float = 0.0
+    decaying:bool = False
     bestrank:str = 'z'
+    percentile_rank:str = 'z'
 
     @staticmethod
     def fromDict(d):
@@ -218,17 +227,37 @@ class TetrioController(BaseGameController):
         if not override and (rankTop or rankBottom):
             achievedOverBottom = False
             if (tournament.rankTop and
-                    tetrioRanks.index(player.info.league.rank) > tetrioRanks.index(tournament.rankTop)):
+                    _rankIndex(player.info.league.rank) > _rankIndex(tournament.rankTop)):
                 raise RegistrationError("Overranked", self.OVERRANKED)
             bestrank = player.info.league.bestrank
-            if rankTop and tetrioRanks.index(bestrank) > tetrioRanks.index(rankTop):
+            if rankTop and _rankIndex(bestrank) > _rankIndex(rankTop):
                 raise RegistrationError("Overranked", self.OVERRANKED)
-            if rankBottom and tetrioRanks.index(bestrank) >= tetrioRanks.index(rankBottom):
+            if rankBottom and _rankIndex(bestrank) >= _rankIndex(rankBottom):
                 achievedOverBottom = True                
             if (rankBottom and not achievedOverBottom and
-                    tetrioRanks.index(player.info.league.rank) < tetrioRanks.index(rankBottom)):
+                    _rankIndex(player.info.league.rank) < _rankIndex(rankBottom)):
                 raise RegistrationError("Underranked", self.UNDERRANKED)
 
+        # get player warnings
+        if ((tournament.rankTop or tournament.rankTop or tournament.trTop or tournament.trBottom) 
+                and player.info.league.rd > 90):
+            # add RD warning if tournament has restrictions, otherwise not needed
+            player.warnings.append(f"{StringsNames.TETRIO_HIGH_RD}:{player.info.league.rd}")
+
+        if tournament.rankTop:
+            if  (_rankIndex(player.info.league.rank) == _rankIndex(tournament.rankTop) and
+                    _rankIndex(player.info.league.percentile_rank) > _rankIndex(player.info.league.rank)):
+                player.warnings.append(f"{StringsNames.TETRIO_NEAR_PROMOTION}:{player.info.league.percentile_rank.upper()}")
+            
+            if (_rankIndex(player.info.league.rank) == _rankIndex(tournament.rankTop) and
+                    player.info.league.decaying):
+                player.warnings.append(StringsNames.TETRIO_PLAYER_DECAYING)
+
+            if (player.info.league.standing - player.info.league.next_at 
+                    < (player.info.league.prev_at - player.info.league.next_at) / 6 ):
+                # add warning for standing 5/6'ths of the way to surpass top boundry
+                player.warnings.append(StringsNames.TETRIO_NEAR_PROMOTION)
+        
         return player
 
     async def getTetrioPlayer(username:str, session):
@@ -343,7 +372,7 @@ async def addTournamentTetrio(ctx:CommandContext, scx:ServerContext, name:str, r
         if rank_floor not in tetrioRanks:
             await scx.sendLocalized(StringsNames.UNEXISTING_TETRIORANK, rank=rank_floor)
             return
-    if (rank_cap and rank_floor) and tetrioRanks.index(rank_floor) > tetrioRanks.index(rank_cap):
+    if (rank_cap and rank_floor) and _rankIndex(rank_floor) > _rankIndex(rank_cap):
         await scx.sendLocalized(StringsNames.TETRIORANKCAP_LOWERTHAN_RANKFLOOR, rank_cap=rank_cap, rank_floor=rank_floor)
         return
     

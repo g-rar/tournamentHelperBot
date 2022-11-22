@@ -58,3 +58,7 @@ class EnglishStrs(Enum):
     TETRIOTRCAP_LOWERTHAN_TRFLOOR = "The tr-cap `{tr_cap}` can't be lower than the tr-floor `{tr_floor}` (._.`)・・・"
     #Tetr.io warnings
     TETRIO_INACTIVE_FOR_A_WEEK = "This player hasn't played a tetra league game since `{}` days ago." 
+    TETRIO_PROMOTION_INMINENT = "This player will be ranked up to `{}` on next tetra league victory."
+    TETRIO_NEAR_PROMOTION = "This player is close to ranking up and out of the tournament."
+    TETRIO_PLAYER_DECAYING = "The rating deviation (RD) of this player is increasing." 
+    TETRIO_HIGH_RD = "This player has a high rating deviation (RD): `{}`." 
