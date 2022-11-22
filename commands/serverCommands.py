@@ -102,7 +102,6 @@ async def setLogChannel(ctx: CommandContext, scx:ServerContext, channel:Channel)
     else:
         await scx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
 
-# TODO getreactions, probably will change with the library
 @bot.command(
     name="get_reactions",
     description="Get the discord tags of the users who reacted to a message.",

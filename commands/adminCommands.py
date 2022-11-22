@@ -37,7 +37,6 @@ async def addOperatorRole(ctx:CommandContext, scx: ServerContext, role:Role):
     res = serverController.updateServer(server)
     if res:
         await scx.sendLocalized(StringsNames.ADDED_OPERATOR_ROLE, role=role.name)
-        # TODO check how to get members from role
         roleMemebers = interactions.search_iterable(ctx.guild.members, lambda m: int(role.id) in m.roles)
         if len(roleMemebers) > 10:
             await scx.sendLocalized(StringsNames.MANY_PEOPLE_WITH_ROLE, rolecount=len(role.members))

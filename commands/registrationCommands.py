@@ -91,7 +91,7 @@ async def closeRegistration(ctx:CommandContext, scx:ServerContext, tournament:st
     if tournamentObj is None:
         await scx.sendLocalized(StringsNames.TOURNAMENT_UNEXISTING, name=tournament)
         return
-    # TODO get from obj the registrationMethod and remove correspondingly
+    # TODO [multiple registration methods] get from obj the registrationMethod and remove correspondingly
     if tournamentObj.registration.status == TournamentStatus.REGISTRATION_CLOSED:
         await scx.sendLocalized(StringsNames.REGISTRATION_CLOSED_ALREADY, tournament=tournament)
         return
@@ -114,7 +114,7 @@ async def setListenersBackUp():
     logging.info("Setting up tournament listeners...")
     for tournament in tournaments:
         try:
-            # TODO when other registration method is implemented add listener setup here
+            # TODO [multiple registration methods] add listener setup here
             if tournament.registration.status == TournamentStatus.REGISTRATION_OPEN_BY_MSG:
                 regChannel:Channel = await interactions.get(bot, Channel, object_id=tournament.registration.channelId)
                 if not regChannel: #channel got deleted or something

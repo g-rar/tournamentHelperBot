@@ -18,11 +18,6 @@ from games import factories
 
 from utils import getQueryAsList
 
-# TODO for plus games there are mandatory fields and custom field validation
-# TODO if its not plus game theres a default valitador (for data types at least)
-# TODO if theres no template it only asks for the plus game fields and/or discord info.
-
-
 class TournamentController:
 
     collectionStr:str = "TOURNAMENT"
@@ -79,8 +74,6 @@ class TournamentController:
     def deleteTournament(self, tournament:Tournament) -> bool:
         res = self.collection.find_one_and_delete({"_id":tournament._id})
         return bool(res)
-
-    # TODO need to add method to register player without it being discord member
 
     async def registerPlayer(self, tournament:Tournament, fields:list, member:User = None, displayName:str = None, overrideReq:bool = False):
         if tournament.registration.status == TournamentStatus.REGISTRATION_CLOSED:

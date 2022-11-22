@@ -19,8 +19,6 @@ class BotSettings:
     TEST_GUILDS = testGuilds
     DEV = bool(os.getenv("DEV"))
 
-# TODO add prefifx to commands that use it
-
 bot = interactions.Client(token= BotSettings.TOKEN, intents=Intents.ALL)
 httpClient = interactions.HTTPClient(BotSettings.TOKEN)
 wait_for.setup(bot=bot)

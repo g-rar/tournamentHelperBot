@@ -66,11 +66,11 @@ async def deleteTournament(ctx:CommandContext, scx:ServerContext, tournament:str
 )
 @customContext
 async def getTournaments(ctx: CommandContext, scx: ServerContext, tournament:str = None):
-    #TODO this can be further prettyfied
     guild:Guild = ctx.guild
     if tournament:
         tournamentData = tournamentController.getTournamentFromName(int(guild.id), tournament)
         if tournamentData:
+            #TODO this can be further prettyfied
             await ctx.send(utilStrs.JS.format(pformat(asdict(tournamentData))))
         else:
             await scx.sendLocalized(StringsNames.TOURNAMENT_UNEXISTING, name=tournament)
@@ -82,7 +82,7 @@ async def getTournaments(ctx: CommandContext, scx: ServerContext, tournament:str
         page = 1
         while len(tournaments) != 0:
             tournament = tournaments.pop(0)
-            tournamentStr = ' - `' + tournament.name.replace("_","\\_") + '`'
+            tournamentStr = f' - `{tournament.name}`'
             if tournament.registration.status != TournamentStatus.CHECK_IN_CLOSED:
                 tournamentStr += " [ 📝 ]"
             embedTournaments.append(tournamentStr)
