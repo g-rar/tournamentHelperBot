@@ -79,6 +79,10 @@ class ParticipantController:
                 obj.playerData = getGamePlayerData(obj.playerData.get("game"), obj.playerData)
         return res
 
+    def getParticipantCountForTournament(self, tournamentId:ObjectId) -> int:
+        c = self.collection.count_documents({ "tournament": tournamentId })
+        return c if c else 0 
+
     def getParticipants(self) -> List[Participant]:
         c = self.collection.find()
         d = getQueryAsList(c) if c is not None else []

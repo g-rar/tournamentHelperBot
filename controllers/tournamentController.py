@@ -2,7 +2,7 @@
 # from discord.user import User
 from dataclasses import asdict
 from typing import List, Union
-from interactions import Snowflake, User
+from interactions import Embed, EmbedField, Snowflake, User
 
 from pymongo.collection import Collection
 from pymongo.database import Database
@@ -16,7 +16,9 @@ from models.registrationModels import Participant, RegistrationError
 from controllers.playerController import participantController
 from games import factories
 
-from utils import getQueryAsList
+from local.names import StringsNames as strs
+
+from utils import getQueryAsList, getStr
 
 class TournamentController:
 
@@ -99,6 +101,35 @@ class TournamentController:
         if update:
             participantController.updateParticipant(participant)
         return participant
+
+        # TODO do this
+    def getTournamentEmbed(self, tournament:Tournament, lang:str):
+        base = Embed(title=tournament.name, color=0xFFBA00, fields=[
+                EmbedField(
+                    name=f" {getStr(strs.CREATED_AT, lang)}:", 
+                    value=f"<t:{int((tournament.createdAt.timestamp()))}:f>", 
+                    inline=False
+                ),
+                EmbedField(
+                    name=f" {getStr(strs.REGISTRATION, lang)}:", 
+                    value=getStr(strs.OPEN if tournament.registration.status else strs.CLOSED, lang), 
+                    inline=True
+                ),
+                # EmbedField(name="\u200b", value="\u200b", inline=False),
+                EmbedField(
+                    name=f" {getStr(strs.PARTICIPANT_COUNT, lang)}:",
+                    value= f"[   {participantController.getParticipantCountForTournament(tournament._id)}   ]", #TODO call tournament controller on this
+                    inline=True
+                ),
+                EmbedField(
+                    name=f"{getStr(strs.GAME, lang)}:",
+                    value=tournament.game.capitalize() + "\n\u200b",
+                    inline=True
+                )
+            ])
+        gameController = factories.getControllerFor(tournament)
+        gameController.addFieldsToEmbed(base, tournament, lang)
+        return base
 
 tournamentController = TournamentController(db)
 

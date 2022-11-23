@@ -1,4 +1,6 @@
 from dataclasses import asdict, dataclass, field
+
+from interactions import Embed
 from models.tournamentModels import Tournament
 from models.registrationModels import Participant, RegistrationError
 from typing import List
@@ -73,6 +75,9 @@ class BaseGameController:
             return bool
         else:
             return None
+    
+    def addFieldsToEmbed(self, embed:Embed, tournament:Tournament, lang:str):
+        pass
 
 @dataclass
 class BasePlayer:

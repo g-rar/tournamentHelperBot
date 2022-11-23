@@ -14,6 +14,11 @@ class SpanishStrs(Enum):
     MEMBER_NOT_FOUND_BY_ID = "No se encontró el usuario con id: `{id}`"
     REACTION_TIMEOUT = "Se acabó el tiempo para reaccionar. Hay un límite de {time} segundos. Intenta de nuevo (＾v＾u)..."
     MAY_TAKE_LONG = "Esto podría durar un rato (＾v＾u)..."
+    GAME = "Juego"
+    CREATED_AT = "Creado el"
+    REGISTRATION = "Registro"
+    OPEN = "📝 Abierto"
+    CLOSED = "❌ Cerrado"
 
     #Server
     CANT_REGISTER_DM = "Este no es un servidor. No uno que pueda registrar al menos ¯\\\_(ツ)_/¯"
@@ -46,9 +51,10 @@ class SpanishStrs(Enum):
     PARTICIPANT_REGISTRATION_FAILED = "No se pudo registrar a `{name}` en el torneo `{tournament}`. Esta es la razón: `{reason}`"
     REGISTRATION_OPEN_CHAT = "Se ha abierto el registro para el torneo `{tournament}` en el chat {chat}."
     REGISTRATION_OPEN_ALREADY = "Ya el registro está abierto para el torneo `{tournament}` en el chat {chat}."
-    REGISTRATION_CLOSED = "Se ha cerrado el registro para el torneo `{tournament}`."
+    REGISTRATION_CLOSED_MSG = "Se ha cerrado el registro para el torneo `{tournament}`."
     REGISTRATION_CLOSED_ALREADY = "El registro para el torneo `{tournament}` ya estaba cerrado."
     REG_CHANNEL_NOT_FOUND = "No pude encontrar el canal de registro para el torneo `{tournament}`. Voy a cerrar el registro para el torneo. Lo puedes volver a abrir en cualquier momento."
+    PARTICIPANT_COUNT = "Cuenta de participantes"
     PARTICIPANT_HAS_WARNINGS = "El participante `{username}` tiene los siguientes warnings:\n"
     PARTICIPANTS_ROLE_REMOVED = "También se le ha quitado el rol \"@{rolename}\" a los participantes descalificados."
 

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import datetime
 from typing import List
 import aiohttp
-from interactions import CommandContext, Option
+from interactions import CommandContext, Embed, Option
 
 import asyncio
 from commands.tournamentCommands import tournamentBaseCommand
@@ -164,6 +164,28 @@ class TetrioController(BaseGameController):
         base["Blitz"] = player.records.blitzScore
         base["Tetr.io_ID"] = player.info._id
         return base
+
+    def addFieldsToEmbed(self, embed:Embed, tournament:TetrioTournament, lang:str):
+        embed.add_field(
+            name="Rank cap:",
+            value=tournament.rankTop.upper() if tournament.rankTop else "N/A",
+            inline=True
+        )
+        embed.add_field(
+            name="Rank bottom:",
+            value=tournament.rankBottom.upper() if tournament.rankBottom else "N/A",
+            inline=True
+        )
+        embed.add_field(
+            name="TR cap:",
+            value=tournament.trTop if tournament.trTop else "N/A",
+            inline=True
+        )
+        embed.add_field(
+            name="TR bottom:",
+            value=tournament.trBottom if tournament.trBottom else "N/A",
+            inline=True
+        )
 
     async def validateFields(self, fields:List[RegistrationField], tournament:TetrioTournament, review=False, session=None, override=False):
         newFields = []

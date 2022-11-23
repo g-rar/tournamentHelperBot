@@ -71,7 +71,9 @@ async def getTournaments(ctx: CommandContext, scx: ServerContext, tournament:str
         tournamentData = tournamentController.getTournamentFromName(int(guild.id), tournament)
         if tournamentData:
             #TODO this can be further prettyfied
-            await ctx.send(utilStrs.JS.format(pformat(asdict(tournamentData))))
+            e = tournamentController.getTournamentEmbed(tournamentData, scx.server.language)
+            e.set_thumbnail(ctx.guild.icon_url)
+            await ctx.send(embeds=e)
         else:
             await scx.sendLocalized(StringsNames.TOURNAMENT_UNEXISTING, name=tournament)
         return

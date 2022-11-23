@@ -21,7 +21,7 @@ from commands.tournamentCommands import tournamentBaseCommand
     ])
 @adminCommand
 @customContext
-async def addTournamentPlain(ctx:CommandContext, scx:ServerContext, name:str, game:str="🎮"):
+async def addTournamentPlain(ctx:CommandContext, scx:ServerContext, name:str, game:str="."):
     if ctx.guild_id is None:
         await scx.sendLocalized(StringsNames.NOT_FOR_DM)
         return

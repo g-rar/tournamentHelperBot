@@ -14,6 +14,11 @@ class EnglishStrs(Enum):
     MEMBER_NOT_FOUND_BY_ID = "Couldn't find user with id: `{id}`"
     REACTION_TIMEOUT = "Time for reacting is over. There's  a {time} seconds limit. Try again (＾v＾u)..."
     MAY_TAKE_LONG = "This may take a while (＾v＾u)..."
+    GAME = "Game"
+    CREATED_AT = "Created at"
+    REGISTRATION = "Registration"
+    OPEN = "📝 Open"
+    CLOSED = "❌ Closed"
 
     #Server
     CANT_REGISTER_DM = "This is not a server. Not one that can be registered anyways ¯\\\_(ツ)_/¯"
@@ -46,9 +51,10 @@ class EnglishStrs(Enum):
     PARTICIPANT_REGISTRATION_FAILED = "The player `{name}` couldn't be registered in the tournament `{tournament}`. This is the reason: `{reason}`"
     REGISTRATION_OPEN_CHAT = "Sign ups for the tournament `{tournament}` are now open on the chat {chat}."
     REGISTRATION_OPEN_ALREADY = "Sign ups for the tournament `{tournament}` were already open on {chat}."
-    REGISTRATION_CLOSED = "Sign ups for the tournament `{tournament}` have been closed."
+    REGISTRATION_CLOSED_MSG = "Sign ups for the tournament `{tournament}` have been closed."
     REGISTRATION_CLOSED_ALREADY = "Sign ups for the tournament `{tournament}` were closed already."
     REG_CHANNEL_NOT_FOUND = "I couldn't find the registration channel that was set up for the tournament `{tournament}`. I'm going to close sign ups for this tournament. You can reopen them at any time"
+    PARTICIPANT_COUNT = "Participant count"
     PARTICIPANT_HAS_WARNINGS = "The participant `{username}` has the following warnings:\n"
     PARTICIPANTS_ROLE_REMOVED = "The role \"@{rolename}\" was also removed from the disqualified servers."
 

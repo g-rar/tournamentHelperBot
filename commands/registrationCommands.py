@@ -102,7 +102,7 @@ async def closeRegistration(ctx:CommandContext, scx:ServerContext, tournament:st
         tournamentObj.registration.status = TournamentStatus.REGISTRATION_CLOSED
         tournamentObj.registration.channelId = None
         tournamentController.updateRegistrationForTournament(tournamentObj, tournamentObj.registration)
-    await scx.sendLocalized(StringsNames.REGISTRATION_CLOSED, tournament=tournament)
+    await scx.sendLocalized(StringsNames.REGISTRATION_CLOSED_MSG, tournament=tournament)
 
 
 @bot.event(name='on_ready')
