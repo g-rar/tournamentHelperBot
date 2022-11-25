@@ -11,6 +11,7 @@ import commands
 # import to register game modules
 import games.tetrio
 import games.generic
+import games.jstris
 
 if os.getenv("DEV"):
     import devCommands

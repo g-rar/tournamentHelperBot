@@ -40,6 +40,7 @@ class EnglishStrs(Enum):
     TOURNAMENT_ADDED = "The tournament `{name}` has been added to the server, hope to see some exciting **{game}** games! ヾ(^▽^*)"
     TOURNAMENT_DELETED = "The tournament `{name}` has been deleted from the server. Looking forward to more in the future (＾u＾)ノ~"
     TOURNAMENT_EXISTS_ALREADY = "There's already a tournament named `{name}`, you should change it so people don't get confused (#｀-_ゝ-)"
+    TOURNAMENT_GAME_WRONG = "The tournament `{name}` is not for the game `{game}`. Make sure you chose the right game when creating the tournament (´。＿。｀)・・・"
     INPUT_CHECK_IN_REACTION = "React to this message with the emoji that players use to check in."
     NO_REACTION_IN_MSG = "There's no one who reacted with {reaction} :thinking:..."
 
@@ -56,7 +57,8 @@ class EnglishStrs(Enum):
     REG_CHANNEL_NOT_FOUND = "I couldn't find the registration channel that was set up for the tournament `{tournament}`. I'm going to close sign ups for this tournament. You can reopen them at any time"
     PARTICIPANT_COUNT = "Participant count"
     PARTICIPANT_HAS_WARNINGS = "The participant `{username}` has the following warnings:\n"
-    PARTICIPANTS_ROLE_REMOVED = "The role \"@{rolename}\" was also removed from the disqualified servers."
+    PARTICIPANTS_ROLE_REMOVED = "The role \"@{rolename}\" was also removed from the disqualified players."
+    NO_PARTICIPANTS_IN_TOURNAMENT = "There are no participants registered in the tournament `{tournament}` ¯\\\_(ツ)_/¯"
 
     #Tetr.io
     UNEXISTING_TETRIORANK = "There's no `{rank}` rank (._.`)・・・"
