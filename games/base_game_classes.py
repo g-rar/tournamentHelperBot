@@ -16,13 +16,13 @@ class BaseGameController:
     REQUIRED_FIELD:int = 2
     ALREADY_REGISTERED:int = 3
     REGISTRATION_CLOSED:int = 4
-    PLAYER_FIELDS:list = list()
-    TEAM_FIELDS:list = list()
 
     def __init__(self):
-        pass
+        self.PLAYER_FIELDS:list = list()
+        self.TEAM_FIELDS:list = list()
 
-    def getParticipantView(self, p:Participant):
+    @staticmethod
+    def getParticipantView(p:Participant):
         pDict = asdict(p)
         d = {k:v for k,v in pDict.items() if k in ["discordId", "discordDisplayname", "registeredTime"]}
         for field in p.fields:

@@ -226,7 +226,6 @@ class TetrioController(BaseGameController):
 
     async def validatePlayer(self, username:str, tournament:TetrioTournament, review=False, session=None, override=False) -> TetrioPlayer:
         try:
-            player:TetrioPlayer  
             player = await TetrioController.getTetrioPlayer(username, session)
         except:
             raise RegistrationError("Invalid playername", self.INVALID_PLAYER)
@@ -285,6 +284,11 @@ class TetrioController(BaseGameController):
     async def getTetrioPlayer(username:str, session):
         api = "https://ch.tetr.io/api/"
 
+        if session:
+            s = session
+        else:
+            s = aiohttp.ClientSession()
+
         async def getPlayerProfile(username:str):
             async with s.get(api + f"users/{username}") as r:
                 return r.status, await r.json()
@@ -301,10 +305,6 @@ class TetrioController(BaseGameController):
         #     async with s.get(api + f"news/user_{id}") as r:
         #         return r.status, await r.json()
 
-        if session:
-            s = session
-        else:
-            s = aiohttp.ClientSession()
 
         try:            
             usr = username.lower()
