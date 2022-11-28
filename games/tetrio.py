@@ -364,11 +364,11 @@ class TetrioController(BaseGameController):
     options=[
         Option(  name="name", description="The tournament's name.",
                         type=OptionTypes.STRING, required=True),
-        Option(  name="rank_cap", description="Maximun lowercase rank a player can have to register",
+        Option(  name="rank_cap", description="Maximum rank a player can have to register",
                         type=OptionTypes.STRING, required=False),
-        Option(  name="rank_floor", description="Minimum lowercase rank a player can have to register",
+        Option(  name="rank_floor", description="Minimum rank a player can have to register",
                         type=OptionTypes.STRING, required=False),
-        Option(  name="tr_cap", description="Maximun TR a player can have to register",
+        Option(  name="tr_cap", description="Maximum TR a player can have to register",
                         type=OptionTypes.INTEGER, required=False),
         Option(  name="tr_floor", description="Minimum TR a player can have to register",
                         type=OptionTypes.INTEGER, required=False)
