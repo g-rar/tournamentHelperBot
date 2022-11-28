@@ -268,14 +268,15 @@ class TetrioController(BaseGameController):
         if tournament.rankTop:
             if  (_rankIndex(player.info.league.rank) == _rankIndex(tournament.rankTop) and
                     _rankIndex(player.info.league.percentile_rank) > _rankIndex(player.info.league.rank)):
-                player.warnings.append(f"{StringsNames.TETRIO_NEAR_PROMOTION}:{player.info.league.percentile_rank.upper()}")
+                player.warnings.append(f"{StringsNames.TETRIO_PROMOTION_INMINENT}:{player.info.league.percentile_rank.upper()}")
             
             if (_rankIndex(player.info.league.rank) == _rankIndex(tournament.rankTop) and
                     player.info.league.decaying):
                 player.warnings.append(StringsNames.TETRIO_PLAYER_DECAYING)
 
-            if (player.info.league.standing - player.info.league.next_at 
-                    < (player.info.league.prev_at - player.info.league.next_at) / 6 ):
+            if (_rankIndex(player.info.league.rank) == _rankIndex(tournament.rankTop) and 
+                    (player.info.league.standing - player.info.league.next_at 
+                    < (player.info.league.prev_at - player.info.league.next_at) / 6 )):
                 # add warning for standing 5/6'ths of the way to surpass top boundry
                 player.warnings.append(StringsNames.TETRIO_NEAR_PROMOTION)
         

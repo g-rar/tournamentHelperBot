@@ -91,6 +91,10 @@ class JstrisController(BaseGameController):
 
             if not review and participantController.getParticipantFromData(tournament._id, {"jstris_username":player.jstris_username}):
                 raise RegistrationError("Jstris account already registered", self.ALREADY_REGISTERED)
+
+            if player.rd > 100:
+                player.warnings.append(f"{StringsNames.TETRIO_HIGH_RD}:{player.rd}")
+
         except RegistrationError as e:
             if e.errorType == self.ALREADY_REGISTERED:
                 raise e
@@ -140,16 +144,6 @@ class JstrisController(BaseGameController):
             except Exception as e:
                 failed.append((participant, str(e)))
         return newParticipants, failed
-
-    def getFieldType(self, fieldType: int) -> type:
-        if fieldType == OptionTypes.STRING:
-            return str
-        elif fieldType == OptionTypes.INTEGER:
-            return int
-        elif fieldType == OptionTypes.BOOLEAN:
-            return bool
-        else:
-            return None
 
     async def getJstrisPlayer(username:str, session) -> JstrisPlayer:
         # g.rar's instance is IP whitelisted for this API
