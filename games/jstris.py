@@ -1,15 +1,13 @@
 import asyncio
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import datetime
 from json import JSONDecodeError
 import json
 import math
 from pprint import pformat, pprint
 import aiohttp
-from bson import ObjectId
-from interactions import Channel, CommandContext, Embed, File, Guild, Message, Option, OptionType
+from interactions import Channel, CommandContext, File, Guild, Message, Option, OptionType
 from interactions.ext import files
-import numpy
 import pandas as pd
 from io import StringIO
 from functools import cmp_to_key
