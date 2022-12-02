@@ -70,3 +70,7 @@ class EnglishStrs(Enum):
     TETRIO_NEAR_PROMOTION = "This player is close to ranking up and out of the tournament."
     TETRIO_PLAYER_DECAYING = "The rating deviation (RD) of this player is increasing." 
     TETRIO_HIGH_RD = "This player has a high rating deviation (RD): `{}`." 
+
+    #JStris+
+    JSTRIS_PREDICTED_GLICKO = "This player's glicko was predicted based on sprint PB."
+    

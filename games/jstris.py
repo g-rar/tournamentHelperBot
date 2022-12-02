@@ -4,19 +4,23 @@ from datetime import datetime
 from json import JSONDecodeError
 import json
 import math
+from pprint import pformat, pprint
 import aiohttp
 from bson import ObjectId
-from interactions import CommandContext, Embed, File, Guild, Option, OptionType
+from interactions import Channel, CommandContext, Embed, File, Guild, Message, Option, OptionType
 from interactions.ext import files
+import numpy
 import pandas as pd
 from io import StringIO
 from functools import cmp_to_key
 
 from baseModel import BaseModel
 from bot import bot, botGuilds
+from commands.csvCommands import getCsvTextFromMsg
 from controllers.playerController import participantController
 from games.base_game_classes import BaseGameController, BasePlayer
 from games.factories import addModule
+from local.lang.utils import utilStrs
 from models.registrationModels import Participant, RegistrationError, RegistrationField, RegistrationTemplate
 from models.tournamentModels import Tournament
 
@@ -28,9 +32,6 @@ from controllers.adminContoller import adminCommand
 
 from commands.tournamentCommands import tournamentBaseCommand
 from utils import OptionTypes
-
-# TODO make a more elegant way to implement this
-
 
 @dataclass
 class JstrisPlayer(BasePlayer):
@@ -45,6 +46,13 @@ class JstrisPlayer(BasePlayer):
     def fromDict(d):
         return BaseModel.fromDict(d, JstrisPlayer)
 
+def compare(p1:JstrisPlayer, p2:JstrisPlayer):
+    rd1 = p1.rd / 173.7178
+    rd2 = p2.rd / 173.7178
+    rating1 = (p1.rating - 1500) / 173.7178
+    rating2 = (p2.rating - 1500) / 173.7178
+    mu = 1 / (1 + math.exp((rating2-rating1) / math.sqrt(1 + 3 * (rd1 ** 2 + rd2 ** 2) / (math.pi ** 2))))
+    return .5 - mu # make it so its negative when loosing for p1
 
 @dataclass
 class JstrisTournament(Tournament):
@@ -145,6 +153,7 @@ class JstrisController(BaseGameController):
                 failed.append((participant, str(e)))
         return newParticipants, failed
 
+    @staticmethod
     async def getJstrisPlayer(username:str, session) -> JstrisPlayer:
         # g.rar's instance is IP whitelisted for this API
         api = "https://jeague-dev.tali.software/api/MTTO"
@@ -160,17 +169,36 @@ class JstrisController(BaseGameController):
                     return r.status, json.loads(await r.text())
                 except JSONDecodeError as e:
                     return 404, {}        
+
+        async def getJstrisPredGlicko(username:str):
+            async with s.get(f"{api}/{username}?sprintseed=true") as r:
+                try:
+                    d:dict = json.loads(await r.text())
+                    d = {
+                        "rating": d.get("rating"),
+                        "vol": 0.001,
+                        "rd": 200,
+                        "_id": "1"*24
+                    }
+                    return r.status, d
+                except Exception as e:
+                    return 404, {}
         
         try:
             resCode, reqData = await getJstrisMMData(username)
-
+            predictedGlicko = False
             if resCode != 200:
-                raise RegistrationError("Player not found", JstrisController.PLAYER_NOT_FOUND)
+                resCode, reqData = await getJstrisPredGlicko(username)
+                predictedGlicko = True
+                if resCode != 200:
+                    raise RegistrationError("Player not found", JstrisController.PLAYER_NOT_FOUND)
             
             player:JstrisPlayer = JstrisPlayer.fromDict({
                 **reqData,
                 "jstris_username": username
             })
+            if predictedGlicko:
+                player.warnings.append(StringsNames.JSTRIS_PREDICTED_GLICKO)
             return player
 
         except Exception as e:
@@ -242,18 +270,75 @@ async def jstrisSeed(ctx:CommandContext, scx:ServerContext, tournament:str):
     if len(participants) == 0:
         await scx.sendLocalized(StringsNames.NO_PARTICIPANTS_IN_TOURNAMENT, tournament=tournament)
         return
-    
-    def compare(p1:JstrisPlayer, p2:JstrisPlayer):
-        rd1 = p1.rd / 173.7178
-        rd2 = p2.rd / 173.7178
-        rating1 = (p1.rating - 1500) / 173.7178
-        rating2 = (p2.rating - 1500) / 173.7178
-        mu = 1 / (1 + math.exp((rating2-rating1) / math.sqrt(1 + 3 * (rd1 ** 2 + rd2 ** 2) / (math.pi ** 2))))
-        return .5 - mu # make it so its negative when loosing for p1
-    
+        
     seeding = sorted(participants, key=cmp_to_key(lambda p1, p2: compare(p1.playerData, p2.playerData)))
     players = [JstrisController.getParticipantView(p) for p in seeding]
     df = pd.DataFrame(players)
     await files.command_send(ctx, files=File(fp=StringIO(df.to_csv()), filename=f"Participants_{datetime.utcnow()}.csv"))
+
+@jstrisBaseCommand.subcommand(
+    name="seed_file",
+    description="Return rows of a csv file on this text channel sorted using jstris matchmaking criteria.",
+    options=[
+        Option(
+            name="message_id", description="Message in which the file is",
+            type=OptionType.STRING, required=True
+        ),
+        Option(
+            name="player_col", description="Column name where the jstris players are",
+            type=OptionType.STRING, required=True
+        ),
+    ]
+)
+@adminCommand
+@customContext
+async def jstrisSeed(ctx:CommandContext, scx:ServerContext, message_id:str, player_col:str):
+    if not message_id.isdecimal():
+        await scx.sendLocalized(StringsNames.VALUE_SHOULD_BE_DEC, option="message_id")
+        return
+    messageId = int(message_id)
+    chn:Channel = ctx.channel
+    try:
+        msg:Message = await chn.get_message(messageId)
+    except Exception as e:
+        await scx.sendLocalized(StringsNames.MESSAGE_NOT_FOUND, data=type(e).__name__)
+        return
+    try:
+        csvs:str = await getCsvTextFromMsg(msg)
+        playersDF:pd.DataFrame = pd.read_csv(StringIO(csvs))
+        players: list[JstrisPlayer] = []
+        errors = []
+
+        async def getPlayer(p, session):
+            try:
+                players.append(await JstrisController.getJstrisPlayer(p, session))
+            except Exception as e:
+                errors.append((p, str(e)))
+
+        async with aiohttp.ClientSession() as session:
+            coros = [
+                getPlayer(p, session)
+                for p in playersDF[player_col]
+            ]
+            await asyncio.gather(*coros)
+
+        playersSorted = sorted(players, key=cmp_to_key(compare))
+        playerSeeding = {
+            playersSorted[i].jstris_username: i+1 
+            for i in range(len(playersSorted))
+        }
+        playersDF["Seeding"] = playersDF[player_col].map(playerSeeding)
+        result = playersDF[~playersDF["Seeding"].isnull()]
+        result = result.sort_values(by="Seeding")
+        result.reset_index(inplace=True)
+        result.drop(["index","Unnamed: 0", "Seeding"], axis=1, inplace=True)
+
+        await files.command_send(ctx, files=File(fp=StringIO(result.to_csv()), filename=f"Participants_{datetime.utcnow()}.csv"))
+        if len(errors):
+            await files.command_send(ctx, files=File(fp=StringIO(pformat(errors)), filename=f"Errors_{datetime.utcnow()}.csv"))
+
+    except Exception as e:
+        await ctx.send(utilStrs.ERROR.format(e))
+
 
 addModule(JstrisController, JstrisPlayer, JstrisPlayer)
