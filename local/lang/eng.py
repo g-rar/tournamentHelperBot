@@ -58,6 +58,7 @@ class EnglishStrs(Enum):
     REG_CHANNEL_NOT_FOUND = "I couldn't find the registration channel that was set up for the tournament `{tournament}`. I'm going to close sign ups for this tournament. You can reopen them at any time"
     PARTICIPANT_COUNT = "Participant count"
     PARTICIPANT_HAS_WARNINGS = "The participant `{username}` has the following warnings:\n"
+    PARTICIPANT_REGISTRATION_MSG_LINK = "You can view the registration message of `{username}` here: {msg_url}"
     PARTICIPANTS_ROLE_REMOVED = "The role \"@{rolename}\" was also removed from the disqualified players."
     NO_PARTICIPANTS_IN_TOURNAMENT = "There are no participants registered in the tournament `{tournament}` ¯\\\_(ツ)_/¯"
 

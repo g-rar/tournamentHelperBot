@@ -141,9 +141,9 @@ async def setupMessageRegistration(tournament:Tournament): # this asumes that re
         return
     openRegistrationChannels[tournament.registration.channelId] = tournament._id
 
-def getWarningsMsg(server:ServerGuild, playerData:Participant):
+def getWarningsMsg(server:ServerGuild, tournament:str, playerData:Participant, msg:Message = None):
     warnings: list[str] = playerData.playerData.warnings
-    warning_msg = server.getStr(StringsNames.PARTICIPANT_HAS_WARNINGS, username=playerData.discordDisplayname)
+    warning_msg = server.getStr(StringsNames.PARTICIPANT_HAS_WARNINGS, username=playerData.discordDisplayname, tournament=tournament)
     for warning in warnings:
         warning:str
         str_name, *args = warning.split(':')
@@ -152,6 +152,8 @@ def getWarningsMsg(server:ServerGuild, playerData:Participant):
             warning_msg += f"- {warning_item}\n"
         except Exception:
             warning_msg += f"- {str_name}\n" 
+    if msg:
+        warning_msg += "--> " + server.getStr(StringsNames.PARTICIPANT_REGISTRATION_MSG_LINK, username=playerData.discordDisplayname, msg_url=msg.url)
     return warning_msg
 
 @bot.event(name="on_message_create")
@@ -187,7 +189,7 @@ async def on_message(msg:Message):
             if role:
                 await msg.member.add_role(role)
             if len(playerData.playerData.warnings) != 0:
-                warnings_msg = getWarningsMsg(server, playerData)
+                warnings_msg = getWarningsMsg(server, tournament.name, playerData, msg=msg)
                 await server.sendLog(warnings_msg, localize=False)
         else:
             logging.error("Failed to upload to db.")
