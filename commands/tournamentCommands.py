@@ -118,6 +118,39 @@ async def getTournaments(ctx: CommandContext, scx: ServerContext, tournament:str
         embed.set_footer(text="TournamentHelper Bot")
         await ctx.send(embeds=[embed])
 
+@tournamentBaseCommand.subcommand(
+    name="edit_name",
+    options=[
+        Option(name="old_name", description="Tournament to edit",
+               type=OptionType.STRING, required=True),
+        Option(name="new_name", description="New name for the tournament",
+               type=OptionType.STRING, required=True),
+    ]
+)
+@adminCommand
+@customContext
+async def editTournament(
+        ctx: CommandContext,
+        scx: ServerContext,
+        old_name: str,
+        new_name: str
+    ):
+    tournamentObj = tournamentController.getTournamentFromName(ctx.guild_id,old_name)
+    tournamentCtrl = factories.getControllerFor(tournamentObj)
+    if tournamentObj is None:
+        await scx.sendLocalized(StringsNames.TOURNAMENT_UNEXISTING, name=old_name)
+        return
+    newTor = tournamentController.getTournamentFromName(ctx.guild_id, new_name)
+    if newTor is not None:
+        await scx.sendLocalized(StringsNames.TOURNAMENT_EXISTS_ALREADY, name=new_name)
+        return
+    tournamentObj.name = new_name
+    if tournamentController.updateTournament(tournamentObj):
+        await scx.sendLocalized(StringsNames.TOURNAMENT_UPDATED, name=new_name)
+    else:
+        await scx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
+
+
 
 @bot.command(name="check-in", scope=botGuilds)
 async def checkInBaseCommand(ctx:CommandContext): pass

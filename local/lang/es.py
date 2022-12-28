@@ -39,6 +39,7 @@ class SpanishStrs(Enum):
     TOURNAMENT_UNEXISTING = "No se ha encontrado ningún torneo con el nombre `{name}`, asegúrate de que escribiste el nombre bien (._.`)・・・"
     TOURNAMENT_ADDED = "Se ha añadido el torneo `{name}` al servidor, van a ser emocionantes juegos de **{game}**! ヾ(^▽^*)"
     TOURNAMENT_DELETED = "Se ha borrado el torneo `{name}` del servidor. Ojalá hayan más en el futuro (＾u＾)ノ~"
+    TOURNAMENT_UPDATED = "Se ha actualizado el torneo `{name}`. ¡Siento que ahora está mejor! ヾ(^▽^*)~"
     TOURNAMENT_EXISTS_ALREADY = "Ya hay un torneo con el nombre `{name}`, deberías cambiarlo para que la gente no se confunda (#｀-_ゝ-)"
     TOURNAMENT_GAME_WRONG = "El torneo `{name}` no es del juego `{game}`. Asegurate de que se puso el juego correcto cuando se creó el torneo (´。＿。｀)・・・"
     INPUT_CHECK_IN_REACTION = "Reacciona a este mensaje con el emoji con el que los jugadores hacen check in."

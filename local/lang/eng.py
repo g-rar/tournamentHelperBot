@@ -39,6 +39,7 @@ class EnglishStrs(Enum):
     TOURNAMENT_UNEXISTING = "Couldn't find a tournament with the name `{name}`, check if you typed the name correctly (._.`)・・・"
     TOURNAMENT_ADDED = "The tournament `{name}` has been added to the server, hope to see some exciting **{game}** games! ヾ(^▽^*)"
     TOURNAMENT_DELETED = "The tournament `{name}` has been deleted from the server. Looking forward to more in the future (＾u＾)ノ~"
+    TOURNAMENT_UPDATED = "The tournament `{name}` has been updated. I kinda looks better now! ヾ(^▽^*)~"
     TOURNAMENT_EXISTS_ALREADY = "There's already a tournament named `{name}`, you should change it so people don't get confused (#｀-_ゝ-)"
     TOURNAMENT_GAME_WRONG = "The tournament `{name}` is not for the game `{game}`. Make sure you chose the right game when creating the tournament (´。＿。｀)・・・"
     INPUT_CHECK_IN_REACTION = "React to this message with the emoji that players use to check in."
