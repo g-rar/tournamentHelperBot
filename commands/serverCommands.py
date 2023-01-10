@@ -102,6 +102,42 @@ async def setLogChannel(ctx: CommandContext, scx:ServerContext, channel:Channel)
     else:
         await scx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
 
+@botServerConfig.subcommand(
+    name="show_coffee_page",
+    description="Decide wether or not to show the buymeacoffe page on update messages.",
+    options=[
+        Option(name="enabled", description="If False, it will show the buymeacoffee.",
+               type=OptionType.BOOLEAN, required=True)
+    ]
+)
+@adminCommand
+@customContext
+async def no_coffee_sad(ctx: CommandContext, scx:ServerContext, enabled:bool):
+    guildId = int(ctx.guild_id)
+    if guildId is None:
+        await ctx.send(scx.getStr(StringsNames.NOT_FOR_DM))
+        return
+    server = serverController.getServer(guildId)
+    if server is None:
+        server = Server(serverId=guildId, show_bmac=False, serverName=ctx.guild.name)
+        if not serverController.addServer(server):
+            await scx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
+        return
+    server.show_bmac = enabled
+    if serverController.updateServer(server):
+        await scx.sendLocalized(StringsNames.SERVER_UPDATED)
+    else:
+        await scx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
+
+@bot.command(
+    name="buy_me_a_coffee",
+    description="Show the link to the buymeacoffee page.",
+    scope=botGuilds
+)
+@customContext
+async def coffee_pls(ctx:CommandContext, scx:ServerContext):
+    await scx.sendLocalized(StringsNames.BMAC_MSG)
+
 @bot.command(
     name="get_reactions",
     description="Get the discord tags of the users who reacted to a message.",

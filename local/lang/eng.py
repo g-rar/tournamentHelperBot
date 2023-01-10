@@ -19,6 +19,7 @@ class EnglishStrs(Enum):
     REGISTRATION = "Registration"
     OPEN = "📝 Open"
     CLOSED = "❌ Closed"
+    BMAC_MSG = "If you'd like to support my developer or contribute to feature goals, buy me a coffe: ☕😋 https://www.buymeacoffee.com/gerardolop"
 
     #Server
     CANT_REGISTER_DM = "This is not a server. Not one that can be registered anyways ¯\\\_(ツ)_/¯"

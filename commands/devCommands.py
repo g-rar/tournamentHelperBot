@@ -1,6 +1,7 @@
 from interactions import Channel, ChannelType, Choice, CommandContext, Guild, Message, Option, OptionType
 import interactions
 from bot import devGuilds, CONF, bot
+from contextExtentions.contextServer import getServerGuild
 from controllers.serverController import serverController
 from contextExtentions.customContext import ServerContext, customContext
 from local.names import StringsNames
@@ -70,7 +71,14 @@ async def sendNotificationToServers(
     elif server_ids:
         options["serverId"] = {"$in":list(map(lambda x: int(x), serverIds))}
     servers = serverController.getServers(options=options)
-    for server in servers:
+    server_guilds = [
+        await getServerGuild(server, server.serverId)
+        for server in servers
+    ]
+    for server in server_guilds:
+        content = msg.content
+        if not server_ids:
+            content += "\n" + "-"*5 + "\n" + server.getStr(StringsNames.BMAC_MSG)
         guild:Guild = await interactions.get(bot, Guild, object_id=server.serverId)
         if not guild:
             ctx.channel.send(f"Server with `id: {server.serverId}` not found!")
@@ -81,5 +89,5 @@ async def sendNotificationToServers(
             continue
         operatorStr = ", ".join(f"<@&{rId}>" for rId in server.adminRoles)
         oprStr = f"[ {operatorStr} ]\n" if operatorStr and ping_operators else ""
-        await chn.send(content=f"{oprStr}{str(msg.content)}")
+        await chn.send(content=f"{oprStr}{str(content)}")
     await ctx.send("Finished sending messages.")

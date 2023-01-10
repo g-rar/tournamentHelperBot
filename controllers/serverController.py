@@ -19,6 +19,7 @@ class Server(BaseModel):
     serverName: str = ""
     logChannel: int = None
     language: str = "ENGLISH"
+    show_bmac: bool = True
     _id: ObjectId = field(default_factory=ObjectId)
     guildTournaments: list = field(default_factory=list)
     players: list = field(default_factory=list)

@@ -23,6 +23,7 @@ class StringsNames:
     REGISTRATION = "REGISTRATION"
     OPEN = "OPEN"
     CLOSED = "CLOSED"
+    BMAC_MSG = "BMAC_MSG"
 
     #Server
     CANT_REGISTER_DM = "CANT_REGISTER_DM"
