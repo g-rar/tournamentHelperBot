@@ -43,7 +43,7 @@ class TournamentController:
         c = self.collection.find_one({"hostServerId":int(serverId),"name":name})
         if c is None:
             return None
-        obj = factories.getGameTournament(c["game"], c)
+        obj = factories.getGameTournament(c.get("game"), c)
         return obj
 
     def getTournamentsForServer(self, serverId:Union[int, Snowflake]) -> List[Tournament]:

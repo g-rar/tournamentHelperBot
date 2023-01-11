@@ -4,7 +4,7 @@ from datetime import datetime
 from json import JSONDecodeError
 import json
 import math
-from pprint import pformat, pprint
+from pprint import pformat
 import aiohttp
 from interactions import Channel, CommandContext, File, Guild, Message, Option, OptionType
 from interactions.ext import files
@@ -36,6 +36,8 @@ class JstrisPlayer(BasePlayer):
     # should I add
     _id:str = None
     jstris_username:str = ""
+    sprintPB: float | None = None
+    ultraPB: int | None = None
     rating:float = 0
     rd:float = 0
     vol:float = 0
@@ -55,6 +57,9 @@ def compare(p1:JstrisPlayer, p2:JstrisPlayer):
 @dataclass
 class JstrisTournament(Tournament):
     game:str = "jstris"
+    get_mm: bool = False
+    get_sprint: bool = False
+    get_ultra: bool = False
 
     @staticmethod
     def fromDict(d):
@@ -77,7 +82,14 @@ class JstrisController(BaseGameController):
                               required=True)
         )
 
-    # use parents' getParticipantView
+    def getParticipantView(self, p:Participant):
+        base = super().getParticipantView(p)
+        player:JstrisPlayer = p.playerData
+        if player.sprintPB:
+            base["sprintPB"] = player.sprintPB
+        if player.ultraPB:
+            base["ultraPB"] = player.ultraPB
+        return base
 
     async def validateFields(self, fields:list[RegistrationField], tournament:JstrisTournament, review=False, session=None, override=False):
         newFields = []
@@ -93,7 +105,7 @@ class JstrisController(BaseGameController):
     async def validatePlayer(self, username:str, tournament:JstrisTournament, review=False, session=None, override=False) -> JstrisPlayer:
         # since atm we dont do restrictions on jstris tournaments, just return the player
         try:
-            player = await JstrisController.getJstrisPlayer(username, session)
+            player = await JstrisController.getJstrisPlayer(username, session, tournament)
 
             if not review and participantController.getParticipantFromData(tournament._id, {"jstris_username":player.jstris_username}):
                 raise RegistrationError("Jstris account already registered", self.ALREADY_REGISTERED)
@@ -124,7 +136,7 @@ class JstrisController(BaseGameController):
         except RegistrationError as e:
             raise e
 
-    async def checkParticipants(self, participants: list[Participant], tournament):
+    async def checkParticipants(self, participants: list[Participant], tournament:JstrisTournament):
         newParticipants = []
         failed = []
 
@@ -137,8 +149,14 @@ class JstrisController(BaseGameController):
                 failed.append((participant,str(e)))
 
         async with aiohttp.ClientSession() as session:
-            coros = [validatePlayer(p, tournament, session) for p in participants]
-            await asyncio.gather(*coros)
+            if not (tournament.get_sprint or tournament.get_ultra):
+                coros = [validatePlayer(p, tournament, session) for p in participants]
+                await asyncio.gather(*coros)
+            else:
+                for p in participants:
+                    # prevent jstris API from putting cooldowns
+                    await validatePlayer(p, tournament, session)
+                    await asyncio.sleep(1)
 
         for participant in participants:
             try:
@@ -152,9 +170,10 @@ class JstrisController(BaseGameController):
         return newParticipants, failed
 
     @staticmethod
-    async def getJstrisPlayer(username:str, session) -> JstrisPlayer:
+    async def getJstrisPlayer(username:str, session, tournament:JstrisTournament) -> JstrisPlayer:
         # g.rar's instance is IP whitelisted for this API
-        api = "https://jeague-dev.tali.software/api/MTTO"
+        plus_api = "https://jeague-dev.tali.software/api/MTTO"
+        base_api = "https://jstris.jezevec10.com/api"
 
         if session:
             s = session
@@ -162,14 +181,14 @@ class JstrisController(BaseGameController):
             s = aiohttp.ClientSession()
 
         async def getJstrisMMData(username:str):
-            async with s.get(f"{api}/{username}") as r:
+            async with s.get(f"{plus_api}/{username}") as r:
                 try:
                     return r.status, json.loads(await r.text())
                 except JSONDecodeError as e:
-                    return 404, {}        
+                    return 404, {}
 
         async def getJstrisPredGlicko(username:str):
-            async with s.get(f"{api}/{username}?sprintseed=true") as r:
+            async with s.get(f"{plus_api}/{username}?sprintseed=true") as r:
                 try:
                     d:dict = json.loads(await r.text())
                     d = {
@@ -181,8 +200,31 @@ class JstrisController(BaseGameController):
                     return r.status, d
                 except Exception as e:
                     return 404, {}
-        
+
+        async def getJstrisSprintData(username:str):
+            rescode, data = 429, {}
+            while rescode == 429:
+                if (cooldown := data.get("headers", {}).get("Retry-After")):
+                    await asyncio.sleep(cooldown)
+                async with s.get(f"{base_api}/u/{username}/records/1?mode=1") as r:
+                    try:
+                        rescode, data = r.status, json.loads(await r.text())
+                    except JSONDecodeError as e:
+                        return 404, {}
+            return rescode, data
+
+        async def getJstrisUltraData(username:str):
+            rescode, data = 429, {}
+            while rescode == 429:
+                async with s.get(f"{base_api}/u/{username}/records/5?mode=1") as r:
+                    try:
+                        rescode, data = r.status, json.loads(await r.text())
+                    except JSONDecodeError as e:
+                        return 404, {}
+            return rescode, data
+
         try:
+            playerRecords = {}
             resCode, reqData = await getJstrisMMData(username)
             predictedGlicko = False
             if resCode != 200:
@@ -190,9 +232,23 @@ class JstrisController(BaseGameController):
                 predictedGlicko = True
                 if resCode != 200:
                     raise RegistrationError("Player not found", JstrisController.PLAYER_NOT_FOUND)
-            
+
+            if tournament.get_sprint:
+                sprint_resCode, sprint_reqData = await getJstrisSprintData(username)
+                if sprint_resCode != 200:
+                    raise RegistrationError("Player sprint data not found", JstrisController.PLAYER_NOT_FOUND)
+                playerRecords["sprintPB"] = sprint_reqData["min"]
+        
+            if tournament.get_ultra:
+                ultra_resCode, ultra_reqData = await getJstrisUltraData(username)
+                if ultra_resCode != 200:
+                    raise RegistrationError("Player sprint data not found", JstrisController.PLAYER_NOT_FOUND)
+                playerRecords["ultraPB"] = ultra_reqData["max"]
+
+
             player:JstrisPlayer = JstrisPlayer.fromDict({
                 **reqData,
+                **playerRecords,
                 "jstris_username": username
             })
             if predictedGlicko:
@@ -211,10 +267,23 @@ class JstrisController(BaseGameController):
     options=[
         Option(name="name", description="The tournament's name.",
                type=OptionType.STRING, required=True),
+        # Option(name="get_plus", description="Adds jstris+ data to player data (+1 request on backend) (invisible)",
+        #         type=OptionTypes.BOOLEAN, required=False),
+        Option(name="get_sprint", description="Adds sprint data to player data (+1 request on backend)",
+                type=OptionTypes.BOOLEAN, required=False),
+        Option(name="get_ultra", description="Adds ultra data to player data (+1 request on backend)",
+                type=OptionTypes.BOOLEAN, required=False)
     ])
 @adminCommand
 @customContext
-async def addTournamentPlain(ctx: CommandContext, scx: ServerContext, name: str):
+async def addTournamentPlain(
+        ctx: CommandContext,
+        scx: ServerContext,
+        name: str,
+        # get_plus: bool = True,
+        get_sprint: bool = False,
+        get_ultra: bool = False
+    ):
     if ctx.guild_id is None:
         await scx.sendLocalized(StringsNames.NOT_FOR_DM)
         return
@@ -230,7 +299,10 @@ async def addTournamentPlain(ctx: CommandContext, scx: ServerContext, name: str)
     tournament = JstrisTournament(
         name=name,
         hostServerId=int(ctx.guild_id),
-        registrationTemplate=regTemplate
+        registrationTemplate=regTemplate,
+        # get_mm=get_plus,
+        get_sprint=get_sprint,
+        get_ultra=get_ultra
     )
     if tournamentController.addTournament(tournament):
         await scx.sendLocalized(StringsNames.TOURNAMENT_ADDED, name=name, game=tournament.game)
@@ -255,7 +327,7 @@ async def jstrisSeed(ctx:CommandContext, scx:ServerContext, tournament:str):
         await scx.sendLocalized(StringsNames.NOT_FOR_DM)
         return
     guild:Guild = ctx.guild # this could be None
-    tournamentData = tournamentController.getTournamentFromName(guild.id, tournament)
+    tournamentData:JstrisTournament = tournamentController.getTournamentFromName(guild.id, tournament)
     if tournamentData is None:
         await scx.sendLocalized(StringsNames.TOURNAMENT_UNEXISTING, name=tournament)
         return
@@ -264,11 +336,14 @@ async def jstrisSeed(ctx:CommandContext, scx:ServerContext, tournament:str):
         await scx.sendLocalized(StringsNames.TOURNAMENT_GAME_WRONG, name=tournament, game=JstrisTournament.game)
         return
 
+    # if not tournamentData.get_mm:
+    #     await scx.sendLocalized(StringsNames.)
+    
     participants = participantController.getParticipantsForTournament(tournamentId=tournamentData._id)
     if len(participants) == 0:
         await scx.sendLocalized(StringsNames.NO_PARTICIPANTS_IN_TOURNAMENT, tournament=tournament)
         return
-        
+
     seeding = sorted(participants, key=cmp_to_key(lambda p1, p2: compare(p1.playerData, p2.playerData)))
     players = [JstrisController.getParticipantView(p) for p in seeding]
     df = pd.DataFrame(players)
@@ -322,7 +397,7 @@ async def jstrisSeed(ctx:CommandContext, scx:ServerContext, message_id:str, play
 
         playersSorted = sorted(players, key=cmp_to_key(compare))
         playerSeeding = {
-            playersSorted[i].jstris_username: i+1 
+            playersSorted[i].jstris_username: i+1
             for i in range(len(playersSorted))
         }
         playersDF["Seeding"] = playersDF[player_col].map(playerSeeding)
@@ -339,4 +414,4 @@ async def jstrisSeed(ctx:CommandContext, scx:ServerContext, message_id:str, play
         await ctx.send(utilStrs.ERROR.format(e))
 
 
-addModule(JstrisController, JstrisPlayer, JstrisPlayer)
+addModule(JstrisController, JstrisPlayer, JstrisTournament)
