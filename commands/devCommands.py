@@ -36,8 +36,10 @@ async def serversBaseCommand(ctx:CommandContext): pass
                         ]),
         Option(name="ping_operators", description="If True, it pings all the operator roles. No matter how many people that is.",
                         type=OptionType.BOOLEAN, required=False),
+        Option(name="show_bmac", description="If present, displays the buymeacoffee page",
+                        type=OptionType.BOOLEAN, required=False),
         Option(name="server_ids", description="If present, only send the notification to these servers (comma separated)",
-                        type=OptionType.STRING, required=False)
+                        type=OptionType.STRING, required=False),
     ]
 )
 @customContext
@@ -49,6 +51,7 @@ async def sendNotificationToServers(
         channel:Channel,
         language:str = None,
         ping_operators:bool = False,
+        show_bmac:bool = False,
         server_ids:str = ""):
     if channel.type != ChannelType.GUILD_TEXT:
         await scx.sendLocalized(StringsNames.VALUE_SHOULD_BE_TEXT_CHANNEL, option="channel")
@@ -77,7 +80,7 @@ async def sendNotificationToServers(
     ]
     for server in server_guilds:
         content = msg.content
-        if not server_ids:
+        if show_bmac and server.show_bmac:
             content += "\n" + "-"*5 + "\n" + server.getStr(StringsNames.BMAC_MSG)
         guild:Guild = await interactions.get(bot, Guild, object_id=server.serverId)
         if not guild:

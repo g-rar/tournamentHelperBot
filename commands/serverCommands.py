@@ -63,6 +63,7 @@ async def setServerLanguage(ctx: CommandContext, scx: ServerContext=None, langua
         if not serverController.addServer(server):
             await scx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
         return
+    server.language = language
     scx.server.language = language
     if serverController.updateServer(server):
         await scx.sendLocalized(StringsNames.LANGUAGE_CHANGED)
