@@ -160,7 +160,7 @@ class JstrisController(BaseGameController):
 
         for participant in participants:
             try:
-                newFields, playerData = self.validateFields(
+                newFields, playerData = await self.validateFields(
                     participant.fields, tournament, review=True)
                 participant.playerData = playerData
                 participant.fields = newFields

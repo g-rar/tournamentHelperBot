@@ -93,9 +93,9 @@ class TournamentController:
             raise RegistrationError("Either a discord member or displayName are required to register a player!", 2)
         return participantController.registerPlayer(usr_id, displayName, tournament, newFields, playerData)
 
-    def checkPlayer(self, tournament:Tournament, participant:Participant, update:bool=False):
+    async def checkPlayer(self, tournament:Tournament, participant:Participant, update:bool=False):
         gameController = factories.getControllerFor(tournament)
-        newFields, playerData = gameController.validateFields(participant.fields, tournament, review=True)
+        newFields, playerData = await gameController.validateFields(participant.fields, tournament, review=True)
         participant.playerData = playerData
         participant.fields = newFields
         if update:
