@@ -58,7 +58,7 @@ class BaseGameController:
         failed = []
         for participant in participants:
             try:
-                newFields, playerData = self.validateFields(participant.fields, tournament, review=True)
+                newFields, playerData = await self.validateFields(participant.fields, tournament, review=True)
                 participant.playerData = playerData
                 participant.fields = newFields
                 newParticipants.append(participant)
