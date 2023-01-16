@@ -1,4 +1,4 @@
-from interactions import CommandContext, Guild, Member
+from interactions import CommandContext, Member, Permissions
 from local.lang.eng import EnglishStrs
 from local.lang.utils import utilStrs
 
@@ -11,10 +11,11 @@ from controllers.serverController import serverController
 
 class AdminController:
 
-    def isAdmin(server:Guild,user:Member) -> bool:
-        if user.permissions.ADMINISTRATOR:
+    async def isAdmin(ctx: CommandContext) -> bool:
+        if await ctx.has_permissions(Permissions.ADMINISTRATOR):
             return True
-        serverObj = serverController.getServer(server.id)
+        serverObj = serverController.getServer(ctx.guild_id)
+        user:Member = ctx.author
         if not serverObj:
             return False
         if user.id in serverObj.adminUsers:
@@ -27,9 +28,9 @@ class AdminController:
 
 def adminCommand(f):
     async def wrapper(ctx: CommandContext, *args, **kargs):
-        if AdminController.isAdmin(ctx.guild,ctx.author):
+        if await AdminController.isAdmin(ctx):
             await f(ctx, *args, **kargs)
         else:
-            await ctx.send(utilStrs.ERROR.format(EnglishStrs.ADMIN_ONLY.value), hidden=True)
+            await ctx.send(utilStrs.ERROR.format(EnglishStrs.ADMIN_ONLY.value), ephemeral=True)
         return f
     return wrapper
