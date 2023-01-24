@@ -20,7 +20,7 @@ class AdminController:
             return False
         if user.id in serverObj.adminUsers:
             return True
-        if any(role.id in serverObj.adminRoles for role in user.roles):
+        if any(role in serverObj.adminRoles for role in user.roles):
             return True
         return False
 

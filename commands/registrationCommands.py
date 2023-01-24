@@ -171,9 +171,12 @@ async def on_message(msg:Message):
     guild = await msg.get_guild()
     s = serverController.getServer(guild.id)
     server = await getServerGuild(s, guild)
-    role = await interactions.get(bot, Role, object_id=tournament.registration.participantRole, parent_id=guild.id) \
-            if tournament.registration.participantRole \
-            else None
+    try:
+        role = await interactions.get(bot, Role, object_id=tournament.registration.participantRole, parent_id=guild.id) \
+                if tournament.registration.participantRole \
+                else None
+    except:
+        role = None
 
     content = extractQuotedSubstrs(msg.content)
     fields: List[RegistrationField] = deepcopy(tournament.registrationTemplate.participantFields)
