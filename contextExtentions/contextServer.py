@@ -42,6 +42,6 @@ class ServerGuild(Server):
     
 async def getServerGuild(server:Server, guild:Union[Guild, int, Snowflake]):
     if not isinstance(guild, Guild):
-        guild = await interactions.get(bot, Guild, object_id=guild)
+        guild = await interactions.get(bot, Guild, object_id=int(guild))
     res = ServerGuild(**asdict(server), guild=guild)
     return res

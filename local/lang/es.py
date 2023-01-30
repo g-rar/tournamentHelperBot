@@ -35,6 +35,9 @@ class SpanishStrs(Enum):
     NEED_MANAGE_ROLES = "Para eso necesito permiso para administrar roles. Mover mi rol más arriba en la jerarquía de roles también podría ayudar (＾v＾u)..."
     LANGUAGE_CHANGED = "Se ha cambiado el idioma a Español para este servidor. ¡Espero que nos entendamos bien!"
     CANT_ASSIGN_ROLE_TO_USER = "No se pudo asignar el rol `{role}` al usuario `{username}`. Revisa que tenga permiso para administrar roles, y tal vez la jerarquía de roles (＾v＾u)..."
+    SERVER_NOT_FOUND = "No se encontró el servidor con id `{id}`. Asegurate de que el id es correcto (u •_•)"
+    SERVER_LEFT = "Me fui del server `{name}`. Espero que no hayan hecho nada malo (＾v＾u)..."
+    SERVERS_UPDATED = "Se han actualizado los servidores. ¡Espero que ahora estén mejor! ヾ(^▽^*)~"
 
     #Tournament
     TOURNAMENT_UNEXISTING = "No se ha encontrado ningún torneo con el nombre `{name}`, asegúrate de que escribiste el nombre bien (._.`)・・・"

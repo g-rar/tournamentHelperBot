@@ -26,7 +26,8 @@ files.setup(bot)
 
 CONF = BotSettings()
 botGuilds = interactions.MISSING if not CONF.DEV else CONF.TEST_GUILDS
-devGuilds = list(map(lambda x: int(x), os.getenv("DEV_GUILDS").split(","))) if os.getenv("DEV_GUILDS") else []
+devGuild = list(map(lambda x: int(x), os.getenv("DEV_GUILD").split(","))) if os.getenv("DEV_GUILD") else []
+devLogChannel = int(os.getenv("DEV_LOG_CHANNEL")) if os.getenv("DEV_LOG_CHANNEL") else None
 
 
 client:MongoClient = MongoClient(os.getenv("DB_CONNECTIONSTR"))

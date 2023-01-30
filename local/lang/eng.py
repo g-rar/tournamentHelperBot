@@ -35,6 +35,9 @@ class EnglishStrs(Enum):
     NEED_MANAGE_ROLES = "For that I need permission to manage roles. Also moving my role higher in the hierarchy could help (＾v＾u)..."
     LANGUAGE_CHANGED = "The language for this server has been changed to English. We're up for having nice conversations!"
     CANT_ASSIGN_ROLE_TO_USER = "Couldn't assign the role `{role}` to the user `{username}`. Please check if I have permission to manage roles, also check the roles hierarchy (＾v＾u)..."
+    SERVER_NOT_FOUND = "Couldn't find the server with id `{id}`. Check if the id is correct (._.`)・・・"
+    SERVER_LEFT = "I left the server `{name}`. I hope they didn't do anything wrong (u •_•)"
+    SERVERS_UPDATED = "The servers' information was updated! (＾u＾)ノ~"
 
     #Tournament
     TOURNAMENT_UNEXISTING = "Couldn't find a tournament with the name `{name}`, check if you typed the name correctly (._.`)・・・"

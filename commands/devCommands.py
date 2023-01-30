@@ -1,7 +1,9 @@
-from interactions import Channel, ChannelType, Choice, CommandContext, Guild, Message, Option, OptionType
+import logging
+import traceback
+from interactions import Channel, ChannelType, Choice, CommandContext, Embed, Guild, Message, Option, OptionType
 import interactions
-from bot import devGuilds, CONF, bot
-from contextExtentions.contextServer import getServerGuild
+from bot import devGuild, devLogChannel, CONF, bot
+from contextExtentions.contextServer import ServerGuild, getServerGuild
 from controllers.serverController import serverController
 from contextExtentions.customContext import ServerContext, customContext
 from local.names import StringsNames
@@ -16,7 +18,7 @@ def devCommand(f):
         await f(ctx,*args, **kargs)
     return wrapper
 
-@bot.command(name="servers", scope=devGuilds)
+@bot.command(name="servers", scope=devGuild)
 async def serversBaseCommand(ctx:CommandContext): pass
 
 @serversBaseCommand.subcommand(
@@ -94,3 +96,132 @@ async def sendNotificationToServers(
         oprStr = f"[ {operatorStr} ]\n" if operatorStr and ping_operators else ""
         await chn.send(content=f"{oprStr}{str(content)}")
     await ctx.send("Finished sending messages.")
+
+# server leave subcommand
+@serversBaseCommand.subcommand(
+    name="leave",
+    description="Leave a server",
+    options=[
+        Option(name="server_id", description="The server to leave",
+                        type=OptionType.STRING, required=True),
+    ]
+)
+@customContext
+@devCommand
+async def leaveServer(
+        ctx:CommandContext,
+        scx:ServerContext,
+        server_id:str):
+    if not server_id.isdecimal():
+        await scx.sendLocalized(StringsNames.VALUE_SHOULD_BE_DEC, option="server_id")
+        return
+    guild:Guild = await interactions.get(bot, Guild, object_id=int(server_id))
+    if not guild:
+        await scx.sendLocalized(StringsNames.SERVER_NOT_FOUND, id=server_id)
+        return
+    await guild.leave()
+    # remove server from database
+    if serverController.removeServer(server_id):
+        await scx.sendLocalized(StringsNames.SERVER_LEFT, name=guild.name)
+    else:
+        await scx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
+
+# server list subcommand
+@serversBaseCommand.subcommand(
+    name="list",
+    description="List all servers the bot is in",
+)
+@customContext
+@devCommand
+async def listServers(
+        ctx:CommandContext,
+        scx:ServerContext):
+    servers = serverController.getServers()
+    server_guilds: list[ServerGuild] = []
+    i = 0
+    while i < len(servers):
+        server = servers[i]
+        try:
+            server_guilds.append(await getServerGuild(server, server.serverId))
+            i += 1
+        except Exception as e:
+            servers.remove(server)
+            await on_command_error(ctx, e)
+            
+    embed = Embed(
+        title="Servers",
+        description="Servers the bot is in",
+        color=0xFFBA00
+    )
+    for server in server_guilds:
+        embed.add_field(
+            name=f"{server.serverName}",
+            value=f"Server id: {server.serverId}\n"
+                  f"Language: {server.language}\n"
+                  f"Log channel: {server.logChannel}\n"
+                  f"Admin roles: {', '.join(map(str, server.adminRoles))}\n"
+                  f"Show bmac: {server.show_bmac}\n"
+                  f"Server Icon: https://cdn.discordapp.com/icons/{server.serverId}/{server.serverIcon}.png\n"
+        )
+    await ctx.send(embeds=embed)
+
+# server update all subcommand 
+@serversBaseCommand.subcommand(
+    name="update_all",
+    description="Update all servers",
+)
+@customContext
+@devCommand
+async def updateAllServers(
+        ctx:CommandContext,
+        scx:ServerContext):
+    # get all servers, wher the "bot_left" field doesn't exist or is false
+    servers = serverController.getServers()
+    # get server guilds, considering a guild may not exist anymore
+    server_guilds: list[ServerGuild] = []
+    i = 0
+    while i < len(servers):
+        server = servers[i]
+        try:
+            server_guilds.append(await getServerGuild(server, server.serverId))
+            i += 1
+        except Exception as e:
+            servers.remove(server)
+            await on_command_error(ctx, e)
+    # update data of guilds in database, like name, icon, etc
+    for i in range(len(servers)):
+        server = server_guilds[i]
+        servers[i].serverName = server.guild.name
+        servers[i].serverIcon = server.guild.icon
+        serverController.updateServer(servers[i])
+
+    await scx.sendLocalized(StringsNames.SERVERS_UPDATED)
+
+# execption event handlers that send exception info to the dev guild
+@bot.event(name="on_command_error")
+async def on_command_error(ctx:CommandContext, error):
+
+    error_msg = str(error)
+    if error.__traceback__:
+        error_msg = "".join(traceback.format_exception(type(error), error, error.__traceback__))
+
+    logging.error(error_msg)
+
+    dev_channel = await interactions.get(bot, Channel, object_id=devLogChannel)
+    # make info of error using ctx: which command, which guild, who invoked it, etc
+    ctx_info = (
+         "-+"*10 + "New error log:" + "-+"*10 + "-\n"
+        f"Command: {ctx.command.name}\n"
+        f"Guild: {ctx.guild.name + ' (' + str(ctx.guild_id) + ')' if ctx.guild else 'DM'}\n"
+        f"User: {ctx.author.name} ({ctx.author.id})\n"
+        f"Channel: {ctx.channel.name if ctx.channel else 'DM'}\n"
+        f"Message: {ctx.message.content if ctx.message else 'N/A'}\n" 
+    )
+    error_info = f"Error: ```fix\n{error_msg}```\n"
+    if len(error_info) > 2000: # discord message limit, get last 1950 chars of exception
+        error_info = f"Error: ```fix\n(...)\n{error_msg[-1950:]}```\n"
+    await dev_channel.send(ctx_info)
+    await dev_channel.send(error_info)
+    
+
+# TODO event handler for when the bot joins a new server

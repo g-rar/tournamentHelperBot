@@ -1,6 +1,6 @@
 from interactions import CommandContext, Message, Option, OptionType
 import interactions
-from bot import bot, CONF, db, botGuilds, devGuilds
+from bot import bot, CONF, db, botGuilds, devGuild
 from contextExtentions.customContext import ServerContext, customContext
 from local.names import StringsNames
 from utils import getQueryAsList
@@ -18,7 +18,7 @@ def devCommand(f):
 
 @bot.command(
     name="ping",
-    scope=devGuilds
+    scope=devGuild
 )
 @devCommand    
 async def devTestCommand(ctx: CommandContext):
@@ -27,7 +27,7 @@ async def devTestCommand(ctx: CommandContext):
 
 @bot.command(
     name = "test-database",
-    scope=devGuilds,
+    scope=devGuild,
     options=[
         Option(name="msg", description="Message to test db", type=OptionType.STRING)
     ]
@@ -44,7 +44,7 @@ async def devTest(ctx:CommandContext, msg:str):
 @bot.command(
     name="see_commands",
     description="see bot commands",
-    scope=devGuilds
+    scope=devGuild
 )
 async def see_commands(ctx:CommandContext):
     interactions.get()
@@ -58,7 +58,7 @@ async def see_commands(ctx:CommandContext):
 @bot.command(
     name="test_local",
     description="test language diversity",
-    scope=devGuilds,
+    scope=devGuild,
     options=[]
 )
 @customContext

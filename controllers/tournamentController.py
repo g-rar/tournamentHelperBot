@@ -59,7 +59,12 @@ class TournamentController:
         return res
 
     def getOpenTournaments(self) -> List[Tournament]:
-        c = self.collection.find({"registration.status":{"$ne":0}})
+        # make an aggregation with servers that the bot has not left
+        c = self.collection.aggregate([
+            {"$match":{"registration.status": {"$ne": TournamentStatus.REGISTRATION_CLOSED}}},
+            {"$lookup":{"from":"SERVER","localField":"hostServerId","foreignField":"serverId","as":"server"}},
+            {"$match":{"server.bot_left":{"$ne":True}}},
+        ])
         d = getQueryAsList(c) if c is not None else []
         res = list(map(lambda x: factories.getGameTournament(x["game"], x), d))
         return res 

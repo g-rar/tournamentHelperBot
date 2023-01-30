@@ -86,7 +86,8 @@ async def listOperatorRoles(ctx:CommandContext, scx:ServerContext):
         return
     server = serverController.getServer(int(ctx.guild_id))
     if len(server.adminRoles) == 0:
-        ctx.channel.send("This server has no operator roles")
+        await ctx.channel.send("This server has no operator roles")
+        return
     roles = list(filter(
         lambda x: int(x.id) in server.adminRoles, 
         ctx.guild.roles
