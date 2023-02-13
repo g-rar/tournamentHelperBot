@@ -19,13 +19,19 @@ class EnglishStrs(Enum):
     REGISTRATION = "Registration"
     OPEN = "📝 Open"
     CLOSED = "❌ Closed"
+    COLUMN_NOT_FOUND = "Column/s `{column}` not found."
+    LOG_CHANNEL = "Log channel"
+    LANGUAGE = "Language"
+    SHOW_BMAC_PAGE = "Show Buy Me A Coffee page"
     BMAC_MSG = "If you'd like to support my developer or contribute to feature goals, buy me a coffe: ☕😋 https://www.buymeacoffee.com/gerardolop"
 
     #Server
     CANT_REGISTER_DM = "This is not a server. Not one that can be registered anyways ¯\\\_(ツ)_/¯"
     SERVER_ALREADY_IN = "This server is already registered. You can't be registered anymore than you are already ( ´･･)ﾉ(._.`)"
     SERVER_REGISTERED = "Thanks for receiving me on your server, hope to be helpfull ( •̀ ω •́ )✧"
+    SERVER_NOT_REGISTERED = "This server is not registered. You can't be unregistered if you're not registered ( ´･･)ﾉ(._.`)"
     SERVER_UPDATED = "The server's information was updated!"
+    SERVER_CONFIG_TITLE = "Server configuration"
     ADDED_OPERATOR_ROLE = "The role '{role}' was added as bot operator on this server (＾u＾)ノ~"
     REMOVED_OPERATOR_ROLE = "The role '{role}' was removed as bot operator on this server..."
     OPERATOR_ROLE_ALREADY_EXISTS = "The role '{role}' is an operator role already (＾v＾u)..."
@@ -38,6 +44,7 @@ class EnglishStrs(Enum):
     SERVER_NOT_FOUND = "Couldn't find the server with id `{id}`. Check if the id is correct (._.`)・・・"
     SERVER_LEFT = "I left the server `{name}`. I hope they didn't do anything wrong (u •_•)"
     SERVERS_UPDATED = "The servers' information was updated! (＾u＾)ノ~"
+    ROLE_NOT_FOUND = "Couldn't find the role with id `{id}`. May it doesn't exist anymore (._.`)・・・"
 
     #Tournament
     TOURNAMENT_UNEXISTING = "Couldn't find a tournament with the name `{name}`, check if you typed the name correctly (._.`)・・・"

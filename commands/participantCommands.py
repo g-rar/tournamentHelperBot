@@ -1,5 +1,5 @@
 from typing import List
-from interactions import CommandContext, File, Member, Option, OptionType, Role
+from interactions import CommandContext, File, LibraryException, Member, Option, OptionType, Role
 import interactions
 from interactions.ext import files
 import pandas as pd
@@ -109,8 +109,11 @@ async def deleteParticipant(ctx:CommandContext, scx:ServerContext, tournament:st
         await scx.sendLocalized(StringsNames.PARTICIPANT_DELETED, username=f"id: {discord_id}", tournament=tournament)
         if tournamentData.registration.participantRole:
             member:Member = await ctx.guild.get_member(participant.discordId)
-            role = await ctx.guild.get_role(tournamentData.registration.participantRole)
-            await member.remove_role(role, reason='Manually disqualified by TOs')
+            try:
+                role = await ctx.guild.get_role(tournamentData.registration.participantRole)
+                await member.remove_role(role, reason='Manually disqualified by TOs')
+            except LibraryException as e:
+                await scx.sendLocalized(StringsNames.ROLE_NOT_FOUND, role_id=tournamentData.registration.participantRole)
     else:
         await scx.sendLocalized(StringsNames.PARTICIPANT_UNEXISTING, username=f"id: {discord_id}", tournament=tournament)
 

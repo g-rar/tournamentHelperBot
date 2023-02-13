@@ -1,5 +1,4 @@
 import asyncio
-from typing import List
 from interactions import Channel, ChannelType, CommandContext, Embed, File, Guild, Message, MessageReaction, Option, OptionType
 from interactions.ext.paginator import Page, Paginator
 from interactions.ext import files, wait_for
@@ -24,7 +23,7 @@ from games import factories
 
 from commands.registrationCommands import registrationBase
 
-from utils import paginatorButtons
+from utils import paginatorButtons, spaceStrings
 
 
 @bot.command(name="tournaments", scope=botGuilds)
@@ -60,12 +59,14 @@ async def deleteTournament(ctx:CommandContext, scx:ServerContext, tournament:str
     name="view",
     options=[
         Option(name="tournament", description="Get the details for one tournament",
-               type=OptionType.STRING, required=False)
+               type=OptionType.STRING, required=False),
+        Option(name="show_games", description="Show the games for each tournament",
+                type=OptionType.BOOLEAN, required=False)
     ],
     description="Shows a list of the tournaments made by this server"
 )
 @customContext
-async def getTournaments(ctx: CommandContext, scx: ServerContext, tournament:str = None):
+async def getTournaments(ctx: CommandContext, scx: ServerContext, tournament:str = None, show_games:bool = False):
     guild:Guild = ctx.guild
     if tournament:
         tournamentData = tournamentController.getTournamentFromName(int(guild.id), tournament)
@@ -77,21 +78,23 @@ async def getTournaments(ctx: CommandContext, scx: ServerContext, tournament:str
         else:
             await scx.sendLocalized(StringsNames.TOURNAMENT_UNEXISTING, name=tournament)
         return
-    tournaments:List[Tournament] = tournamentController.getTournamentsForServer(ctx.guild_id)
+    tournaments:list[Tournament] = tournamentController.getTournamentsForServer(ctx.guild_id)
     if len(tournaments) > 20:
         pageList = []
         embedTournaments = []
         page = 1
-        while len(tournaments) != 0:
-            tournament = tournaments.pop(0)
-            tournamentStr = f' - `{tournament.name}`'
+        for i in range(len(tournaments)):
+            tournament:Tournament = tournaments[i]
+            game = f"({tournament.game})"
+            tournamentStr = f' - `{spaceStrings(tournament.name, tournament.game, 40) if show_games else tournament.name}`'
             if tournament.registration.status != TournamentStatus.CHECK_IN_CLOSED:
                 tournamentStr += " [ 📝 ]"
             embedTournaments.append(tournamentStr)
-            if len(embedTournaments) == 20 or len(tournaments) == 0:
+            # every 20 tournaments or when the last tournament is reached
+            if (i+1) % 20 == 0 or i == len(tournaments)-1:
                 tournamentStr = "\n".join(embedTournaments)
                 embed = Embed(
-                    title=f"Showing tournaments from {embedTournaments[0]} to {embedTournaments[-1]}:", 
+                    title=f"Showing tournaments from { tournaments[i-19].name } to { tournaments[i].name }", 
                     color=0xFFBA00, 
                     description="\n"+tournamentStr, 
                     timestamp=datetime.utcnow())
@@ -104,8 +107,8 @@ async def getTournaments(ctx: CommandContext, scx: ServerContext, tournament:str
     else:
         tournamentStr = ""
         for t in tournaments:
-            t:Tournament
-            tournamentStr += ' - `' + t.name + '`'
+            game = f"({t.game})"
+            tournamentStr += f' - `{spaceStrings(t.name, game, 40) if show_games else game}`'
             if t.registration.status != TournamentStatus.CHECK_IN_CLOSED:
                 tournamentStr += "[ 📝 ]"
             tournamentStr += "\n"

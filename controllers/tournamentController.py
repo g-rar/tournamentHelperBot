@@ -107,7 +107,6 @@ class TournamentController:
             participantController.updateParticipant(participant)
         return participant
 
-        # TODO do this
     def getTournamentEmbed(self, tournament:Tournament, lang:str):
         base = Embed(title=tournament.name, color=0xFFBA00, fields=[
                 EmbedField(

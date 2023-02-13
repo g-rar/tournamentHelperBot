@@ -19,13 +19,19 @@ class SpanishStrs(Enum):
     REGISTRATION = "Registro"
     OPEN = "📝 Abierto"
     CLOSED = "❌ Cerrado"
+    COLUMN_NOT_FOUND = "No se encontró la columna `{column}`..."
+    LOG_CHANNEL = "Canal de registro"
+    LANGUAGE = "Idioma"
+    SHOW_BMAC_PAGE = "Mostrar página de Buy Me A Coffee"
     BMAC_MSG = "Si te gustaría apoyar a mi desarrollador o apoyar metas de características, cómprame un café: ☕😋 https://www.buymeacoffee.com/gerardolop"
 
     #Server
     CANT_REGISTER_DM = "Este no es un servidor. No uno que pueda registrar al menos ¯\\\_(ツ)_/¯"
     SERVER_ALREADY_IN = "Este serividor ya está registrado. No puedes estar más registrado de lo que ya estás ( ´･･)ﾉ(._.`)"
     SERVER_REGISTERED = "Gracias por recibirme en el server, espero ser de ayuda ( •̀ ω •́ )✧"
+    SERVER_NOT_REGISTERED = "Este serividor no está registrado. No puedo hacer nada si no me registran ( ´･･)ﾉ(._.`)"
     SERVER_UPDATED = "¡La información del servidor se ha actualizado!"
+    SERVER_CONFIG_TITLE = "Configuración del servidor"
     ADDED_OPERATOR_ROLE = "Se ha añadido el rol '{role}' como operador de este servidor (＾u＾)ノ~"
     REMOVED_OPERATOR_ROLE = "Se ha quitado el rol '{role}' como operador de este servidor..."
     OPERATOR_ROLE_ALREADY_EXISTS = "Ese rol '{role}' ya es un rol de operador para empezar (＾v＾u)..."
@@ -38,6 +44,7 @@ class SpanishStrs(Enum):
     SERVER_NOT_FOUND = "No se encontró el servidor con id `{id}`. Asegurate de que el id es correcto (u •_•)"
     SERVER_LEFT = "Me fui del server `{name}`. Espero que no hayan hecho nada malo (＾v＾u)..."
     SERVERS_UPDATED = "Se han actualizado los servidores. ¡Espero que ahora estén mejor! ヾ(^▽^*)~"
+    ROLE_NOT_FOUND = "No se encontró el rol con id `{id}`. Talv vez ya no existe (u •_•)"
 
     #Tournament
     TOURNAMENT_UNEXISTING = "No se ha encontrado ningún torneo con el nombre `{name}`, asegúrate de que escribiste el nombre bien (._.`)・・・"

@@ -53,6 +53,10 @@ def extractQuotedSubstrs(s) -> List[str]:
 
     return res
 
+def spaceStrings(s1:str, s2:str, length:int) -> str:
+    if len(s1) + len(s2) >= length:
+        return s1 + s2
+    return s1 + " " * (length - len(s1) - len(s2)) + s2
 
 class OptionTypes:
     SUB_COMMAND = 1

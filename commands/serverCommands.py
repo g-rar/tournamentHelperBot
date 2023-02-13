@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 from io import StringIO
-from interactions import Channel, ChannelType, Choice, CommandContext, File, MessageReaction, Option, OptionType, Message
+from interactions import Channel, ChannelType, Choice, CommandContext, Embed, File, MessageReaction, Option, OptionType, Message
 from interactions.ext import wait_for, files
 from controllers.adminContoller import adminCommand
 from controllers.serverController import Server, serverController
@@ -129,6 +129,37 @@ async def no_coffee_sad(ctx: CommandContext, scx:ServerContext, enabled:bool):
         await scx.sendLocalized(StringsNames.SERVER_UPDATED)
     else:
         await scx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
+
+
+# server subcommand to display server config
+@botServerConfig.subcommand(
+    name="show",
+    description="Show the current server configuration."
+)
+@adminCommand
+@customContext
+async def showServerConfig(ctx: CommandContext, scx:ServerContext):
+    guildId = int(ctx.guild_id)
+    if guildId is None:
+        await ctx.send(scx.getStr(StringsNames.NOT_FOR_DM))
+        return
+    server = serverController.getServer(guildId)
+    if server is None:
+        await scx.sendLocalized(StringsNames.SERVER_NOT_REGISTERED)
+        return
+    embed = Embed(
+        title=scx.getStr(StringsNames.SERVER_CONFIG_TITLE),
+        color=0xFFBA00
+    )
+    embed.add_field(name=scx.getStr(StringsNames.LANGUAGE), value=server.language, inline=False)
+    embed.add_field(
+        name=scx.getStr(StringsNames.LOG_CHANNEL), 
+        value=f"<#{server.logChannel}>" if server.logChannel else "None", 
+        inline=False
+    )
+    embed.add_field(name=scx.getStr(StringsNames.SHOW_BMAC_PAGE), value=server.show_bmac, inline=False)        
+
+    await scx.send(embeds=embed)
 
 @bot.command(
     name="buy_me_a_coffee",

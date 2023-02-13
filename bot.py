@@ -39,3 +39,7 @@ async def on_ready():
     logging.info("Connected to discord")
     print("Connected to discord")
 
+@bot.event(name='on_disconnect')
+async def on_disconnect():
+    logging.info("Disconnected from discord")
+    print("Disconnected from discord")

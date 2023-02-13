@@ -67,7 +67,8 @@ async def seedBy(ctx:CommandContext, scx:ServerContext, column:str, order:str, m
             header= not columnsList or len(columnsList)!=1
         )
         await files.command_send(ctx, content= utilStrs.INFO.format("File generated"), files=[File(fp=StringIO(dfcsv), filename="Seeding.csv")])
-        
+    except KeyError as e:
+        await scx.sendLocalized(StringsNames.COLUMN_NOT_FOUND, column=e.args)
     except Exception as e:
         await ctx.send(utilStrs.ERROR.format(e))
         raise e
@@ -107,9 +108,11 @@ async def getColumn(ctx:CommandContext, scx:ServerContext, columns:str, message_
             content=utilStrs.INFO.format("File generated"),
             files=[File(fp=StringIO(dfcsv), filename="Seeding.csv")]
         )
+    except KeyError as e:
+        await scx.sendLocalized(StringsNames.COLUMN_NOT_FOUND, column=e.args)
     except Exception as e:
         await ctx.send(utilStrs.ERROR.format(e))
-
+        raise e
 
 
 async def getCsvTextFromMsg(msg:Message):
