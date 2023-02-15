@@ -24,6 +24,7 @@ class SpanishStrs(Enum):
     LANGUAGE = "Idioma"
     SHOW_BMAC_PAGE = "Mostrar página de Buy Me A Coffee"
     BMAC_MSG = "Si te gustaría apoyar a mi desarrollador o apoyar metas de características, cómprame un café: ☕😋 https://www.buymeacoffee.com/gerardolop"
+    OPERATOR_ROLES = "Roles de operador"
 
     #Server
     CANT_REGISTER_DM = "Este no es un servidor. No uno que pueda registrar al menos ¯\\\_(ツ)_/¯"

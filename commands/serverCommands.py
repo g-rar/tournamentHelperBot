@@ -160,7 +160,13 @@ async def showServerConfig(ctx:CommandContext, scx:ServerContext):
         value=f"<#{server.logChannel}>" if server.logChannel else "None", 
         inline=False
     )
-    embed.add_field(name=scx.getStr(StringsNames.SHOW_BMAC_PAGE), value=server.show_bmac, inline=False)        
+    embed.add_field(name=scx.getStr(StringsNames.SHOW_BMAC_PAGE), value=server.show_bmac, inline=False)
+    server.adminRoles
+    embed.add_field(
+        name=scx.getStr(StringsNames.OPERATOR_ROLES), 
+        value="\n".join(f"<@&{role}>" for role in server.adminRoles) if server.adminRoles else "None", 
+        inline=False
+    )
 
     await scx.send(embeds=embed)
 
