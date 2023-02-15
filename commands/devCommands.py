@@ -208,6 +208,10 @@ async def on_command_error(ctx:CommandContext, error):
     logging.error(error_msg)
 
     dev_channel = await interactions.get(bot, Channel, object_id=devLogChannel)
+
+    if not dev_channel:
+        return
+
     # make info of error using ctx: which command, which guild, who invoked it, etc
     ctx_info = (
          "-+"*10 + "New error log:" + "-+"*10 + "-\n"

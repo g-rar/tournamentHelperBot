@@ -45,6 +45,10 @@ class SpanishStrs(Enum):
     SERVER_LEFT = "Me fui del server `{name}`. Espero que no hayan hecho nada malo (＾v＾u)..."
     SERVERS_UPDATED = "Se han actualizado los servidores. ¡Espero que ahora estén mejor! ヾ(^▽^*)~"
     ROLE_NOT_FOUND = "No se encontró el rol con id `{id}`. Talv vez ya no existe (u •_•)"
+    REPORT_ISSUE_MODAL_TITLE = "Reportar un problema"
+    REPORT_ISSUE_DESC = "Por favor, comparte los detalles aquí:"
+    REPORT_ISSUE_TITLE = "Título del problema:"
+    REPORT_ISSUE_RECEIVED = "Gracias por reportar el proble: `{title}`. Lo intentaré reparar lo más pronto posible! (＾u＾)ノ~"
 
     #Tournament
     TOURNAMENT_UNEXISTING = "No se ha encontrado ningún torneo con el nombre `{name}`, asegúrate de que escribiste el nombre bien (._.`)・・・"

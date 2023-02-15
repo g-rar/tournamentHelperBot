@@ -28,10 +28,12 @@ CONF = BotSettings()
 botGuilds = interactions.MISSING if not CONF.DEV else CONF.TEST_GUILDS
 devGuild = list(map(lambda x: int(x), os.getenv("DEV_GUILD").split(","))) if os.getenv("DEV_GUILD") else []
 devLogChannel = int(os.getenv("DEV_LOG_CHANNEL")) if os.getenv("DEV_LOG_CHANNEL") else None
-
+devReportChannel = int(os.getenv("DEV_REPORT_CHANNEL")) if os.getenv("DEV_REPORT_CHANNEL") else None
 
 client:MongoClient = MongoClient(os.getenv("DB_CONNECTIONSTR"))
 db:Database = client.get_database(name=CONF.DB_NAME)
+# check database connection
+db.command("ping")
 
 
 @bot.event(name='on_ready')

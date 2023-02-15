@@ -45,6 +45,10 @@ class EnglishStrs(Enum):
     SERVER_LEFT = "I left the server `{name}`. I hope they didn't do anything wrong (u •_•)"
     SERVERS_UPDATED = "The servers' information was updated! (＾u＾)ノ~"
     ROLE_NOT_FOUND = "Couldn't find the role with id `{id}`. May it doesn't exist anymore (._.`)・・・"
+    REPORT_ISSUE_MODAL_TITLE = "Issue report"
+    REPORT_ISSUE_DESC = "Please share the details here:"
+    REPORT_ISSUE_TITLE = "Issue title:"
+    REPORT_ISSUE_RECEIVED = "Thanks for reporting the issue: `{title}`. I'll try to fix it as soon as possible (＾u＾)ノ~"
 
     #Tournament
     TOURNAMENT_UNEXISTING = "Couldn't find a tournament with the name `{name}`, check if you typed the name correctly (._.`)・・・"

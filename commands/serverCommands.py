@@ -1,14 +1,17 @@
 import asyncio
 from datetime import datetime
 from io import StringIO
-from interactions import Channel, ChannelType, Choice, CommandContext, Embed, File, MessageReaction, Option, OptionType, Message
+
+import interactions
+from interactions import Channel, ChannelType, Choice, CommandContext, Embed, File, MessageReaction, Modal, Option, OptionType, Message, TextInput, TextStyleType
 from interactions.ext import wait_for, files
+
 from controllers.adminContoller import adminCommand
 from controllers.serverController import Server, serverController
 from contextExtentions.customContext import customContext, ServerContext
 from local.names import StringsNames
 
-from bot import botGuilds, bot
+from bot import botGuilds, bot, devReportChannel
 from httpClient import getAllUsersFromReaction
 import pandas as pd
 
@@ -52,7 +55,7 @@ async def configRegisterServer(ctx:CommandContext, scx:ServerContext):
 )
 @adminCommand
 @customContext
-async def setServerLanguage(ctx: CommandContext, scx: ServerContext=None, language:str=None):
+async def setServerLanguage(ctx:CommandContext, scx: ServerContext=None, language:str=None):
     guildId = int(ctx.guild_id)
     if guildId is None:
         await ctx.send(scx.getStr(StringsNames.NOT_FOR_DM))
@@ -81,7 +84,7 @@ async def setServerLanguage(ctx: CommandContext, scx: ServerContext=None, langua
 )
 @adminCommand
 @customContext
-async def setLogChannel(ctx: CommandContext, scx:ServerContext, channel:Channel):
+async def setLogChannel(ctx:CommandContext, scx:ServerContext, channel:Channel):
     guild_id = int(ctx.guild_id)
     if guild_id is None:
         await ctx.send(scx.getStr(StringsNames.NOT_FOR_DM))
@@ -113,7 +116,7 @@ async def setLogChannel(ctx: CommandContext, scx:ServerContext, channel:Channel)
 )
 @adminCommand
 @customContext
-async def no_coffee_sad(ctx: CommandContext, scx:ServerContext, enabled:bool):
+async def no_coffee_sad(ctx:CommandContext, scx:ServerContext, enabled:bool):
     guildId = int(ctx.guild_id)
     if guildId is None:
         await ctx.send(scx.getStr(StringsNames.NOT_FOR_DM))
@@ -138,7 +141,7 @@ async def no_coffee_sad(ctx: CommandContext, scx:ServerContext, enabled:bool):
 )
 @adminCommand
 @customContext
-async def showServerConfig(ctx: CommandContext, scx:ServerContext):
+async def showServerConfig(ctx:CommandContext, scx:ServerContext):
     guildId = int(ctx.guild_id)
     if guildId is None:
         await ctx.send(scx.getStr(StringsNames.NOT_FOR_DM))
@@ -186,7 +189,7 @@ async def coffee_pls(ctx:CommandContext, scx:ServerContext):
     ]
 )
 @customContext
-async def getReactions(ctx: CommandContext, scx:ServerContext, channel:Channel, message_id:str):
+async def getReactions(ctx:CommandContext, scx:ServerContext, channel:Channel, message_id:str):
     if channel.type != ChannelType.GUILD_TEXT:
         await scx.sendLocalized(StringsNames.VALUE_SHOULD_BE_TEXT_CHANNEL, option="channel")
         return
@@ -226,3 +229,57 @@ async def getReactions(ctx: CommandContext, scx:ServerContext, channel:Channel, 
             File(filename=f"Reactions_{datetime.utcnow()}.csv", fp=StringIO(df.to_csv(index=False,header=False)))
         ]
     )
+
+
+@bot.command(
+    name="report_issue",
+    description="Report an issue to the bot developer.",
+    scope=botGuilds,
+)
+@adminCommand
+@customContext
+async def reportIssue(ctx:CommandContext, scx:ServerContext):
+    if ctx.guild_id is None:
+        await scx.sendLocalized(StringsNames.NOT_FOR_DM)
+        return
+    # create modal where user can input the issue in detail and send it to the developer
+    modal = Modal(
+        title=scx.getStr(StringsNames.REPORT_ISSUE_MODAL_TITLE),
+        custom_id="issue_report_modal",
+        components=[
+            TextInput(
+                style=TextStyleType.SHORT,
+                label=scx.getStr(StringsNames.REPORT_ISSUE_TITLE),
+                custom_id="issue_report_title",
+                min_length=1,
+                max_length=100,
+            ),
+            TextInput(
+                style=TextStyleType.PARAGRAPH,
+                label=scx.getStr(StringsNames.REPORT_ISSUE_DESC),
+                custom_id="issue_report_description",
+                min_length=1,
+                max_length=2000,
+            ),
+        ],
+    )
+
+    await ctx.popup(modal)
+
+
+@bot.modal("issue_report_modal")
+@customContext
+async def mod_app_form(ctx:CommandContext, title:str, description:str, scx:ServerContext):
+    await scx.sendLocalized(StringsNames.REPORT_ISSUE_RECEIVED, title=title)
+    # send the issue to the developer
+    report_channel = await interactions.get(bot, Channel, object_id=devReportChannel)
+    ctx_info = (
+         "**"+"-+"*10 + "New Issue report!:" + "-+"*10 + "-**\n"
+        f"**Guild**: {ctx.guild.name + ' (' + str(ctx.guild_id) + ')' if ctx.guild else 'DM'}\n"
+        f"**User**: {ctx.author.name} ({ctx.author.id})\n"
+        f"**Channel**: {ctx.channel.name if ctx.channel else 'DM'}\n"
+        f"**Details:**\n"
+        f"           -  {title}  -\n"
+    )
+    await report_channel.send(content=ctx_info)
+    await report_channel.send(content=description)
