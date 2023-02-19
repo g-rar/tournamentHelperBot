@@ -108,7 +108,7 @@ async def getTournaments(ctx: CommandContext, scx: ServerContext, tournament:str
         tournamentStr = ""
         for t in tournaments:
             game = f"({t.game})"
-            tournamentStr += f' - `{spaceStrings(t.name, game, 40) if show_games else game}`'
+            tournamentStr += f' - `{spaceStrings(t.name, game, 40) if show_games else t.name}`'
             if t.registration.status != TournamentStatus.CHECK_IN_CLOSED:
                 tournamentStr += "[ 📝 ]"
             tournamentStr += "\n"
