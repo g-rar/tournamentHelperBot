@@ -20,7 +20,7 @@ class BotSettings:
     DEV = bool(os.getenv("DEV"))
 
 bot = interactions.Client(token= BotSettings.TOKEN, intents=Intents.ALL)
-httpClient = interactions.HTTPClient(BotSettings.TOKEN)
+httpClient = interactions.HTTPClient(BotSettings.TOKEN, cache=interactions.Cache())
 wait_for.setup(bot=bot)
 files.setup(bot)
 
