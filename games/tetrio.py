@@ -259,14 +259,17 @@ class TetrioController(BaseGameController):
                     _rankIndex(player.info.league.rank) < _rankIndex(rankBottom)):
                 raise RegistrationError("Underranked", self.UNDERRANKED)
 
-        # get player warnings
-        if ((tournament.rankTop or tournament.rankTop or tournament.trTop or tournament.trBottom) 
+        
+        ####### get player warnings
+
+        if ((tournament.rankTop or tournament.rankBottom or tournament.trTop or tournament.trBottom) 
                 and player.info.league.rd > 90):
             # add RD warning if tournament has restrictions, otherwise not needed
             player.warnings.append(f"{StringsNames.TETRIO_HIGH_RD}:{player.info.league.rd}")
 
         if tournament.rankTop:
-            if  (_rankIndex(player.info.league.rank) == _rankIndex(tournament.rankTop) and
+            if  (tournament.rankTop != "x" and
+                    _rankIndex(player.info.league.rank) == _rankIndex(tournament.rankTop) and
                     _rankIndex(player.info.league.percentile_rank) > _rankIndex(player.info.league.rank)):
                 player.warnings.append(f"{StringsNames.TETRIO_PROMOTION_INMINENT}:{player.info.league.percentile_rank.upper()}")
             
@@ -274,7 +277,8 @@ class TetrioController(BaseGameController):
                     player.info.league.decaying):
                 player.warnings.append(StringsNames.TETRIO_PLAYER_DECAYING)
 
-            if (_rankIndex(player.info.league.rank) == _rankIndex(tournament.rankTop) and 
+            if (tournament.rankTop != "x" and
+                    _rankIndex(player.info.league.rank) == _rankIndex(tournament.rankTop) and 
                     (player.info.league.standing - player.info.league.next_at 
                     < (player.info.league.prev_at - player.info.league.next_at) / 6 )):
                 # add warning for standing 5/6'ths of the way to surpass top boundry
