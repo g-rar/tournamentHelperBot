@@ -7,11 +7,12 @@ from pymongo.collection import Collection
 from pymongo.database import Database
 from bson.objectid import ObjectId
 
-from utils import getQueryAsList
+from utils.utils import getQueryAsList
+from utils.encryption import encrypt_value, decrypt_value
 
 from baseModel import BaseModel
 
-from bot import db
+from bot import db, CONF
 
 @dataclass
 class Server(BaseModel):
@@ -26,6 +27,8 @@ class Server(BaseModel):
     teamRegFields: list = field(default_factory=list)
     adminRoles: list = field(default_factory=list)
     adminUsers: list = field(default_factory=list)
+    _salt: str = None
+    _challongeEncryptedApiKey: str = None
 
     @staticmethod
     def fromDict(d):

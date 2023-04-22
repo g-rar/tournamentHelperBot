@@ -22,6 +22,7 @@ from utils import getQueryAsList
 # TODO if its not plus game theres a default valitador (for data types at least)
 # TODO if theres no template it only asks for the plus game fields and/or discord info.
 
+from utils.utils import getQueryAsList, getStr
 
 class TournamentController:
 

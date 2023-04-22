@@ -3,7 +3,7 @@ from models.tournamentModels import Tournament
 from models.registrationModels import Participant, RegistrationError
 from typing import List
 
-from utils import OptionTypes
+from utils.utils import OptionTypes
 
 from baseModel import BaseModel
 from models.registrationModels import RegistrationField

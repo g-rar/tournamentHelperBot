@@ -15,7 +15,7 @@ from pymongo.collection import Collection
 from pymongo.database import Database
 from pymongo.operations import DeleteOne, ReplaceOne
 
-from utils import getQueryAsList
+from utils.utils import getQueryAsList
 
 from bot import db
 

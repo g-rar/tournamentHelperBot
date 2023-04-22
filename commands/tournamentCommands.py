@@ -24,7 +24,7 @@ from games import factories
 
 from commands.registrationCommands import registrationBase
 
-from utils import paginatorButtons
+from utils.utils import paginatorButtons, spaceStrings
 
 
 @bot.command(name="tournaments", scope=botGuilds)
@@ -66,7 +66,6 @@ async def deleteTournament(ctx:CommandContext, scx:ServerContext, tournament:str
 )
 @customContext
 async def getTournaments(ctx: CommandContext, scx: ServerContext, tournament:str = None):
-    #TODO this can be further prettyfied
     guild:Guild = ctx.guild
     if tournament:
         tournamentData = tournamentController.getTournamentFromName(int(guild.id), tournament)

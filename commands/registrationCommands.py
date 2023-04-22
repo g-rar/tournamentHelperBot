@@ -18,7 +18,7 @@ from controllers.adminContoller import adminCommand
 from controllers.serverController import serverController
 from controllers.tournamentController import tournamentController
 
-from utils import OptionTypes, extractQuotedSubstrs
+from utils.utils import OptionTypes, extractQuotedSubstrs
 
 
 # structure follows {channelId: tournamentId}
