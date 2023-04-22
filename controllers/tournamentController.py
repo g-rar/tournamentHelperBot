@@ -18,7 +18,7 @@ from games import factories
 
 from local.names import StringsNames as strs
 
-from utils import getQueryAsList, getStr
+from utils.utils import getQueryAsList, getStr
 
 class TournamentController:
 

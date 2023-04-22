@@ -23,7 +23,7 @@ from games import factories
 
 from commands.registrationCommands import registrationBase
 
-from utils import paginatorButtons, spaceStrings
+from utils.utils import paginatorButtons, spaceStrings
 
 
 @bot.command(name="tournaments", scope=botGuilds)

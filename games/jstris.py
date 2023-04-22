@@ -29,7 +29,7 @@ from controllers.tournamentController import tournamentController
 from controllers.adminContoller import adminCommand
 
 from commands.tournamentCommands import tournamentBaseCommand
-from utils import OptionTypes
+from utils.utils import OptionTypes
 
 @dataclass
 class JstrisPlayer(BasePlayer):

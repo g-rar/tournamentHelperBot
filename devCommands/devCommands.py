@@ -3,7 +3,7 @@ import interactions
 from bot import bot, CONF, db, botGuilds, devGuild
 from contextExtentions.customContext import ServerContext, customContext
 from local.names import StringsNames
-from utils import getQueryAsList
+from utils.utils import getQueryAsList
 
 from pymongo.collection import Collection
 

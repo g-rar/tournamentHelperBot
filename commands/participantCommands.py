@@ -20,7 +20,7 @@ from controllers.playerController import participantController
 from controllers.tournamentController import tournamentController
 from games import factories
 
-from utils import OptionTypes, extractQuotedSubstrs
+from utils.utils import OptionTypes, extractQuotedSubstrs
 
 @bot.command(name="participants", scope=botGuilds)
 async def particpantsBaseCommand(ctx:CommandContext): pass

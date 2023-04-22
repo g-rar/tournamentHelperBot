@@ -23,7 +23,7 @@ from controllers.playerController import participantController
 
 from bot import botGuilds
 
-from utils import OptionTypes
+from utils.utils import OptionTypes
 
 tetrioRanks = ["z","d","d+"] + [let + sign for let in "cbas" for sign in ["-","","+"]] + ["ss","u",'x']
 tetrioNamePttr = (
