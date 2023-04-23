@@ -86,9 +86,9 @@ async def getTournaments(ctx: CommandContext, scx: ServerContext, tournament:str
         for i in range(len(tournaments)):
             tournament:Tournament = tournaments[i]
             game = f"({tournament.game})"
-            tournamentStr = f' - `{spaceStrings(tournament.name, tournament.game, 40) if show_games else tournament.name}`'
+            tournamentStr = f'- `{spaceStrings(tournament.name, tournament.game, 40) if show_games else tournament.name}`'
             if tournament.registration.status != TournamentStatus.CHECK_IN_CLOSED:
-                tournamentStr += " [ 📝 ]"
+                tournamentStr = f" {tournamentStr} [ 📝 ]"
             embedTournaments.append(tournamentStr)
             # every 20 tournaments or when the last tournament is reached
             if (i+1) % 20 == 0 or i == len(tournaments)-1:
@@ -108,9 +108,9 @@ async def getTournaments(ctx: CommandContext, scx: ServerContext, tournament:str
         tournamentStr = ""
         for t in tournaments:
             game = f"({t.game})"
-            tournamentStr += f' - `{spaceStrings(t.name, game, 40) if show_games else t.name}`'
+            tournamentStr += f'- `{spaceStrings(t.name, game, 40) if show_games else t.name}`'
             if t.registration.status != TournamentStatus.CHECK_IN_CLOSED:
-                tournamentStr += "[ 📝 ]"
+                tournamentStr = f" {tournamentStr} [ 📝 ]"
             tournamentStr += "\n"
         embed = Embed(
             title=guild.name, 
