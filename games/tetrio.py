@@ -239,10 +239,14 @@ class TetrioController(BaseGameController):
         if not review and participantController.getParticipantFromData(tournament._id, {"info._id":player.info._id}):
             raise RegistrationError("Tetrio account already registered", self.ALREADY_REGISTERED)
         if not override:
-            if tournament.trTop and player.info.league.rating > tournament.trTop:
-                raise RegistrationError("TR over cap", self.TR_OVER_TOP)
-            if tournament.trBottom and player.info.league.rating < tournament.trBottom:
-                raise RegistrationError("TR under floor", self.TR_UNDER_BOTTOM)
+            if tournament.trTop or tournament.trBottom:
+                maxTr = await TetrioController.getMaxTr(player.info._id)
+                if maxTr is None:
+                    raise RegistrationError("Couldn't get maxTR", self.INVALID_PLAYER)               
+            if tournament.trTop and maxTr >= tournament.trTop:
+                raise RegistrationError("Max TR over cap", self.TR_OVER_TOP)
+            if tournament.trBottom and maxTr <= tournament.trBottom:
+                raise RegistrationError("Max TR under floor", self.TR_UNDER_BOTTOM)
         
         rankTop, rankBottom = tournament.rankTop, tournament.rankBottom
         if not override and (rankTop or rankBottom):
@@ -285,7 +289,15 @@ class TetrioController(BaseGameController):
                 player.warnings.append(StringsNames.TETRIO_NEAR_PROMOTION)
         
         return player
-
+    
+    async def getMaxTr(player_id:str) -> int:
+        goats_api = "https://api.p1nkl0bst3r.xyz/"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(goats_api + f"toptr/{player_id}") as r:
+                if r.status == 200:
+                    # returns and integer value in response body
+                    return int(float(await r.text()))
+                
     async def getTetrioPlayer(username:str, session):
         api = "https://ch.tetr.io/api/"
 
@@ -372,9 +384,9 @@ class TetrioController(BaseGameController):
                         type=OptionTypes.STRING, required=False),
         Option(  name="rank_floor", description="Minimum rank a player can have to register",
                         type=OptionTypes.STRING, required=False),
-        Option(  name="tr_cap", description="Maximum TR a player can have to register",
+        Option(  name="tr_cap", description="Maximum TR a player can have achieved to register",
                         type=OptionTypes.INTEGER, required=False),
-        Option(  name="tr_floor", description="Minimum TR a player can have to register",
+        Option(  name="tr_floor", description="If a player has achieved a TR higher than this, they can register",
                         type=OptionTypes.INTEGER, required=False)
     ])
 @adminCommand
