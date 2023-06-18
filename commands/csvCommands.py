@@ -8,6 +8,7 @@ from bot import bot, botGuilds
 from local.lang.utils import utilStrs
 from contextExtentions.customContext import ServerContext, customContext
 from local.names import StringsNames
+from utils.utils import getCsvTextFromMsg
 
 @bot.command(name="csv", scope=botGuilds)
 async def csvBaseCommand(ctx:CommandContext): pass
@@ -113,14 +114,3 @@ async def getColumn(ctx:CommandContext, scx:ServerContext, columns:str, message_
     except Exception as e:
         await ctx.send(utilStrs.ERROR.format(e))
         raise e
-
-
-async def getCsvTextFromMsg(msg:Message):
-    if not msg.attachments:
-        raise Exception("Did not find any CSV file")
-    file_url = msg.attachments[0].url
-    req = requests.get(file_url)
-    if req.status_code == 200:
-        return req.content.decode('utf-8')
-    else:
-        raise Exception("Could not read CSV file")

@@ -152,6 +152,7 @@ async def getTournamentParticipants(ctx:CommandContext, scx:ServerContext, tourn
 @adminCommand
 @customContext
 async def refreshParticipants(ctx:CommandContext, scx:ServerContext, tournament:str, update:bool = False):
+    await ctx.defer() # defer response to avoid timeout
     tournamentObj = tournamentController.getTournamentFromName(ctx.guild_id,tournament)
     tournamentCtrl = factories.getControllerFor(tournamentObj)
     if tournamentObj is None:

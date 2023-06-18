@@ -218,9 +218,17 @@ class TetrioController(BaseGameController):
             except Exception as e:
                 failed.append((participant,str(e)))
         
-        async with aiohttp.ClientSession() as session:
-            coros = [validatePlayer(p, tournament, session) for p in participants]
-            await asyncio.gather(*coros)
+        if len(participants) < 10:
+            async with aiohttp.ClientSession() as session:
+                coros = [validatePlayer(p, tournament, session) for p in participants]
+                await asyncio.gather(*coros)
+        else:
+            # if there are more than 10 participants, do 10 requests per second
+            async with aiohttp.ClientSession() as session:
+                for i in range(0, len(participants), 10):
+                    coros = [validatePlayer(p, tournament, session) for p in participants[i:i+10]]
+                    await asyncio.gather(*coros)
+                    await asyncio.sleep(1)
 
         return newParticipants, failed
 

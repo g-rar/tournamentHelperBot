@@ -2,8 +2,9 @@ from typing import List
 from pymongo.cursor import Cursor
 import re
 import asyncio
-from interactions import Button, ButtonStyle
+from interactions import Button, ButtonStyle, Message
 from interactions.ext.paginator import ButtonKind
+import requests
 import local.names as strs
 from local.names import languages
 import logging
@@ -57,6 +58,16 @@ def spaceStrings(s1:str, s2:str, length:int) -> str:
     if len(s1) + len(s2) >= length:
         return s1 + s2
     return s1 + " " * (length - len(s1) - len(s2)) + s2
+
+async def getCsvTextFromMsg(msg:Message):
+    if not msg.attachments:
+        raise Exception("Did not find any CSV file")
+    file_url = msg.attachments[0].url
+    req = requests.get(file_url)
+    if req.status_code == 200:
+        return req.content.decode('utf-8')
+    else:
+        raise Exception("Could not read CSV file")
 
 class OptionTypes:
     SUB_COMMAND = 1

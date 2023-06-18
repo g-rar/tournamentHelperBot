@@ -18,6 +18,7 @@ class BotSettings:
     DB_NAME = os.getenv("DB_NAME")
     TEST_GUILDS = testGuilds
     DEV = bool(os.getenv("DEV"))
+    IGNORE_LISTENERS = bool(os.getenv("IGNORE_LISTENERS")) if os.getenv("IGNORE_LISTENERS") else False
 
 bot = interactions.Client(token= BotSettings.TOKEN, intents=Intents.ALL)
 httpClient = interactions.HTTPClient(BotSettings.TOKEN, cache=interactions.Cache())

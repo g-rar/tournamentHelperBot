@@ -6,7 +6,7 @@ from pprint import pformat, pprint
 from copy import deepcopy
 import logging
 
-from bot import bot, botGuilds
+from bot import BotSettings, bot, botGuilds
 from contextExtentions.contextServer import ServerGuild, getServerGuild
 from contextExtentions.customContext import ServerContext, customContext
 from local.names import StringsNames
@@ -109,7 +109,8 @@ async def closeRegistration(ctx:CommandContext, scx:ServerContext, tournament:st
 async def setListenersBackUp():
     #get tournaments
     tournaments = tournamentController.getOpenTournaments()
-    if not tournaments:
+    if not tournaments or BotSettings.IGNORE_LISTENERS:
+        logging.info("No tournaments to set up listeners for.")
         return
     logging.info("Setting up tournament listeners...")
     for tournament in tournaments:
