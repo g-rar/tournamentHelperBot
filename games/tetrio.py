@@ -3,6 +3,7 @@ import datetime
 from typing import List
 import aiohttp
 from interactions import CommandContext, Embed, Option
+from ratelimit import RateLimitException, limits
 
 import asyncio
 from commands.tournamentCommands import tournamentBaseCommand
@@ -34,6 +35,12 @@ tetrioNamePttr = (
 
 def _rankIndex(r:str):
     return tetrioRanks.index(r)
+
+@limits(calls=2, period=1)
+async def callApi(url:str, session: aiohttp.ClientSession):
+    async with session.get(url) as r:
+        return r.status, await r.json()
+
 
 @dataclass
 class TetrioLeague(BaseModel):
@@ -197,14 +204,14 @@ class TetrioController(BaseGameController):
             newFields.append(res[0])
         return (newFields, playerData)
 
-    async def checkParticipants(self, participants: List[Participant], tournament):
+    async def checkParticipants(self, participants: List[Participant], tournament:TetrioTournament):
         newParticipants = []
         failed = []
-        async def validatePlayer(participant:Participant, tournament, session):
+        async def validatePlayer(participant:Participant, tournament:TetrioTournament, session):
             try:
                 # this is to catch possible name changes                 
                 tetrioNameField = next(filter(lambda f: f.name == "Tetr.io username", participant.fields))
-                tetrioNameField.value = participant.playerData._id
+                # tetrioNameField.value = participant.playerData._id
 
                 newFields, playerData = await self.validateFields(participant.fields, tournament, review=True, session=session)
                 participant.playerData = playerData
@@ -218,17 +225,10 @@ class TetrioController(BaseGameController):
             except Exception as e:
                 failed.append((participant,str(e)))
         
-        if len(participants) < 10:
-            async with aiohttp.ClientSession() as session:
-                coros = [validatePlayer(p, tournament, session) for p in participants]
-                await asyncio.gather(*coros)
-        else:
-            # if there are more than 10 participants, do 10 requests per second
-            async with aiohttp.ClientSession() as session:
-                for i in range(0, len(participants), 10):
-                    coros = [validatePlayer(p, tournament, session) for p in participants[i:i+10]]
-                    await asyncio.gather(*coros)
-                    await asyncio.sleep(1)
+        async with aiohttp.ClientSession() as session:
+            for i in range(0, len(participants)):
+                await validatePlayer(participants[i], tournament, session)
+
 
         return newParticipants, failed
 
@@ -314,17 +314,21 @@ class TetrioController(BaseGameController):
         else:
             s = aiohttp.ClientSession()
 
+        async def callApiWithRetry(url:str, session:aiohttp.ClientSession):
+            while True:
+                try:
+                    return await callApi(url, session)
+                except RateLimitException as e:
+                    await asyncio.sleep(1)
+
         async def getPlayerProfile(username:str):
-            async with s.get(api + f"users/{username}") as r:
-                return r.status, await r.json()
+            return await callApiWithRetry(f"{api}users/{username}", s)
 
         async def getPlayerRecords(username:str):
-            async with s.get(api + f"users/{username}/records") as r:
-                return r.status, await r.json()
+            return await callApiWithRetry(f"{api}users/{username}/records", s)
 
         async def getPlayerLatestMatches(id:str):
-            async with s.get(api + f"/streams/league_userrecent_{id}") as r:
-                return r.status, await r.json()
+            return await callApiWithRetry(f"{api}streams/league_userrecent_{id}", s)
 
         # async def getPlayerNews(id:str):
         #     async with s.get(api + f"news/user_{id}") as r:
