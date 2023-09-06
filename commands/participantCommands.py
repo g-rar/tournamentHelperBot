@@ -42,7 +42,7 @@ async def particpantsBaseCommand(ctx:CommandContext): pass
 @adminCommand
 @customContext
 async def registerPlayerWithDiscord(ctx:CommandContext, scx:ServerContext, tournament:str, discord_id:str, msg_content:str, override_req:bool=False):
-    # await ctx.send(utilStrs.ERROR.format("This is an error"))
+    await ctx.defer()
     if ctx.guild_id is None:
         await scx.sendLocalized(StringsNames.NOT_FOR_DM)
         return
