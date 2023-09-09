@@ -221,11 +221,14 @@ async def on_command_error(ctx:CommandContext, error):
         f"Channel: {ctx.channel.name if ctx.channel else 'DM'}\n"
         f"Message: {ctx.message.content if ctx.message else 'N/A'}\n" 
     )
-    error_info = f"Error: ```fix\n{error_msg}```\n"
-    if len(error_info) > 2000: # discord message limit, get last 1950 chars of exception
-        error_info = f"Error: ```fix\n(...)\n{error_msg[-1950:]}```\n"
     await dev_channel.send(ctx_info)
-    await dev_channel.send(error_info)
-    
+    error_info = f"Error: ```fix\n{error_msg}```\n"
+    if len(error_info) > 2000: # discord message limit, send messages with chunks of 1950 chars
+        dots = ''
+        for i in range(0, len(error_info), 1950):
+            await dev_channel.send(f"Error: ```fix{dots}\n{error_msg[i:i+1950]}```\n")
+            dots = '\n(...)'
+    else:
+        await dev_channel.send(f"Error: ```fix\n{error_msg}```\n")
 
 # TODO event handler for when the bot joins a new server
