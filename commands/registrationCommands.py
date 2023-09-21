@@ -6,13 +6,13 @@ from pprint import pformat, pprint
 from copy import deepcopy
 import logging
 
-from bot import BotSettings, bot, botGuilds
+from bot import BotSettings, bot, botGuilds, on_command_error, sendErrorWithMessage
 from contextExtentions.contextServer import ServerGuild, getServerGuild
 from contextExtentions.customContext import ServerContext, customContext
 from local.names import StringsNames
 
 from models.tournamentModels import Tournament, TournamentStatus
-from models.registrationModels import Participant, RegistrationField, RegistrationError
+from models.registrationModels import Participant, RegistrationField, ParticipantRegistrationError, RegistrationException
 
 from controllers.adminContoller import adminCommand
 from controllers.serverController import serverController
@@ -199,7 +199,16 @@ async def on_message(msg:Message):
             logging.error("Failed to upload to db.")
             await server.sendLog(StringsNames.PARTICIPANT_REGISTRATION_FAILED, name=msg.member.name, tournament=tournament.name, reason="DB UPLOAD ERROR")
             await msg.create_reaction("🆘")
-    except RegistrationError as e:
+    except RegistrationException as e:
+        await msg.create_reaction("❌")
+        await server.sendLog(
+            StringsNames.PARTICIPANT_REGISTRATION_FAILED,
+            name=msg.member.name,
+            tournament=tournament.name,
+            reason=server.getStr(StringsNames.REGISTRATION_ERROR, message=e.args[0])
+        )
+        await sendErrorWithMessage(msg, e)
+    except ParticipantRegistrationError as e:
         await msg.create_reaction("❌")
         await server.sendLog(StringsNames.PARTICIPANT_REGISTRATION_FAILED, name=msg.member.name, tournament=tournament.name, reason=str(e))
     except IndexError as e:

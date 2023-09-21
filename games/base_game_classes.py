@@ -2,7 +2,7 @@ from dataclasses import asdict, dataclass, field
 
 from interactions import Embed
 from models.tournamentModels import Tournament
-from models.registrationModels import Participant, RegistrationError
+from models.registrationModels import Participant, ParticipantRegistrationError
 from typing import List
 
 from utils.utils import OptionTypes
@@ -44,13 +44,13 @@ class BaseGameController:
         try:
             t = self.getFieldType(field.fieldType)
             if field.value is None and field.required:
-                raise RegistrationError(field, BaseGameController.REQUIRED_FIELD)
+                raise ParticipantRegistrationError(field, BaseGameController.REQUIRED_FIELD)
             val = t(field.value)
             field.value = val
             return (field, True)
         except ValueError:
-            raise RegistrationError(f"Wrong value type for {field.name}: '{field.value}'",BaseGameController.WRONG_TYPE)
-        except RegistrationError as e:
+            raise ParticipantRegistrationError(f"Wrong value type for {field.name}: '{field.value}'",BaseGameController.WRONG_TYPE)
+        except ParticipantRegistrationError as e:
             raise e
 
     async def checkParticipants(self, participants: List[Participant], tournament):

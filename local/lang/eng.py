@@ -71,6 +71,7 @@ class EnglishStrs(Enum):
     REGISTRATION_OPEN_ALREADY = "Sign ups for the tournament `{tournament}` were already open on {chat}."
     REGISTRATION_CLOSED_MSG = "Sign ups for the tournament `{tournament}` have been closed."
     REGISTRATION_CLOSED_ALREADY = "Sign ups for the tournament `{tournament}` were closed already."
+    REGISTRATION_ERROR = "🔥 There was an API error with the following message: `{message}`. Imma share the details with my dev to check this up!"
     REG_CHANNEL_NOT_FOUND = "I couldn't find the registration channel that was set up for the tournament `{tournament}`. I'm going to close sign ups for this tournament. You can reopen them at any time"
     PARTICIPANT_COUNT = "Participant count"
     PARTICIPANT_HAS_WARNINGS = "The participant `{username}` has the following warnings:\n"

@@ -72,6 +72,7 @@ class SpanishStrs(Enum):
     REGISTRATION_CLOSED_MSG = "Se ha cerrado el registro para el torneo `{tournament}`."
     REGISTRATION_CLOSED_ALREADY = "El registro para el torneo `{tournament}` ya estaba cerrado."
     REG_CHANNEL_NOT_FOUND = "No pude encontrar el canal de registro para el torneo `{tournament}`. Voy a cerrar el registro para el torneo. Lo puedes volver a abrir en cualquier momento."
+    REGISTRATION_ERROR = "🔥 Hubo un error con el registro que incluye el siguiente mensage: `{message}`. Voy a compartir los detalles con mi desarrollador para que lo revise."
     PARTICIPANT_COUNT = "Cuenta de participantes"
     PARTICIPANT_HAS_WARNINGS = "El participante `{username}` tiene los siguientes warnings respecto al torneo `{tournament}`:\n"
     PARTICIPANT_REGISTRATION_MSG_LINK = "Puedes ver el mensaje de registro de `{username}` aquí: {msg_url}"

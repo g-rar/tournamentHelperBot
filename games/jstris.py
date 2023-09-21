@@ -19,7 +19,7 @@ from controllers.playerController import participantController
 from games.base_game_classes import BaseGameController, BasePlayer
 from games.factories import addModule
 from local.lang.utils import utilStrs
-from models.registrationModels import Participant, RegistrationError, RegistrationField, RegistrationTemplate
+from models.registrationModels import Participant, ParticipantRegistrationError, RegistrationField, RegistrationTemplate
 from models.tournamentModels import Tournament
 
 from local.names import StringsNames
@@ -108,15 +108,15 @@ class JstrisController(BaseGameController):
             player = await JstrisController.getJstrisPlayer(username, session, tournament)
 
             if not review and participantController.getParticipantFromData(tournament._id, {"jstris_username":player.jstris_username}):
-                raise RegistrationError("Jstris account already registered", self.ALREADY_REGISTERED)
+                raise ParticipantRegistrationError("Jstris account already registered", self.ALREADY_REGISTERED)
 
             if player.rd > 100:
                 player.warnings.append(f"{StringsNames.TETRIO_HIGH_RD}:{player.rd}")
 
-        except RegistrationError as e:
+        except ParticipantRegistrationError as e:
             if e.errorType == self.ALREADY_REGISTERED:
                 raise e
-            raise RegistrationError("Player not found", self.PLAYER_NOT_FOUND)
+            raise ParticipantRegistrationError("Player not found", self.PLAYER_NOT_FOUND)
         return player
 
     def validateField(self, field: RegistrationField, review: bool = False):
@@ -125,15 +125,15 @@ class JstrisController(BaseGameController):
         try:
             t = self.getFieldType(field.fieldType)
             if field.value is None and field.required:
-                raise RegistrationError(
+                raise ParticipantRegistrationError(
                     field, BaseGameController.REQUIRED_FIELD)
             val = t(field.value)
             field.value = val
             return (field, True)
         except ValueError:
-            raise RegistrationError(
+            raise ParticipantRegistrationError(
                 f"Wrong value type for {field.name}: '{field.value}'", BaseGameController.WRONG_TYPE)
-        except RegistrationError as e:
+        except ParticipantRegistrationError as e:
             raise e
 
     async def checkParticipants(self, participants: list[Participant], tournament:JstrisTournament):
@@ -231,18 +231,18 @@ class JstrisController(BaseGameController):
                 resCode, reqData = await getJstrisPredGlicko(username)
                 predictedGlicko = True
                 if resCode != 200:
-                    raise RegistrationError("Player not found", JstrisController.PLAYER_NOT_FOUND)
+                    raise ParticipantRegistrationError("Player not found", JstrisController.PLAYER_NOT_FOUND)
 
             if tournament.get_sprint:
                 sprint_resCode, sprint_reqData = await getJstrisSprintData(username)
                 if sprint_resCode != 200:
-                    raise RegistrationError("Player sprint data not found", JstrisController.PLAYER_NOT_FOUND)
+                    raise ParticipantRegistrationError("Player sprint data not found", JstrisController.PLAYER_NOT_FOUND)
                 playerRecords["sprintPB"] = sprint_reqData["min"]
         
             if tournament.get_ultra:
                 ultra_resCode, ultra_reqData = await getJstrisUltraData(username)
                 if ultra_resCode != 200:
-                    raise RegistrationError("Player sprint data not found", JstrisController.PLAYER_NOT_FOUND)
+                    raise ParticipantRegistrationError("Player sprint data not found", JstrisController.PLAYER_NOT_FOUND)
                 playerRecords["ultraPB"] = ultra_reqData["max"]
 
 

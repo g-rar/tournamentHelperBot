@@ -1,13 +1,16 @@
-import logging
-import traceback
+from dataclasses import asdict
+from datetime import datetime
+from bson import ObjectId
 from interactions import Channel, ChannelType, Choice, CommandContext, Embed, Guild, Message, Option, OptionType
 import interactions
-from bot import devGuild, devLogChannel, CONF, bot
+from bot import devGuild, devLogChannel, CONF, bot, on_command_error
 from contextExtentions.contextServer import ServerGuild, getServerGuild
 from controllers.serverController import serverController
 from contextExtentions.customContext import ServerContext, customContext
+from games.tetrio import TetrioController, TetrioTournament
 from local.names import StringsNames
 from local.lang.utils import utilStrs
+from models.registrationModels import Participant, RegistrationField, RegistrationException
 
 
 def devCommand(f):
@@ -198,37 +201,5 @@ async def updateAllServers(
     await scx.sendLocalized(StringsNames.SERVERS_UPDATED)
 
 # execption event handlers that send exception info to the dev guild
-@bot.event(name="on_command_error")
-async def on_command_error(ctx:CommandContext, error):
 
-    error_msg = str(error)
-    if error.__traceback__:
-        error_msg = "".join(traceback.format_exception(type(error), error, error.__traceback__))
 
-    logging.error(error_msg)
-
-    dev_channel = await interactions.get(bot, Channel, object_id=devLogChannel)
-
-    if not dev_channel:
-        return
-
-    # make info of error using ctx: which command, which guild, who invoked it, etc
-    ctx_info = (
-         "-+"*10 + "New error log:" + "-+"*10 + "-\n"
-        f"Command: {ctx.command.name}\n"
-        f"Guild: {ctx.guild.name + ' (' + str(ctx.guild_id) + ')' if ctx.guild else 'DM'}\n"
-        f"User: {ctx.author.name} ({ctx.author.id})\n"
-        f"Channel: {ctx.channel.name if ctx.channel else 'DM'}\n"
-        f"Message: {ctx.message.content if ctx.message else 'N/A'}\n" 
-    )
-    await dev_channel.send(ctx_info)
-    error_info = f"Error: ```fix\n{error_msg}```\n"
-    if len(error_info) > 2000: # discord message limit, send messages with chunks of 1950 chars
-        dots = ''
-        for i in range(0, len(error_info), 1950):
-            await dev_channel.send(f"Error: ```fix{dots}\n{error_msg[i:i+1950]}```\n")
-            dots = '\n(...)'
-    else:
-        await dev_channel.send(f"Error: ```fix\n{error_msg}```\n")
-
-# TODO event handler for when the bot joins a new server

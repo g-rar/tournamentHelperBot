@@ -11,7 +11,7 @@ from bson.objectid import ObjectId
 from bot import db
 
 from models.tournamentModels import Tournament, TournamentRegistration, TournamentStatus
-from models.registrationModels import Participant, RegistrationError
+from models.registrationModels import Participant, ParticipantRegistrationError
 
 from controllers.playerController import participantController
 from games import factories
@@ -84,18 +84,18 @@ class TournamentController:
 
     async def registerPlayer(self, tournament:Tournament, fields:list, member:User = None, displayName:str = None, overrideReq:bool = False):
         if tournament.registration.status == TournamentStatus.REGISTRATION_CLOSED:
-            raise RegistrationError("Registration for this tournament is currently closed",4)
+            raise ParticipantRegistrationError("Registration for this tournament is currently closed",4)
         gameController = factories.getControllerFor(tournament)
         newFields, playerData = await gameController.validateFields(fields, tournament, override=overrideReq)
         if member:
             if participantController.getParticipantFromDiscordId(int(member.id), tournament._id):
-                raise RegistrationError("Discord user already registered in tournament", 3)
+                raise ParticipantRegistrationError("Discord user already registered in tournament", 3)
             usr_id = int(member.id)
             displayName = f"{member.username}#{member.discriminator}"
         elif displayName:
             usr_id = None
         else:
-            raise RegistrationError("Either a discord member or displayName are required to register a player!", 2)
+            raise ParticipantRegistrationError("Either a discord member or displayName are required to register a player!", 2)
         return participantController.registerPlayer(usr_id, displayName, tournament, newFields, playerData)
 
     async def checkPlayer(self, tournament:Tournament, participant:Participant, update:bool=False):

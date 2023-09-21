@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import logging
+import traceback
 import interactions
 from interactions.ext import wait_for, files
 from interactions.api.models.flags import Intents
@@ -46,3 +47,71 @@ async def on_ready():
 async def on_disconnect():
     logging.info("Disconnected from discord")
     print("Disconnected from discord")
+
+async def sendErrorWithMessage(msg:interactions.Message, error:str):
+    error_msg = str(error)
+    if error.__traceback__:
+        error_msg = "".join(traceback.format_exception(type(error), error, error.__traceback__))
+
+    logging.error(error_msg)
+
+    if not devLogChannel:
+        return
+    dev_channel = await interactions.get(bot, interactions.Channel, object_id=devLogChannel)
+    if not dev_channel:
+        return
+    guild = await msg.get_guild()
+    if not guild:
+        return
+    author = msg.author
+    channel = await msg.get_channel()
+    ctx_info = (
+         "-+"*10 + "New error log:" + "-+"*10 + "-\n"
+        f"Command: -on message event-\n"
+        f"Guild: {guild.name + ' (' + str(guild.id ) + ')' if guild else 'DM'}\n"
+        f"User: {author.username} ({author.id})\n"
+        f"Channel: {channel.name if channel else 'DM'}\n"
+        f"Message: {msg.content if msg else 'N/A'}\n" 
+    )
+    await dev_channel.send(ctx_info)
+    error_info = f"Error: ```fix\n{error_msg}```\n"
+    if len(error_info) > 2000: # discord message limit, send messages with chunks of 1950 chars
+        dots = ''
+        for i in range(0, len(error_info), 1950):
+            await dev_channel.send(f"Error: ```fix{dots}\n{error_msg[i:i+1950]}```\n")
+            dots = '\n(...)'
+    else:
+        await dev_channel.send(f"Error: ```fix\n{error_msg}```\n")
+
+
+@bot.event(name="on_command_error")
+async def on_command_error(ctx:interactions.CommandContext, error):
+    error_msg = str(error)
+    if error.__traceback__:
+        error_msg = "".join(traceback.format_exception(type(error), error, error.__traceback__))
+
+    logging.error(error_msg)
+
+    dev_channel = await interactions.get(bot, interactions.Channel, object_id=devLogChannel)
+
+    if not dev_channel:
+        return
+
+    # make info of error using ctx: which command, which guild, who invoked it, etc
+    ctx_info = (
+         "-+"*10 + "New error log:" + "-+"*10 + "-\n"
+        f"Command: {ctx.command.name}\n"
+        f"Guild: {ctx.guild.name + ' (' + str(ctx.guild_id) + ')' if ctx.guild else 'DM'}\n"
+        f"User: {ctx.author.name} ({ctx.author.id})\n"
+        f"Channel: {ctx.channel.name if ctx.channel else 'DM'}\n"
+        f"Message: {ctx.message.content if ctx.message else 'N/A'}\n" 
+    )
+    await dev_channel.send(ctx_info)
+    error_info = f"Error: ```fix\n{error_msg}```\n"
+    if len(error_info) > 2000: # discord message limit, send messages with chunks of 1950 chars
+        dots = ''
+        for i in range(0, len(error_info), 1950):
+            await dev_channel.send(f"Error: ```fix{dots}\n{error_msg[i:i+1950]}```\n")
+            dots = '\n(...)'
+    else:
+        await dev_channel.send(f"Error: ```fix\n{error_msg}```\n")

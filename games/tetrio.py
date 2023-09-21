@@ -15,8 +15,13 @@ from baseModel import BaseModel
 from contextExtentions.customContext import ServerContext, customContext
 from local.names import StringsNames
 from models.tournamentModels import Tournament
-from models.registrationModels import Participant, RegistrationError, RegistrationField, RegistrationTemplate
-
+from models.registrationModels import (
+    Participant,
+    ParticipantRegistrationError,
+    RegistrationException,
+    RegistrationField,
+    RegistrationTemplate
+)
 from controllers.tournamentController import tournamentController
 from controllers.playerController import participantController
 from controllers.adminContoller import adminCommand
@@ -39,6 +44,12 @@ def _rankIndex(r:str):
 @limits(calls=2, period=1)
 async def callApi(url:str, session: aiohttp.ClientSession):
     async with session.get(url) as r:
+        if r.status == 429:
+            msg = await r.text()
+            raise RegistrationException("🔥 Rate limited", msg)
+        elif r.status == 403:
+            msg = await r.text()
+            raise RegistrationException("🔥 Forbidden", msg)
         return r.status, await r.json()
 
 
@@ -222,6 +233,8 @@ class TetrioController(BaseGameController):
                 tetrioNameField.value = participant.playerData.info.username
                  
                 newParticipants.append(participant)
+            except RegistrationException as e:
+                raise e
             except Exception as e:
                 failed.append((participant,str(e)))
         
@@ -235,41 +248,43 @@ class TetrioController(BaseGameController):
     async def validatePlayer(self, username:str, tournament:TetrioTournament, review=False, session=None, override=False) -> TetrioPlayer:
         try:
             player = await TetrioController.getTetrioPlayer(username, session)
+        except RegistrationException as e:
+            raise e
         except:
-            raise RegistrationError("Invalid playername", self.INVALID_PLAYER)
+            raise ParticipantRegistrationError("Invalid playername", self.INVALID_PLAYER)
         
         if not override and any([tournament.trBottom, tournament.trTop, tournament.rankBottom, tournament.rankTop]) \
             and player.info.league.rank == 'z':
-            raise RegistrationError("Unranked", self.UNRANKED)
+            raise ParticipantRegistrationError("Unranked", self.UNRANKED)
 
         if player is None:
-            raise RegistrationError("Invalid playername", self.INVALID_PLAYER)
+            raise ParticipantRegistrationError("Invalid playername", self.INVALID_PLAYER)
         if not review and participantController.getParticipantFromData(tournament._id, {"info._id":player.info._id}):
-            raise RegistrationError("Tetrio account already registered", self.ALREADY_REGISTERED)
+            raise ParticipantRegistrationError("Tetrio account already registered", self.ALREADY_REGISTERED)
         if not override:
             if tournament.trTop or tournament.trBottom:
                 maxTr = await TetrioController.getMaxTr(player.info._id)
                 if maxTr is None:
-                    raise RegistrationError("Couldn't get maxTR", self.INVALID_PLAYER)               
+                    raise ParticipantRegistrationError("Couldn't get maxTR", self.INVALID_PLAYER)               
             if tournament.trTop and maxTr >= tournament.trTop:
-                raise RegistrationError("Max TR over cap", self.TR_OVER_TOP)
+                raise ParticipantRegistrationError("Max TR over cap", self.TR_OVER_TOP)
             if tournament.trBottom and maxTr <= tournament.trBottom:
-                raise RegistrationError("Max TR under floor", self.TR_UNDER_BOTTOM)
+                raise ParticipantRegistrationError("Max TR under floor", self.TR_UNDER_BOTTOM)
         
         rankTop, rankBottom = tournament.rankTop, tournament.rankBottom
         if not override and (rankTop or rankBottom):
             achievedOverBottom = False
             if (tournament.rankTop and
                     _rankIndex(player.info.league.rank) > _rankIndex(tournament.rankTop)):
-                raise RegistrationError("Overranked", self.OVERRANKED)
+                raise ParticipantRegistrationError("Overranked", self.OVERRANKED)
             bestrank = player.info.league.bestrank
             if rankTop and _rankIndex(bestrank) > _rankIndex(rankTop):
-                raise RegistrationError("Overranked", self.OVERRANKED)
+                raise ParticipantRegistrationError("Overranked", self.OVERRANKED)
             if rankBottom and _rankIndex(bestrank) >= _rankIndex(rankBottom):
                 achievedOverBottom = True                
             if (rankBottom and not achievedOverBottom and
                     _rankIndex(player.info.league.rank) < _rankIndex(rankBottom)):
-                raise RegistrationError("Underranked", self.UNDERRANKED)
+                raise ParticipantRegistrationError("Underranked", self.UNDERRANKED)
 
         
         ####### get player warnings
@@ -317,7 +332,10 @@ class TetrioController(BaseGameController):
         async def callApiWithRetry(url:str, session:aiohttp.ClientSession):
             while True:
                 try:
-                    return await callApi(url, session)
+                    resCode, reqData = await callApi(url, session)
+                    if resCode == 429:
+                        print("rate limited")
+                    return resCode, reqData
                 except RateLimitException as e:
                     await asyncio.sleep(1)
 
@@ -341,22 +359,22 @@ class TetrioController(BaseGameController):
 
             if resCode != 200:
                 # await ctx.send(strs.ERROR.format(f"Error {resCode}"))
-                raise RegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
+                raise ParticipantRegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
 
             if not reqData["success"]:
                 # await ctx.send(f"⚠ The player '{username}' doesn't seem to exist in tetr.io :/")
-                raise RegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
+                raise ParticipantRegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
 
             
             # get records, checks only to be sure
             resCode, reqRecData = await getPlayerRecords(usr)
             if resCode != 200:
                 # await ctx.send(strs.ERROR.format(f"Error {resCode}"))
-                raise RegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
+                raise ParticipantRegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
 
             if not reqRecData["success"]:
                 # await ctx.send(f"⚠ The player '{username}' doesn't seem to exist in tetr.io :/")
-                raise RegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
+                raise ParticipantRegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
 
 
             playerData = reqData["data"]["user"]

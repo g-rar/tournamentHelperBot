@@ -61,9 +61,12 @@ class Participant(BaseModel):
         return base
     
 
-class RegistrationError(Exception):
+class ParticipantRegistrationError(Exception):
     def __init__(self, data, errorType:int):    
         self.data = data
         self.errorType = errorType
     def __str__(self):
         return repr(self.data)
+
+class RegistrationException(Exception):
+    pass

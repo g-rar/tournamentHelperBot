@@ -13,7 +13,7 @@ from local.lang.utils import utilStrs
 from contextExtentions.customContext import ServerContext, customContext
 from local.names import StringsNames
 
-from models.registrationModels import RegistrationField
+from models.registrationModels import RegistrationField, RegistrationException
 
 from controllers.adminContoller import adminCommand
 from controllers.playerController import participantController
@@ -161,7 +161,11 @@ async def refreshParticipants(ctx:CommandContext, scx:ServerContext, tournament:
     await scx.sendLocalized(StringsNames.MAY_TAKE_LONG)
     participants = participantController.getParticipantsForTournament(tournamentObj._id)
     async with ctx.channel.typing:
-        newParticipants, failed = await tournamentCtrl.checkParticipants(participants, tournamentObj)
+        try:
+            newParticipants, failed = await tournamentCtrl.checkParticipants(participants, tournamentObj)
+        except RegistrationException as e:
+            await scx.sendLocalized(StringsNames.REGISTRATION_ERROR, message=str(e.args[0]))
+            raise e
     pViews = list(map(lambda p: tournamentCtrl.getParticipantView(p), newParticipants))
     fViews = [{'reason':r, **tournamentCtrl.getParticipantView(p)} for p,r in failed]
     participantViews = pd.DataFrame(pViews)
