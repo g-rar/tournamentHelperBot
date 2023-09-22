@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import datetime
+import logging
 from typing import List
 import aiohttp
 from interactions import CommandContext, Embed, Option
@@ -41,14 +42,27 @@ tetrioNamePttr = (
 def _rankIndex(r:str):
     return tetrioRanks.index(r)
 
-@limits(calls=2, period=1)
+# tetrio api logging
+api_logger = logging.getLogger("tetrio")
+api_logger.setLevel(logging.INFO)
+api_handler = logging.FileHandler("tetrio_api.log")
+api_handler.setLevel(logging.INFO)
+api_logger.addHandler(api_handler)
+
+api_handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(message)s'))
+api_logger.addHandler(api_handler)
+
+@limits(calls=1, period=1)
 async def callApi(url:str, session: aiohttp.ClientSession):
     async with session.get(url) as r:
+        api_logger.info(f"{r.status} <- `{url}`")
         if r.status == 429:
             msg = await r.text()
+            api_logger.error(f"Rate limited: {msg}")
             raise RegistrationException("🔥 Rate limited", msg)
         elif r.status == 403:
             msg = await r.text()
+            api_logger.error(f"Forbidden: {msg}")
             raise RegistrationException("🔥 Forbidden", msg)
         return r.status, await r.json()
 
