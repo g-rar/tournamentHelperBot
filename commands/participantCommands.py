@@ -8,7 +8,7 @@ from datetime import datetime
 from io import StringIO
 from copy import deepcopy
 
-from bot import bot, botGuilds
+from bot import bot, botGuilds, on_command_error
 from local.lang.utils import utilStrs
 from contextExtentions.customContext import ServerContext, customContext
 from local.names import StringsNames
@@ -77,6 +77,9 @@ async def registerPlayerWithDiscord(ctx:CommandContext, scx:ServerContext, tourn
             await scx.sendLocalized(StringsNames.PLAYER_REGISTERED, username=member.name, tournament=tournament)
         else:
             await scx.sendLocalized(StringsNames.DB_UPLOAD_ERROR)
+    except RegistrationException as e:
+        await scx.sendLocalized(StringsNames.REGISTRATION_ERROR, message=str(e.args[0]))
+        raise on_command_error(ctx, e)
     except Exception as e:
         await ctx.send(utilStrs.ERROR.format(e))
 
