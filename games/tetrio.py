@@ -104,6 +104,9 @@ class TetrioPlayerRecords(BaseModel):
 
     @staticmethod
     def fromDict(d):
+        if not d:
+            return None
+
         #check if this is from the api by checking if the sprint key exists
         if "sprint" in d.keys():
             return BaseModel.fromDict(d,TetrioPlayerRecords)
@@ -192,8 +195,8 @@ class TetrioController(BaseGameController):
         base["VS"] = round(player.info.league.vs, 2) if player.info.league.vs else None
         base["APM"] = round(player.info.league.apm, 2) if player.info.league.apm else None
         base["PPS"] = round(player.info.league.pps, 2) if player.info.league.pps else None
-        base["Sprint"] = round(player.records.sprintTime, 2) if player.records.sprintTime else None
-        base["Blitz"] = player.records.blitzScore
+        base["Sprint"] = round(player.records.sprintTime, 2) if (player.records and player.records.sprintTime) else None
+        base["Blitz"] = player.records.blitzScore if player.records else None
         base["Tetr.io_ID"] = player.info._id
         return base
 
@@ -372,40 +375,39 @@ class TetrioController(BaseGameController):
             resCode, reqData = await getPlayerProfile(usr)
 
             if resCode != 200:
-                # await ctx.send(strs.ERROR.format(f"Error {resCode}"))
                 raise ParticipantRegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
 
             if not reqData["success"]:
-                # await ctx.send(f"⚠ The player '{username}' doesn't seem to exist in tetr.io :/")
                 raise ParticipantRegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
 
             
             # get records, checks only to be sure
-            resCode, reqRecData = await getPlayerRecords(usr)
-            if resCode != 200:
-                # await ctx.send(strs.ERROR.format(f"Error {resCode}"))
-                raise ParticipantRegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
+            # resCode, reqRecData = await getPlayerRecords(usr)
+            # if resCode != 200:
+            #     raise ParticipantRegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
 
-            if not reqRecData["success"]:
-                # await ctx.send(f"⚠ The player '{username}' doesn't seem to exist in tetr.io :/")
-                raise ParticipantRegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
+            # if not reqRecData["success"]:
+            #     raise ParticipantRegistrationError("Invalid playername", TetrioController.INVALID_PLAYER)
 
 
             playerData = reqData["data"]["user"]
-            playerRecords = reqRecData["data"]["records"]
-            playerDict = {"info":playerData, "records":playerRecords}
+            # playerRecords = reqRecData["data"]["records"]
+            playerDict = {
+                "info":playerData,
+                # "records":playerRecords
+            }
 
             player:TetrioPlayer = TetrioPlayer.fromDict(playerDict)
 
             # get latest matches
-            resCode, reqMatchData = await getPlayerLatestMatches(player.info._id)
-            if len(reqMatchData["data"]["records"]):
-                d = reqMatchData["data"]["records"][0]["ts"]
-                now = datetime.datetime.utcnow()
-                lastGame = datetime.datetime.strptime(d, '%Y-%m-%dT%H:%M:%S.%fZ')
-                dl = now - lastGame
-                if dl.days > 7:
-                    player.warnings.append(f"{StringsNames.TETRIO_INACTIVE_FOR_A_WEEK}:{dl.days}")
+            # resCode, reqMatchData = await getPlayerLatestMatches(player.info._id)
+            # if len(reqMatchData["data"]["records"]):
+            #     d = reqMatchData["data"]["records"][0]["ts"]
+            #     now = datetime.datetime.utcnow()
+            #     lastGame = datetime.datetime.strptime(d, '%Y-%m-%dT%H:%M:%S.%fZ')
+            #     dl = now - lastGame
+            #     if dl.days > 7:
+            #         player.warnings.append(f"{StringsNames.TETRIO_INACTIVE_FOR_A_WEEK}:{dl.days}")
 
             if not session:
                 await s.close()
