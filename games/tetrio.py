@@ -285,7 +285,7 @@ class TetrioController(BaseGameController):
                     raise ParticipantRegistrationError("Couldn't get maxTR", self.INVALID_PLAYER)               
             if tournament.trTop and maxTr >= tournament.trTop:
                 raise ParticipantRegistrationError("Max TR over cap", self.TR_OVER_TOP)
-            if tournament.trBottom and maxTr <= tournament.trBottom:
+            if tournament.trBottom and maxTr < tournament.trBottom:
                 raise ParticipantRegistrationError("Max TR under floor", self.TR_UNDER_BOTTOM)
         
         rankTop, rankBottom = tournament.rankTop, tournament.rankBottom
@@ -336,7 +336,7 @@ class TetrioController(BaseGameController):
             async with session.get(goats_api + f"toptr/{player_id}") as r:
                 if r.status == 200:
                     # returns and integer value in response body
-                    return int(float(await r.text()))
+                    return float(await r.text())
                 
     async def getTetrioPlayer(username:str, session):
         api = "https://ch.tetr.io/api/"
