@@ -1,0 +1,95 @@
+from enum import Enum
+from local.lang.utils import utilStrs
+
+class KoreanStrs(Enum):
+    #Generales
+    DB_UPLOAD_ERROR = "해당 정보를 추가하는 데 실패했어요. 다시 시도하거나 봇 개발자(g.rar)에게 문의해 주세요."
+    DB_DROP_ERROR = "해당 정보를 제거하는 데 실패했어요. 다시 시도하거나 봇 개발자(g.rar)에게 문의해 주세요."
+    ERROR = "실행 중 오류가 발생했어요. \n" + utilStrs.ERROR
+    NOT_FOR_DM = "다이렉트 메시지(DM)에서 사용할 수 없는 기능이에요. ( ´･･)ﾉ(._.`)"
+    ADMIN_ONLY = "봇 관리자만 사용할 수 있는 기능이에요. (ㆆ_ㆆ)ﾉ"
+    VALUE_SHOULD_BE_DEC = "`{option}`에 대한 옵션 값은 숫자로만 입력해 주세요."
+    VALUE_SHOULD_BE_TEXT_CHANNEL = "`{option}`을 이용할 텍스트 채널을 지정해 주세요."
+    MESSAGE_NOT_FOUND = "해당 메시지를 찾지 못했어요: {data}..."
+    MEMBER_NOT_FOUND_BY_ID = "ID `{id}`를 가진 유저를 찾지 못했어요 "
+    REACTION_TIMEOUT = "리액션 제한 시간 {time}초가 다 지났어요. 다시 시도해 주세요. (＾v＾u)..."
+    MAY_TAKE_LONG = "생각보다 오래 걸리네요. 잠시만 기다려 주세요. (＾v＾u)..."
+    GAME = "플랫폼"
+    CREATED_AT = "경기 생성 시각"
+    REGISTRATION = "참가 신청"
+    OPEN = "📝 열림"
+    CLOSED = "❌ 닫힘"
+    COLUMN_NOT_FOUND = "항목 `{column}`을 찾을 수 없어요."
+    LOG_CHANNEL = "로그 채널"
+    LANGUAGE = "언어 설정"
+    SHOW_BMAC_PAGE = "개발자를 후원 링크"
+    BMAC_MSG = "링크를 통해 커피 한 잔 값으로 저희 개발 팀을 지원해 주세요: ☕😋 https://www.buymeacoffee.com/gerardolop"
+    OPERATOR_ROLES = "봇 관리자"
+
+    #Server
+    CANT_REGISTER_DM = "DM에서 커맨드를 쓰신 것 같은데...? 서버에서 다시 시도해 주실 수 있나요? ¯\\\_(ツ)_/¯"
+    SERVER_ALREADY_IN = "이미 제가 여기에 있는데... 다시 저를 부를 필요가 있나요? ( ´･･)ﾉ(._.`)"
+    SERVER_REGISTERED = "여러분의 부르심을 받고 찾아왔어요! 잘 부탁드려요! ( •̀ ω •́ )✧"
+    SERVER_NOT_REGISTERED = "아직 등록하지 않은 서버에요. 먼저 서버를 등록해 주세요. ( ´･･)ﾉ(._.`)"
+    SERVER_UPDATED = "방금 서버 정보를 업데이트 했어요!"
+    SERVER_CONFIG_TITLE = "서버 관리"
+    ADDED_OPERATOR_ROLE = "성공! 이제 '{role}' 역할을 가진 분은 저를 관리할 수 있어요!  (＾u＾)ノ~"
+    REMOVED_OPERATOR_ROLE = "'{role}' 역할을 가진 분은 더 이상 저를 관리할 수 없어요..."
+    OPERATOR_ROLE_ALREADY_EXISTS = "이미 저를 관리하실 수 있는 역할이네요. (＾v＾u)..."
+    NO_OPERATOR_ROLES = "지금 저를 관리할 수 있는 분이 하나도 없는 것 같은데요? (._. u)"
+    MANY_PEOPLE_WITH_ROLE = "이 역할을 가진 분이 {rolecount}명이나 되는데, 괜찮으신가요? (´。＿。｀)・・・"
+    NOT_AN_OPERATOR_ROLE = "이 분은 지금 저를 관리할 수 없으세요. (u •_•)"
+    NEED_MANAGE_ROLES = "제가 역할을 직접 설정할 수 있도록 설정해주세요. 그리고 제 역할을 리스트 제일 위로 올려 주실 수도 있나요? (＾v＾u)..."
+    LANGUAGE_CHANGED = "방금 한국어로 바꿨어요! 저랑 말이 잘 통했으면 좋겠네요!"
+    CANT_ASSIGN_ROLE_TO_USER = "`{role}`역할을 `{username}`한테 주지 못했어요. 제가 역할을 직접 설정할 수 있도록 설정해주세요. 그리고 제 역할을 리스트 제일 위로 올려 주실 수도 있나요? (＾v＾u)..."
+    SERVER_NOT_FOUND = "ID `{id}`를 가진 서버를 찾지 못했어요. ID를 정확히 입력했는 지 확인해 주세요. (._.`)・・・"
+    SERVER_LEFT = "`{name}` 서버에서 방금 나갔어요. 그 서버 관리자 분들한테 나쁜 말은 하지 말아주세요. (u •_•)"
+    SERVERS_UPDATED = "서버 정보를 방금 업데이트했어요! (＾u＾)ノ~"
+    ROLE_NOT_FOUND = "`{id}`를 가진 역할을 찾을 수 없네요. 혹시 지우신 건 아니죠? (._.`)・・・"
+    REPORT_ISSUE_MODAL_TITLE = "오류 보고 메시지"
+    REPORT_ISSUE_DESC = "보고하고자 하는 오류에 대해 자세히 설명해 주세요:"
+    REPORT_ISSUE_TITLE = "메시지 제목:"
+    REPORT_ISSUE_RECEIVED = "`{title}` 문제를 보고해 주셔서 감사합니다. 빨리 고칠 수 있도록 노력할게요! (＾u＾)ノ~"
+
+    #Tournament
+    TOURNAMENT_UNEXISTING = "제 기억에는 `{name}`를 여신 적이 없는 것 같은데요? 혹시 오타가 났는지 확인해 주세요. (._.`)・・・"
+    TOURNAMENT_ADDED = "방금 `{name}`을(를) 서버에 추가했어요. 어떤 `{game}` 경기가 펼쳐질 지 기대가 되네요! ヾ(^▽^*)"
+    TOURNAMENT_DELETED = "방금 `{name}`을(를) 서버에서 제거했어요. 토너먼트를 열고 싶으시면 언제든지 저를 불러주세요!  (＾u＾)ノ~"
+    TOURNAMENT_UPDATED = "`{name}`의 정보를 업데이트 했어요! 더 말끔해 보이는 것 같은데, 저만 그런가요? ヾ(^▽^*)~"
+    TOURNAMENT_EXISTS_ALREADY = "같은 이름으로 토너먼트를 여시게요? 참가자 분들이 혼동하시지 않게 이름을 바꾸시는 건 어떤가요? (#｀-_ゝ-)"
+    TOURNAMENT_GAME_WRONG = "`{name}`이(가) `{game}` 이벤트였나요? 토너먼트 플랫폼을 맞게 설정하셨는지 확인해 주세요. (´。＿。｀)・・・"
+    INPUT_CHECK_IN_REACTION = "체크인에 사용한 이모티콘을 리액션으로 달아주세요."
+    NO_REACTION_IN_MSG = "{reaction}를 클릭하신 분이 아무도 없네요. 어떻게 된 일이죠? :thinking:..."
+
+    #Registration
+    PLAYER_REGISTERED = "**{username}**님이 방금 **{tournament}**에 참가하셨어요. ( •̀ ω •́ )✧"
+    PARTICIPANT_UNEXISTING = "`{username}`님이 아직 **{tournament}**에 참가하지 않은 것 같네요? (u •_•)"
+    PARTICIPANT_DELETED = "`{username}`님의 **{tournament}** 참가 신청을 취소했어요. ヾ(^▽^*)"
+    PARTICIPANTS_DELETED = "`{amount}`분의 참가자들의 참가 신청을 취소했어요. 취소 처리된 플레이어 분들을 확인해 주세요:"
+    PARTICIPANT_REGISTRATION_FAILED = "`{name}`님이 `{tournament}` 참가 신청에 실패했어요. 오류 메시지를 확인해 주세요: `{reason}`"
+    REGISTRATION_OPEN_CHAT = "방금 `{tournament}` 참가 신청을 {chat} 채널에 열었어요."
+    REGISTRATION_OPEN_ALREADY = "이미 `{chat}` 채널에 `{tournament}` 참가 신청을 여신 것 같은데요?"
+    REGISTRATION_CLOSED_MSG = "방금 `{tournament}` 참가 신청을 닫았어요."
+    REGISTRATION_CLOSED_ALREADY = "전에 `{tournament}` 참가 신청이 닫지 않으셨나요?"
+    REGISTRATION_ERROR = "🔥 다음 메시지를 처리하는 중 API 오류가 났어요: `{message}`. 개발 팀이 보실 수 있게 오류 내용을 전송할게요."
+    REG_CHANNEL_NOT_FOUND = "`{tournament}`의 참가 신청 채널을 찾을 수 없어서 제가 참가 신청을 닫았어요. 준비가 되시면 다시 열어주세요."
+    PARTICIPANT_COUNT = "참가자 수"
+    PARTICIPANT_HAS_WARNINGS = "여러분이 `{username}님에 대해 유의해야 할 게 있어요:\n"
+    PARTICIPANT_REGISTRATION_MSG_LINK = "이 링크를 통해 `{username}`님의 참가 신청 메시지를 확인하세요: {msg_url}"
+    PARTICIPANTS_ROLE_REMOVED = "방금 실격 처리된 모든 플레이어한테서 \"@{rolename}\" 역할을 제거했어요."
+    NO_PARTICIPANTS_IN_TOURNAMENT = "`{tournament}`에 아무도 참가하지 않은 것 같네요. 저하고 가위바위보라도 하실래요? ¯\\\_(ツ)_/¯"
+
+    #Tetr.io
+    UNEXISTING_TETRIORANK = "죄송하지만, TETR.IO에 `{rank}`랭크가 있었나요...? (._.`)・・・"
+    TETRIORANKCAP_LOWERTHAN_RANKFLOOR = "`{rank_cap}`랭크를 상한으로 설정하시려고요? 랭크 하한인 `{rank_floor}`보다 더 낮은 것 같은데... (._.`)・・・"
+    TETRIOTRCAP_LOWERTHAN_TRFLOOR = "`{tr_cap}`TR을 TR 상한으로 설정하시려고요? TR 하한인 `{tr_floor}`보다 더 낮은 것 같은데... (._.`)・・・"
+    #Tetr.io warnings
+    TETRIO_INACTIVE_FOR_A_WEEK = "`{}`일간 테트라 리그를 플레이하지 않은 플레이어에요." 
+    TETRIO_PROMOTION_INMINENT = "테트라 리그 1판만 더 이기면 `{}`랭크로 올라갈 수 있는 플레이어에요."
+    TETRIO_NEAR_PROMOTION = "랭크가 올라가서 랭크 제한에 걸릴 수 있는 플레이어에요. 유의해 주세요!"
+    TETRIO_PLAYER_DECAYING = "이 플레이어의 레이팅 편차(RD)가 높아지고 있어요." 
+    TETRIO_HIGH_RD = "`{}`님의 레이팅 편자(RD)가 너무 높아요." 
+
+    #JStris+
+    JSTRIS_PREDICTED_GLICKO = "플레이어의 스프린트 기록을 가지고 랭크 포인트를 추산했어요."
+    

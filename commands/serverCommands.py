@@ -48,7 +48,8 @@ async def configRegisterServer(ctx:CommandContext, scx:ServerContext):
             type=OptionType.STRING, required=True,
             choices=[
                 Choice(name="English", value="ENGLISH"),
-                Choice(name="Español", value="SPANISH")
+                Choice(name="Español", value="SPANISH"),
+                Choice(name="한국어", value="KOREAN")
             ]
         )
     ]

@@ -1,9 +1,11 @@
 from local.lang.eng import EnglishStrs
 from local.lang.es import SpanishStrs
+from local.lang.kor import KoreanStrs
 
 languages = {
     "SPANISH": SpanishStrs,
     "ENGLISH": EnglishStrs,
+    "KOREAN": KoreanStrs
 }
 
 class StringsNames:
